@@ -1,0 +1,182 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "Email",
+  "version": "${project.version}",
+  "description": "Sends email through any SMTP server, with the connection configured on the node.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "nodes": [
+    {
+      "nodeType": "EMAIL_SEND",
+      "displayName": "Send Email",
+      "description": "Sends an email through an SMTP server. Host, port, security and authentication are configured on the node, so any provider the operator has credentials for can be used. Declared non-idempotent, so a retry replays the recorded send rather than sending twice.",
+      "category": "Communication",
+      "icon": "email",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["smtpHost", "fromEmail", "to", "subject", "body"],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "enum": ["SEND", "TEST_CONNECTION"],
+            "default": "SEND",
+            "description": "SEND delivers the message. TEST_CONNECTION performs the whole connection — DNS, TCP, TLS and authentication — and disconnects without sending anything."
+          },
+          "provider": {
+            "type": "string",
+            "title": "SMTP provider",
+            "enum": ["CUSTOM", "GMAIL", "MICROSOFT365", "YAHOO", "ZOHO", "SENDGRID", "AMAZON_SES", "MAILGUN"],
+            "default": "CUSTOM",
+            "description": "Fills in the host, port and security below. Every one of them stays editable. Amazon SES supplies no host because its endpoints are regional."
+          },
+          "smtpHost": {
+            "type": "string",
+            "title": "SMTP host",
+            "description": "For example smtp.company.com. Supports variables, such as ${smtp.host}."
+          },
+          "smtpPort": {
+            "type": "integer",
+            "title": "SMTP port",
+            "default": 587,
+            "description": "Any port from 1 to 65535. Commonly 587 for STARTTLS, 465 for SSL/TLS, 25 or 2525 for a relay."
+          },
+          "security": {
+            "type": "string",
+            "title": "Security",
+            "enum": ["NONE", "STARTTLS", "SSL_TLS"],
+            "default": "STARTTLS",
+            "description": "STARTTLS upgrades a plaintext connection; SSL/TLS is encrypted from the first byte. Never both."
+          },
+          "authenticationRequired": {
+            "type": "boolean",
+            "title": "Authentication required",
+            "default": true,
+            "description": "Turn off only for a relay that accepts unauthenticated mail from this host."
+          },
+          "username": {
+            "type": "string",
+            "title": "SMTP username",
+            "description": "Usually the mailbox address. SendGrid requires the literal 'apikey'. Supports variables."
+          },
+          "passwordSecret": {
+            "type": "string",
+            "format": "secret-ref",
+            "title": "Password secret",
+            "description": "The NAME of a secret holding the password, never the password itself. The value is fetched at execution, redacted from logs, and never enters the workflow definition."
+          },
+          "credentialId": {
+            "type": "string",
+            "title": "Credential id",
+            "description": "An alternative to the password secret: names a stored credential whose parts are held as the secrets <id>.username and <id>.password."
+          },
+          "fromEmail": {
+            "type": "string",
+            "title": "From email",
+            "description": "The address the message is sent from. The server decides whether you are allowed to use it."
+          },
+          "fromName": {
+            "type": "string",
+            "title": "From name",
+            "description": "Shown beside the address, for example Workflow Automation <notifications@company.com>."
+          },
+          "replyTo": {
+            "type": "string",
+            "title": "Reply-To"
+          },
+          "to": {
+            "type": "array",
+            "title": "To",
+            "items": { "type": "string", "title": "Address" },
+            "description": "At least one recipient. A variable may expand to several addresses separated by commas."
+          },
+          "cc": {
+            "type": "array",
+            "title": "CC",
+            "items": { "type": "string", "title": "Address" }
+          },
+          "bcc": {
+            "type": "array",
+            "title": "BCC",
+            "items": { "type": "string", "title": "Address" },
+            "description": "Hidden from the other recipients by the transport."
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "description": "Supports variables, for example Order ${order.id} approved."
+          },
+          "bodyType": {
+            "type": "string",
+            "title": "Body type",
+            "enum": ["TEXT", "HTML"],
+            "default": "TEXT"
+          },
+          "body": {
+            "type": "string",
+            "format": "textarea",
+            "title": "Body",
+            "description": "Supports variables. Rendered as text or HTML according to the body type."
+          },
+          "attachments": {
+            "type": "array",
+            "title": "Attachments",
+            "description": "Content comes from a workflow variable or a base64 value. A filesystem path is deliberately not a source.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fileName": { "type": "string", "title": "File name" },
+                "source": {
+                  "type": "string",
+                  "title": "Source",
+                  "enum": ["VARIABLE", "BASE64", "WORKFLOW_FILE", "OBJECT_STORAGE"]
+                },
+                "value": { "type": "string", "title": "Content or variable" },
+                "contentType": { "type": "string", "title": "Content type" }
+              }
+            }
+          },
+          "connectionTimeoutMillis": {
+            "type": "integer",
+            "title": "Connection timeout (ms)",
+            "default": 15000
+          },
+          "readTimeoutMillis": {
+            "type": "integer",
+            "title": "Read timeout (ms)",
+            "default": 30000
+          }
+        }
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "groupId": "org.eclipse.angus",
+      "artifactId": "jakarta.mail",
+      "version": "2.0.3",
+      "scope": "bundled"
+    },
+    {
+      "groupId": "org.eclipse.angus",
+      "artifactId": "angus-activation",
+      "version": "2.0.2",
+      "scope": "bundled"
+    },
+    {
+      "groupId": "jakarta.activation",
+      "artifactId": "jakarta.activation-api",
+      "version": "2.1.4",
+      "scope": "bundled"
+    }
+  ],
+  "permissions": {
+    "network": [],
+    "secrets": ["smtp."],
+    "notes": "This plugin opens SMTP sockets directly through Jakarta Mail. The engine's allowed-hosts guard applies to its HTTP client and does not constrain those connections, so granting this plugin to an operator grants the ability to reach an arbitrary host and port on the network the engine sits in."
+  }
+}

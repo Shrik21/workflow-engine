@@ -1,0 +1,121 @@
+{
+  "name": "Provision GCP VM",
+  "description": "Collects VM details on a form, creates a Compute Engine instance, and notifies by email on success or Slack on failure. Store the service-account JSON as a secret named gcp.prod.serviceAccount before running.",
+  "variables": {
+    "gcpProjectId": "my-project"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "inputMapping": {
+        "instanceName": "${input.instanceName}",
+        "gcpZone": "${input.zone}",
+        "machineType": "${input.machineType}"
+      }
+    },
+    {
+      "id": "collect-details",
+      "type": "FORM",
+      "name": "VM Details",
+      "configuration": {
+        "title": "New VM",
+        "fields": [
+          { "name": "instanceName", "label": "Instance name", "type": "text", "required": true },
+          { "name": "zone", "label": "Zone", "type": "text", "required": true, "default": "asia-south1-a" },
+          { "name": "machineType", "label": "Machine type", "type": "text", "required": true, "default": "e2-medium" }
+        ]
+      }
+    },
+    {
+      "id": "create-vm",
+      "type": "GCP_COMPUTE_CREATE_INSTANCE",
+      "name": "Create GCP Instance",
+      "pluginId": "gcp-compute-instance",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "credentialsSecret": "gcp.prod.serviceAccount",
+        "projectId": "${gcpProjectId}",
+        "zone": "${gcpZone}",
+        "instanceName": "${instanceName}",
+        "machineType": "${machineType}",
+        "imageProject": "ubuntu-os-cloud",
+        "imageFamily": "ubuntu-2404-lts-amd64",
+        "diskSizeGb": 30,
+        "diskType": "pd-balanced",
+        "network": "default",
+        "externalIp": "EPHEMERAL",
+        "labels": { "environment": "dev", "owner": "orchpilot" },
+        "tags": "http-server https-server",
+        "startupScript": "#!/bin/bash\necho \"OrchPilot VM initialized\"",
+        "ifExists": "FAIL",
+        "waitForCompletion": true,
+        "timeoutSeconds": 600,
+        "pollIntervalSeconds": 5
+      },
+      "outputMapping": {
+        "status": "workflow.vmStatus",
+        "instanceId": "workflow.vmId",
+        "selfLink": "workflow.vmSelfLink"
+      },
+      "retry": { "enabled": true, "maxAttempts": 2, "backoffMillis": 5000 }
+    },
+    {
+      "id": "status-decision",
+      "type": "DECISION",
+      "name": "VM Running?",
+      "conditions": [
+        { "branch": "running", "expression": "vmStatus == 'RUNNING'" }
+      ],
+      "defaultBranch": "failed"
+    },
+    {
+      "id": "notify-success",
+      "type": "EMAIL_SEND",
+      "name": "Email Success",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "smtpHost": "smtp.example.com",
+        "passwordSecret": "smtp.password",
+        "username": "notifier@example.com",
+        "fromEmail": "notifier@example.com",
+        "to": ["ops@example.com"],
+        "subject": "VM ${instanceName} is running",
+        "body": "Instance ${instanceName} (${workflow.vmId}) is RUNNING in ${gcpZone}."
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "notify-failure",
+      "type": "SLACK_MESSAGE",
+      "name": "Notify Slack",
+      "pluginId": "slack",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "botTokenSecret": "slack.botToken",
+        "channel": "#cloud-ops",
+        "text": "VM ${instanceName} failed to reach RUNNING (status ${workflow.vmStatus})."
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    { "id": "end-1", "type": "END", "name": "Done" }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "collect-details" },
+    { "source": "collect-details", "target": "create-vm" },
+    { "source": "create-vm", "target": "status-decision" },
+    { "source": "status-decision", "sourcePort": "running", "target": "notify-success" },
+    { "source": "status-decision", "sourcePort": "failed", "target": "notify-failure" },
+    { "source": "notify-success", "target": "end-1" },
+    { "source": "notify-failure", "target": "end-1" }
+  ],
+  "metadata": {
+    "owner": "cloud-ops",
+    "tags": ["gcp", "compute", "sample"]
+  }
+}

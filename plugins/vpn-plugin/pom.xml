@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>vpn-plugin</artifactId>
+    <version>1.0.2</version>
+    <name>Secure Network / VPN Workflow Plugin</name>
+    <description>Manages and reports secure-network (VPN) connection state through provider control-plane
+        APIs, with a pluggable provider architecture</description>
+
+    <properties>
+        <plugin.id>vpn</plugin.id>
+        <plugin.class>com.orchpilot.workflow.plugins.vpn.VpnPlugin</plugin.class>
+    </properties>
+
+    <dependencies>
+        <!--
+          provided: the SDK lives in the engine and is delegated parent-first by the plugin class loader.
+
+          There is deliberately no cloud SDK here and nothing to bundle. Cloud control-plane calls go through
+          the engine's PluginHttpClient — which enforces the plugin's host allowlist, timeouts and response
+          size — rather than the AWS/Azure/GCP SDKs, which would add ~150 MB, could not be constrained by the
+          allowlist, and would make the plugin impossible to install offline. Provider responses are parsed
+          with the JDK's own XML and a hand-written tolerant JSON reader, so this plugin's archive is only its
+          own classes.
+        -->
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

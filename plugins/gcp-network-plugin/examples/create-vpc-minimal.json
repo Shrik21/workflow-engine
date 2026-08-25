@@ -1,0 +1,61 @@
+{
+  "name": "Create VPC",
+  "description": "The smallest useful GCP Network workflow: create a custom-mode VPC and read it back. Store the service-account JSON as a secret named GCP_Auth and grant the plugin the GCP_ secret scope before running.",
+  "variables": {
+    "gcpProject": "my-gcp-project",
+    "vpcName": "prod-vpc"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    { "id": "start-1", "type": "START", "name": "Start" },
+    {
+      "id": "create-vpc",
+      "type": "GCP_NET_CREATE_VPC",
+      "name": "Create VPC",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "GCP_Auth",
+        "project": "${gcpProject}",
+        "vpcName": "${vpcName}",
+        "description": "Production network, provisioned by OrchPilot",
+        "routingMode": "REGIONAL",
+        "autoCreateSubnets": false,
+        "waitForCompletion": true
+      },
+      "outputMapping": {
+        "vpcName": "workflow.vpc",
+        "selfLink": "workflow.vpcSelfLink",
+        "mode": "workflow.vpcMode"
+      },
+      "retry": { "enabled": true, "maxAttempts": 2, "backoffMillis": 5000 }
+    },
+    {
+      "id": "read-back",
+      "type": "GCP_NET_GET_VPC",
+      "name": "Read it back",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "GCP_Auth",
+        "project": "${gcpProject}",
+        "vpcName": "${workflow.vpc}"
+      },
+      "outputMapping": {
+        "subnetCount": "workflow.subnetCount"
+      }
+    },
+    { "id": "end-1", "type": "END", "name": "Done" }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "create-vpc" },
+    { "source": "create-vpc", "target": "read-back" },
+    { "source": "read-back", "target": "end-1" }
+  ],
+  "metadata": {
+    "owner": "cloud-ops",
+    "tags": ["gcp", "network", "vpc", "sample"]
+  }
+}

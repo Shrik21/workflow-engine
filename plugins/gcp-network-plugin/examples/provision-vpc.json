@@ -1,0 +1,167 @@
+{
+  "name": "Provision production VPC",
+  "description": "Custom-mode VPC, two subnets, an internal-only firewall rule, and a Cloud Router with NAT so private instances get outbound access without public addresses. Store the service-account JSON as a secret named gcp.prod.network before running.",
+  "variables": {
+    "gcpProject": "acme-prod",
+    "region": "asia-south1",
+    "vpcName": "prod-vpc"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    { "id": "start-1", "type": "START", "name": "Start" },
+    {
+      "id": "create-vpc",
+      "type": "GCP_NET_CREATE_VPC",
+      "name": "Create VPC",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "vpcName": "${vpcName}",
+        "description": "Production network, provisioned by OrchPilot",
+        "routingMode": "REGIONAL",
+        "autoCreateSubnets": false,
+        "waitForCompletion": true
+      },
+      "outputMapping": {
+        "vpcName": "workflow.vpc",
+        "selfLink": "workflow.vpcSelfLink"
+      }
+    },
+    {
+      "id": "create-app-subnet",
+      "type": "GCP_NET_CREATE_SUBNET",
+      "name": "App subnet",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "region": "${region}",
+        "vpcName": "${workflow.vpc}",
+        "subnetName": "app-subnet",
+        "ipCidrRange": "10.10.0.0/20",
+        "privateGoogleAccess": true,
+        "flowLogs": true,
+        "secondaryIpRanges": [
+          { "rangeName": "gke-pods", "ipCidrRange": "10.20.0.0/16" },
+          { "rangeName": "gke-services", "ipCidrRange": "10.30.0.0/20" }
+        ],
+        "description": "Application tier"
+      },
+      "retry": { "enabled": true, "maxAttempts": 2, "backoffMillis": 5000 }
+    },
+    {
+      "id": "create-data-subnet",
+      "type": "GCP_NET_CREATE_SUBNET",
+      "name": "Data subnet",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "region": "${region}",
+        "vpcName": "${workflow.vpc}",
+        "subnetName": "data-subnet",
+        "ipCidrRange": "10.11.0.0/24",
+        "privateGoogleAccess": true,
+        "description": "Database tier"
+      }
+    },
+    {
+      "id": "allow-internal",
+      "type": "GCP_NET_CREATE_FIREWALL",
+      "name": "Allow internal traffic",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "firewallName": "prod-allow-internal",
+        "network": "${workflow.vpc}",
+        "direction": "INGRESS",
+        "action": "ALLOW",
+        "priority": 1000,
+        "protocol": "tcp",
+        "ports": "0-65535",
+        "sourceRanges": "10.10.0.0/20,10.11.0.0/24",
+        "targetTags": "prod",
+        "logging": true,
+        "description": "East-west traffic between the app and data subnets"
+      },
+      "outputMapping": {
+        "exposesAdministrativeAccess": "workflow.firewallExposed"
+      }
+    },
+    {
+      "id": "create-router",
+      "type": "GCP_NET_CREATE_ROUTER",
+      "name": "Cloud Router",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "region": "${region}",
+        "routerName": "prod-router",
+        "network": "${workflow.vpc}",
+        "description": "Carries the NAT configuration for private instances"
+      },
+      "outputMapping": {
+        "routerName": "workflow.router"
+      }
+    },
+    {
+      "id": "create-nat",
+      "type": "GCP_NET_CREATE_NAT",
+      "name": "Cloud NAT",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "region": "${region}",
+        "routerName": "${workflow.router}",
+        "natName": "prod-nat",
+        "natIpAllocateOption": "AUTO_ONLY",
+        "sourceSubnetworkIpRangesToNat": "ALL_SUBNETWORKS_ALL_IP_RANGES",
+        "logging": true,
+        "logFilter": "ERRORS_ONLY"
+      }
+    },
+    {
+      "id": "inspect",
+      "type": "GCP_NET_INSPECT",
+      "name": "Inspect the finished network",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.prod.network",
+        "project": "${gcpProject}",
+        "vpcName": "${workflow.vpc}"
+      },
+      "outputMapping": {
+        "counts": "workflow.networkCounts",
+        "partial": "workflow.inspectionPartial"
+      }
+    },
+    { "id": "end-1", "type": "END", "name": "Done" }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "create-vpc" },
+    { "source": "create-vpc", "target": "create-app-subnet" },
+    { "source": "create-app-subnet", "target": "create-data-subnet" },
+    { "source": "create-data-subnet", "target": "allow-internal" },
+    { "source": "allow-internal", "target": "create-router" },
+    { "source": "create-router", "target": "create-nat" },
+    { "source": "create-nat", "target": "inspect" },
+    { "source": "inspect", "target": "end-1" }
+  ],
+  "metadata": {
+    "owner": "cloud-ops",
+    "tags": ["gcp", "network", "vpc", "sample"]
+  }
+}

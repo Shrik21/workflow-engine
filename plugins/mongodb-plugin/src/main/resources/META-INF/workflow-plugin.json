@@ -1,0 +1,292 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "MongoDB",
+  "version": "${project.version}",
+  "description": "Reads and writes MongoDB from a workflow, with the connection configured on the node.",
+  "vendor": "OrchPilot",
+  "author": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "supportedPlatformVersion": ">=1.0.0 <2.0.0",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+
+  "nodeTypes": ["MONGODB_READ", "MONGODB_WRITE", "MONGODB_ADMIN"],
+
+  "nodes": [
+    {
+      "nodeType": "MONGODB_READ",
+      "displayName": "MongoDB Read",
+      "description": "Finds, counts, aggregates. Every read is bounded by a document limit and a server-side time limit, both capped by the installation's ceilings.",
+      "category": "Database",
+      "icon": "database",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["operation"],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "enum": ["FIND_ONE", "FIND_MANY", "COUNT", "DISTINCT", "AGGREGATE"],
+            "default": "FIND_ONE"
+          },
+          "connectionUri": {
+            "type": "string",
+            "title": "Connection string",
+            "description": "mongodb://host:27017/db or mongodb+srv://cluster.mongodb.net/db. A URI containing user:password@ is refused; supply credentials separately.",
+            "visibleWhen": { "connectionMode": ["URI", ""] }
+          },
+          "host": { "type": "string", "title": "Host" },
+          "port": { "type": "integer", "title": "Port", "default": 27017 },
+          "database": { "type": "string", "title": "Database" },
+          "collection": { "type": "string", "title": "Collection" },
+          "username": { "type": "string", "title": "Username" },
+          "passwordSecret": {
+            "type": "string",
+            "format": "secret-ref",
+            "title": "Password secret",
+            "description": "The NAME of a secret holding the password, never the password itself."
+          },
+          "credentialId": { "type": "string", "title": "Credential id" },
+          "authenticationDatabase": { "type": "string", "title": "Authentication database" },
+          "replicaSet": { "type": "string", "title": "Replica set" },
+          "tls": { "type": "boolean", "title": "TLS", "default": false },
+          "tlsAllowInvalidHostnames": { "type": "boolean", "title": "Allow invalid hostnames", "default": false },
+
+          "filter": {
+            "type": "object",
+            "title": "Filter",
+            "description": "A MongoDB query document with variables resolved inside it, such as {\"email\": \"${form.email}\"}. For an ObjectId write {\"_id\": {\"$oid\": \"${customer.id}\"}}.",
+            "visibleWhen": { "operation": ["FIND_ONE", "FIND_MANY", "COUNT", "DISTINCT"] }
+          },
+          "projection": {
+            "type": "object",
+            "title": "Projection",
+            "visibleWhen": { "operation": ["FIND_ONE", "FIND_MANY"] }
+          },
+          "sort": {
+            "type": "object",
+            "title": "Sort",
+            "visibleWhen": { "operation": ["FIND_ONE", "FIND_MANY"] }
+          },
+          "hint": { "type": "object", "title": "Index hint", "visibleWhen": { "operation": ["FIND_ONE", "FIND_MANY"] } },
+          "collation": { "type": "object", "title": "Collation", "visibleWhen": { "operation": ["FIND_ONE", "FIND_MANY"] } },
+          "pipeline": {
+            "type": "array",
+            "title": "Aggregation pipeline",
+            "items": { "type": "object" },
+            "description": "An array of stages: [{\"$match\": {...}}, {\"$group\": {...}}, {\"$sort\": {...}}].",
+            "visibleWhen": { "operation": ["AGGREGATE"] }
+          },
+          "allowDiskUse": { "type": "boolean", "title": "Allow disk use", "visibleWhen": { "operation": ["AGGREGATE"] } },
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "description": "The field to collect distinct values of.",
+            "visibleWhen": { "operation": ["DISTINCT"] }
+          },
+          "page": { "type": "integer", "title": "Page", "visibleWhen": { "operation": ["FIND_MANY"] } },
+          "pageSize": { "type": "integer", "title": "Page size", "visibleWhen": { "operation": ["FIND_MANY"] } },
+          "skip": { "type": "integer", "title": "Skip", "visibleWhen": { "operation": ["FIND_MANY", "COUNT"] } },
+          "limit": { "type": "integer", "title": "Limit", "visibleWhen": { "operation": ["FIND_MANY"] } },
+          "includeTotalCount": { "type": "boolean", "title": "Include total count", "visibleWhen": { "operation": ["FIND_MANY"] } },
+
+          "maxDocuments": { "type": "integer", "title": "Maximum documents", "default": 1000 },
+          "maxTimeMillis": { "type": "integer", "title": "Maximum server time (ms)", "default": 30000 },
+          "connectionTimeoutMillis": { "type": "integer", "title": "Connection timeout (ms)", "default": 10000 },
+          "socketTimeoutMillis": { "type": "integer", "title": "Socket timeout (ms)", "default": 30000 },
+          "serverSelectionTimeoutMillis": { "type": "integer", "title": "Server selection timeout (ms)", "default": 15000 },
+          "maxPoolSize": { "type": "integer", "title": "Maximum pool size", "default": 20 },
+          "minPoolSize": { "type": "integer", "title": "Minimum pool size", "default": 0 },
+          "outputVariable": {
+            "type": "string",
+            "title": "Output variable",
+            "default": "result",
+            "description": "The name subsequent nodes use, as in ${customerResult.items}."
+          }
+        }
+      }
+    },
+    {
+      "nodeType": "MONGODB_WRITE",
+      "displayName": "MongoDB Write",
+      "description": "Inserts, updates, replaces, deletes and batches of those. Anything affecting more than one document requires explicit confirmation on the node.",
+      "category": "Database",
+      "icon": "database",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["operation"],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "enum": ["INSERT_ONE", "INSERT_MANY", "UPDATE_ONE", "UPDATE_MANY", "REPLACE_ONE", "DELETE_ONE", "DELETE_MANY", "BULK_WRITE"],
+            "default": "INSERT_ONE",
+            "description": "Update One changes named fields; Replace One overwrites the whole document."
+          },
+          "connectionUri": { "type": "string", "title": "Connection string" },
+          "host": { "type": "string", "title": "Host" },
+          "port": { "type": "integer", "title": "Port", "default": 27017 },
+          "database": { "type": "string", "title": "Database" },
+          "collection": { "type": "string", "title": "Collection" },
+          "username": { "type": "string", "title": "Username" },
+          "passwordSecret": { "type": "string", "format": "secret-ref", "title": "Password secret" },
+          "credentialId": { "type": "string", "title": "Credential id" },
+          "authenticationDatabase": { "type": "string", "title": "Authentication database" },
+          "replicaSet": { "type": "string", "title": "Replica set" },
+          "tls": { "type": "boolean", "title": "TLS", "default": false },
+
+          "documents": {
+            "type": "array",
+            "title": "Documents",
+            "items": { "type": "object" },
+            "description": "The documents to insert, the replacement for REPLACE_ONE, or the operations for BULK_WRITE.",
+            "visibleWhen": { "operation": ["INSERT_ONE", "INSERT_MANY", "REPLACE_ONE", "BULK_WRITE"] }
+          },
+          "filter": {
+            "type": "object",
+            "title": "Filter",
+            "visibleWhen": { "operation": ["UPDATE_ONE", "UPDATE_MANY", "REPLACE_ONE", "DELETE_ONE", "DELETE_MANY"] }
+          },
+          "update": {
+            "type": "object",
+            "title": "Update",
+            "description": "Update operators such as $set, $inc, $push. A plain document is refused, because it would replace rather than update.",
+            "visibleWhen": { "operation": ["UPDATE_ONE", "UPDATE_MANY"] }
+          },
+          "upsert": {
+            "type": "boolean",
+            "title": "Upsert",
+            "default": false,
+            "visibleWhen": { "operation": ["UPDATE_ONE", "UPDATE_MANY", "REPLACE_ONE"] }
+          },
+          "ordered": { "type": "boolean", "title": "Ordered", "default": true, "visibleWhen": { "operation": ["INSERT_MANY", "BULK_WRITE"] } },
+          "useTransaction": {
+            "type": "boolean",
+            "title": "Run in a transaction",
+            "default": false,
+            "description": "Needs a replica set or sharded cluster. The transaction lives for this node only: it commits or rolls back before the workflow moves on.",
+            "visibleWhen": { "operation": ["BULK_WRITE"] }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed",
+            "default": false,
+            "description": "Required for UPDATE_MANY, DELETE_MANY, REPLACE_ONE and BULK_WRITE.",
+            "visibleWhen": { "operation": ["UPDATE_MANY", "DELETE_MANY", "REPLACE_ONE", "BULK_WRITE"] }
+          },
+          "allowEmptyFilter": {
+            "type": "boolean",
+            "title": "Allow an empty filter",
+            "default": false,
+            "description": "An empty filter matches every document. Usually it means a variable resolved to nothing.",
+            "visibleWhen": { "operation": ["UPDATE_MANY", "DELETE_MANY"] }
+          },
+
+          "maxTimeMillis": { "type": "integer", "title": "Maximum server time (ms)", "default": 30000 },
+          "connectionTimeoutMillis": { "type": "integer", "title": "Connection timeout (ms)", "default": 10000 },
+          "socketTimeoutMillis": { "type": "integer", "title": "Socket timeout (ms)", "default": 30000 },
+          "maxPoolSize": { "type": "integer", "title": "Maximum pool size", "default": 20 },
+          "outputVariable": { "type": "string", "title": "Output variable", "default": "result" }
+        }
+      }
+    },
+    {
+      "nodeType": "MONGODB_ADMIN",
+      "displayName": "MongoDB Admin",
+      "description": "Collections, indexes, database commands, and a connection test. Destructive operations require confirmation and a mapped permission.",
+      "category": "Database",
+      "icon": "database",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["operation"],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "enum": ["TEST_CONNECTION", "LIST_COLLECTIONS", "COLLECTION_STATS", "CREATE_COLLECTION", "RENAME_COLLECTION", "DROP_COLLECTION", "LIST_INDEXES", "CREATE_INDEX", "DROP_INDEX", "EXECUTE_COMMAND"],
+            "default": "TEST_CONNECTION"
+          },
+          "connectionUri": { "type": "string", "title": "Connection string" },
+          "host": { "type": "string", "title": "Host" },
+          "port": { "type": "integer", "title": "Port", "default": 27017 },
+          "database": { "type": "string", "title": "Database" },
+          "collection": { "type": "string", "title": "Collection", "visibleWhen": { "operation": ["COLLECTION_STATS", "RENAME_COLLECTION", "DROP_COLLECTION", "LIST_INDEXES", "CREATE_INDEX", "DROP_INDEX"] } },
+          "targetCollection": { "type": "string", "title": "Target collection", "visibleWhen": { "operation": ["CREATE_COLLECTION", "RENAME_COLLECTION"] } },
+          "username": { "type": "string", "title": "Username" },
+          "passwordSecret": { "type": "string", "format": "secret-ref", "title": "Password secret" },
+          "credentialId": { "type": "string", "title": "Credential id" },
+          "authenticationDatabase": { "type": "string", "title": "Authentication database" },
+          "tls": { "type": "boolean", "title": "TLS", "default": false },
+
+          "keys": {
+            "type": "object",
+            "title": "Index keys",
+            "description": "{\"email\": 1} or {\"lastName\": 1, \"firstName\": 1}.",
+            "visibleWhen": { "operation": ["CREATE_INDEX", "DROP_INDEX"] }
+          },
+          "field": { "type": "string", "title": "Index name", "visibleWhen": { "operation": ["DROP_INDEX"] } },
+          "options": {
+            "type": "object",
+            "title": "Options",
+            "description": "Index options such as {\"unique\": true, \"expireAfterSeconds\": 3600}, or the command document for EXECUTE_COMMAND.",
+            "visibleWhen": { "operation": ["CREATE_INDEX", "EXECUTE_COMMAND"] }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed",
+            "default": false,
+            "visibleWhen": { "operation": ["RENAME_COLLECTION", "DROP_COLLECTION", "DROP_INDEX", "EXECUTE_COMMAND"] }
+          },
+          "outputVariable": { "type": "string", "title": "Output variable", "default": "result" }
+        }
+      }
+    }
+  ],
+
+  "credentials": {
+    "required": false,
+    "description": "A username and password are needed by any deployment that authenticates, which is every deployment that is not a developer's laptop. The password is always a secret name, never a value: 'passwordSecret' names a secret holding it, or 'credentialId' names a credential stored as <id>.username and <id>.password.",
+    "fields": [
+      { "name": "username", "secret": false, "description": "The database user." },
+      { "name": "passwordSecret", "secret": true, "description": "The name of a secret holding the password." },
+      { "name": "credentialId", "secret": true, "description": "Names both halves in the secret store." }
+    ]
+  },
+
+  "dependencies": [
+    { "groupId": "org.mongodb", "artifactId": "mongodb-driver-sync", "version": "5.6.5", "scope": "bundled" },
+    { "groupId": "org.mongodb", "artifactId": "mongodb-driver-core", "version": "5.6.5", "scope": "bundled" },
+    { "groupId": "org.mongodb", "artifactId": "bson", "version": "5.6.5", "scope": "bundled" },
+    { "groupId": "org.mongodb", "artifactId": "bson-record-codec", "version": "5.6.5", "scope": "bundled" }
+  ],
+
+  "permissions": {
+    "network": [],
+    "secrets": ["mongodb.", "mongo."],
+    "declared": [
+      "MONGODB_CONNECT",
+      "MONGODB_READ",
+      "MONGODB_INSERT",
+      "MONGODB_UPDATE",
+      "MONGODB_DELETE",
+      "MONGODB_AGGREGATE",
+      "MONGODB_INDEX_MANAGE",
+      "MONGODB_COLLECTION_MANAGE",
+      "MONGODB_TRANSACTION",
+      "MONGODB_COMMAND_EXECUTE"
+    ],
+    "notes": "These permission names are enforced by this plugin against the acting user's roles, using a mapping an administrator sets in the plugin's installation settings (permission.mongodb_delete=ADMIN,DATA_STEWARD). They are NOT engine authorities: the engine's Permission enum is compiled in and a plugin cannot add to it, which is deliberate — installing a plugin must not be able to invent authorities. The engine's own WORKFLOW_EXECUTE and WORKFLOW_EDIT remain the authoritative gate; this mapping is defence in depth behind it. An unmapped permission is open. This plugin also opens TCP connections directly through the MongoDB driver, which the engine's allowed-hosts guard does not constrain: it applies to the plugin HTTP client only."
+  },
+
+  "settings": {
+    "maxDocumentsDefault": { "type": "integer", "default": 1000, "description": "Documents a read returns when the node does not say." },
+    "maxDocumentsCeiling": { "type": "integer", "default": 10000, "description": "The most a node may ask for." },
+    "maxTimeMillisDefault": { "type": "integer", "default": 30000 },
+    "maxTimeMillisCeiling": { "type": "integer", "default": 300000 },
+    "maxResultBytes": { "type": "integer", "default": 16777216, "description": "A read is refused once its documents exceed this, before the engine's heap notices." },
+    "logQueries": { "type": "boolean", "default": false, "description": "Writes filters to the debug log. Filters contain data, so this is an administrator's decision." },
+    "operation.execute_command.enabled": { "type": "boolean", "default": false, "description": "Arbitrary database commands. Off unless switched on." }
+  }
+}

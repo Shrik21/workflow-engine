@@ -1,0 +1,293 @@
+{
+  "_": "One node configuration per scenario. Drop the body into a PLUGIN node's 'configuration' with pluginId 'mongodb'. Every one names a secret rather than holding a password: store the value with the engine's secret management first. The connection fields are identical on all three node types, so they are shown once here and abbreviated afterwards.",
+
+  "connection": {
+    "_notes": [
+      "Either connectionUri or host/port. A URI containing user:password@ is refused: split it as shown.",
+      "credentialId names both halves in the secret store as <id>.username and <id>.password; passwordSecret names the password alone.",
+      "Atlas requires TLS, which mongodb+srv:// turns on by itself."
+    ],
+    "connectionUri": "mongodb://mongo.internal:27017/customers",
+    "username": "workflow",
+    "passwordSecret": "mongodb.password",
+    "authenticationDatabase": "admin",
+    "tls": false,
+    "serverSelectionTimeoutMillis": 15000,
+    "maxPoolSize": 20
+  },
+
+  "atlasConnection": {
+    "_notes": [
+      "The same node against Atlas. The SRV record supplies the hosts and the replica set; TLS is implied.",
+      "The database may live in the URI, or in 'database' where one node serves several."
+    ],
+    "connectionUri": "mongodb+srv://cluster0.abcde.mongodb.net/customers?retryWrites=true&w=majority",
+    "username": "workflow",
+    "credentialId": "atlas-prod"
+  },
+
+  "insertCustomer": {
+    "_scenario": "1. Insert a customer, with form fields interpolated.",
+    "_notes": [
+      "$date turns the resolved timestamp into a BSON date rather than a string, so range queries on it work.",
+      "A whole-value placeholder that resolves to a number is stored as a number: 'age' below arrives as an int."
+    ],
+    "operation": "INSERT_ONE",
+    "connectionUri": "mongodb://mongo.internal:27017/customers",
+    "collection": "customers",
+    "username": "workflow",
+    "passwordSecret": "mongodb.password",
+    "documents": [
+      {
+        "firstName": "${form.firstName}",
+        "lastName": "${form.lastName}",
+        "email": "${form.email}",
+        "age": "${form.age}",
+        "status": "ACTIVE",
+        "createdAt": { "$date": "${system.currentTime}" }
+      }
+    ],
+    "outputVariable": "created"
+  },
+
+  "insertMany": {
+    "_scenario": "Insert several documents at once.",
+    "_notes": ["ordered=false keeps going after a failure, which suits an import where one bad row should not stop the rest."],
+    "operation": "INSERT_MANY",
+    "collection": "customers",
+    "documents": [
+      { "name": "${customer.name}", "email": "${customer.email}" },
+      { "name": "${customer2.name}", "email": "${customer2.email}" }
+    ],
+    "ordered": false,
+    "outputVariable": "imported"
+  },
+
+  "findCustomer": {
+    "_scenario": "2. Find one customer and map fields into workflow variables.",
+    "_notes": [
+      "FIND_ONE publishes the document's own fields directly, so ${customer.name} works — as well as ${customer.document.name}.",
+      "'found' is false rather than an error when nothing matched: 'no such customer' is an ordinary outcome to branch on."
+    ],
+    "operation": "FIND_ONE",
+    "collection": "customers",
+    "filter": { "email": "${user.email}" },
+    "projection": { "_id": 1, "name": 1, "email": 1 },
+    "sort": { "createdAt": -1 },
+    "outputVariable": "customer",
+    "_outputMapping": {
+      "customer.name": "workflow.customerName",
+      "customer.found": "workflow.customerFound"
+    }
+  },
+
+  "findManyPaged": {
+    "_scenario": "Find a page of active adults, newest first.",
+    "_notes": [
+      "hasMore is a fact, not a guess: the query asks for one more document than it returns.",
+      "includeTotalCount runs a second count over the same filter. Off unless a UI needs the total."
+    ],
+    "operation": "FIND_MANY",
+    "collection": "customers",
+    "filter": { "status": "ACTIVE", "age": { "$gte": 18 } },
+    "sort": { "createdAt": -1 },
+    "page": 1,
+    "pageSize": 50,
+    "includeTotalCount": true,
+    "maxTimeMillis": 15000,
+    "outputVariable": "customers"
+  },
+
+  "findByObjectId": {
+    "_scenario": "Look a document up by its _id.",
+    "_notes": [
+      "$oid is required. A 24-character hex string resolved from a variable stays a string on purpose, and a string never matches an ObjectId — the query is valid, runs, and returns nothing."
+    ],
+    "operation": "FIND_ONE",
+    "collection": "customers",
+    "filter": { "_id": { "$oid": "${workflow.customerId}" } },
+    "outputVariable": "customer"
+  },
+
+  "updateCustomer": {
+    "_scenario": "3. Update a customer.",
+    "_notes": [
+      "Update operators only. A plain document here is refused, because MongoDB would treat it as a replacement and drop every field it does not mention.",
+      "upsert inserts when the filter matched nothing, and publishes upsertedId."
+    ],
+    "operation": "UPDATE_ONE",
+    "collection": "customers",
+    "filter": { "_id": { "$oid": "${customer.id}" } },
+    "update": {
+      "$set": { "status": "ACTIVE", "updatedAt": { "$date": "${system.currentTime}" } },
+      "$inc": { "loginCount": 1 },
+      "$addToSet": { "tags": "verified" }
+    },
+    "upsert": false,
+    "outputVariable": "updated"
+  },
+
+  "updateMany": {
+    "_scenario": "Update every matching document.",
+    "_notes": [
+      "confirmed is required: this touches every document the filter matches.",
+      "If the filter could resolve to {} — a variable that came back empty — it is refused separately unless allowEmptyFilter is set."
+    ],
+    "operation": "UPDATE_MANY",
+    "collection": "customers",
+    "filter": { "department": "${form.department}" },
+    "update": { "$set": { "reviewedAt": { "$date": "${system.currentTime}" } } },
+    "confirmed": true,
+    "outputVariable": "reviewed"
+  },
+
+  "replaceCustomer": {
+    "_scenario": "Overwrite a document entirely.",
+    "_notes": ["Every field the replacement does not contain is gone. That is why it is a separate operation and why it is confirmed."],
+    "operation": "REPLACE_ONE",
+    "collection": "customers",
+    "filter": { "email": "${form.email}" },
+    "documents": [
+      { "email": "${form.email}", "name": "${form.name}", "status": "ACTIVE", "migratedAt": { "$date": "${system.currentTime}" } }
+    ],
+    "confirmed": true,
+    "outputVariable": "replaced"
+  },
+
+  "deleteMany": {
+    "_scenario": "Delete the documents a filter names.",
+    "_notes": ["confirmed is required, and an empty filter is refused on top of that."],
+    "operation": "DELETE_MANY",
+    "collection": "customers",
+    "filter": { "status": "DELETED", "deletedAt": { "$lt": { "$date": "${workflow.cutoff}" } } },
+    "confirmed": true,
+    "outputVariable": "purge"
+  },
+
+  "aggregateOrders": {
+    "_scenario": "4. Aggregate orders by department.",
+    "_notes": [
+      "Stages are validated before the server sees them: a stage missing its $ is caught here rather than as an unrecognised-field error several layers in.",
+      "allowDiskUse lets a large $group spill rather than failing at the server's in-memory stage limit."
+    ],
+    "operation": "AGGREGATE",
+    "collection": "orders",
+    "pipeline": [
+      { "$match": { "status": "${filter.status}", "createdAt": { "$gte": { "$date": "${filter.since}" } } } },
+      { "$lookup": { "from": "customers", "localField": "customerId", "foreignField": "_id", "as": "customer" } },
+      { "$unwind": "$customer" },
+      { "$group": { "_id": "$customer.department", "revenue": { "$sum": "$total" }, "count": { "$sum": 1 } } },
+      { "$sort": { "revenue": -1 } },
+      { "$limit": 20 }
+    ],
+    "allowDiskUse": true,
+    "maxTimeMillis": 60000,
+    "outputVariable": "byDepartment"
+  },
+
+  "countActive": {
+    "_scenario": "Count matching documents.",
+    "operation": "COUNT",
+    "collection": "customers",
+    "filter": { "status": "ACTIVE" },
+    "outputVariable": "activeCustomers"
+  },
+
+  "distinctDepartments": {
+    "_scenario": "Collect the distinct values of a field.",
+    "operation": "DISTINCT",
+    "collection": "customers",
+    "field": "department",
+    "filter": { "status": "ACTIVE" },
+    "outputVariable": "departments"
+  },
+
+  "transaction": {
+    "_scenario": "5. A transaction: create a customer, debit an account and write an audit record, atomically.",
+    "_notes": [
+      "One node, three operations. The transaction begins and ends inside it — see the README for why it cannot span workflow steps.",
+      "Needs a replica set or sharded cluster; a standalone server refuses it with MONGO_NOT_SUPPORTED.",
+      "Every write here is on one collection. Cross-collection atomicity needs the operations in one bulk write against a collection each, which this node cannot express: use it for the common case and a compensating node for the rest."
+    ],
+    "operation": "BULK_WRITE",
+    "collection": "ledger",
+    "useTransaction": true,
+    "ordered": true,
+    "confirmed": true,
+    "documents": [
+      { "insertOne": { "document": { "type": "CUSTOMER", "customerId": "${workflow.customerId}", "at": { "$date": "${system.currentTime}" } } } },
+      { "updateOne": { "filter": { "type": "ACCOUNT", "accountId": "${workflow.accountId}" }, "update": { "$inc": { "balance": -100 } } } },
+      { "insertOne": { "document": { "type": "AUDIT", "action": "ONBOARDED", "actor": "${system.username}", "at": { "$date": "${system.currentTime}" } } } }
+    ],
+    "outputVariable": "ledgerWrite"
+  },
+
+  "mongoToRestApi": {
+    "_scenario": "6. MongoDB → REST API. Read here, then feed the REST API node.",
+    "_notes": [
+      "The read publishes items; the REST node interpolates them into its body as ${customers.items}.",
+      "Keep the page small: whatever this returns is held in memory and serialised into the next request."
+    ],
+    "operation": "FIND_MANY",
+    "collection": "customers",
+    "filter": { "syncedAt": { "$exists": false } },
+    "limit": 100,
+    "outputVariable": "customers",
+    "_thenRestApiNode": {
+      "pluginId": "restapi",
+      "configuration": {
+        "method": "POST",
+        "url": "https://api.example.com/customers/bulk",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "customers": "${customers.items}" },
+        "bearerTokenSecret": "partner.apiToken"
+      }
+    }
+  },
+
+  "mongoToDecision": {
+    "_scenario": "8. MongoDB → decision. Read, then branch on what came back.",
+    "_notes": ["'found' and 'count' are published for exactly this: a decision node reads them without parsing a document."],
+    "operation": "COUNT",
+    "collection": "orders",
+    "filter": { "customerId": "${workflow.customerId}", "status": "OPEN" },
+    "outputVariable": "openOrders",
+    "_outputMapping": { "openOrders.count": "workflow.openOrderCount" },
+    "_thenDecisionNode": {
+      "type": "DECISION",
+      "conditions": [
+        { "branch": "hasOpenOrders", "expression": "workflow.openOrderCount > 0" },
+        { "branch": "none", "expression": "workflow.openOrderCount == 0" }
+      ],
+      "defaultBranch": "none"
+    }
+  },
+
+  "createIndex": {
+    "_scenario": "Create a unique index.",
+    "_notes": [
+      "expireAfterSeconds makes it a TTL index: the server deletes documents on its own schedule, with nothing in the workflow to record it.",
+      "partialFilterExpression indexes only the documents that match, which is how a unique index coexists with soft-deleted rows."
+    ],
+    "operation": "CREATE_INDEX",
+    "collection": "customers",
+    "keys": { "email": 1 },
+    "options": {
+      "unique": true,
+      "name": "email_unique",
+      "partialFilterExpression": { "status": { "$ne": "DELETED" } }
+    },
+    "outputVariable": "index"
+  },
+
+  "testConnection": {
+    "_scenario": "20. Prove a connection before a workflow depends on it.",
+    "_notes": ["Connects, pings and reports the server version without touching data. Run it on its own from the designer."],
+    "operation": "TEST_CONNECTION",
+    "connectionUri": "mongodb+srv://cluster0.abcde.mongodb.net/customers",
+    "username": "workflow",
+    "passwordSecret": "mongodb.password",
+    "serverSelectionTimeoutMillis": 5000,
+    "outputVariable": "mongo"
+  }
+}

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>email-plugin</artifactId>
+    <!--
+      Versioned independently of the reactor, because a published registry version is immutable: a fix to a
+      plugin somebody has already installed is a new version rather than a re-upload of the old one.
+
+      1.0.1: node outputs are published as a nested object. 1.0.0 published them as dotted keys, which cannot be
+      persisted into the execution document, so a node sent the mail and then left the workflow stuck in RUNNING.
+    -->
+    <version>1.0.3</version>
+    <name>Email Workflow Plugin</name>
+    <description>Sends email through any SMTP server, with the connection configured on the node</description>
+
+    <properties>
+        <plugin.id>email</plugin.id>
+        <plugin.class>com.orchpilot.workflow.plugins.email.EmailPlugin</plugin.class>
+        <angus.mail.version>2.0.3</angus.mail.version>
+        <angus.activation.version>2.0.2</angus.activation.version>
+    </properties>
+
+    <dependencies>
+        <!--
+          provided: the SDK lives in the engine and is delegated parent-first by the plugin class loader.
+          Bundling it would create two incompatible copies of the API types.
+        -->
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          Angus Mail: the Jakarta Mail implementation. Bundled into lib/ inside the archive, where the engine's
+          class loader finds it, because the engine itself has no mail library and must not be made to depend
+          on one for the sake of a plugin.
+        -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>${angus.mail.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-activation</artifactId>
+            <version>${angus.activation.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!--
+          Filtered so META-INF/workflow-plugin.json is generated from the same ${plugin.id}, ${plugin.class} and
+          ${project.version} the JAR manifest entries use. Hand-maintaining the version in two places is how a
+          plugin comes to declare 1.0.0 while being built as 1.1.0.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+
+            <!--
+              Copies the runtime dependencies to lib/ inside the archive. The engine extracts anything under
+              lib/ and adds it to the plugin's own class loader, which is what keeps Angus Mail isolated to
+              this plugin: another plugin may bundle a different version without either being affected.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-runtime-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <excludeScope>provided</excludeScope>
+                            <excludeTransitive>false</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,45 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "REST API",
+  "version": "${project.version}",
+  "description": "Calls an HTTP endpoint and publishes its response as workflow variables.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "nodes": [
+    {
+      "nodeType": "REST_API_CALL",
+      "displayName": "REST API Call",
+      "description": "Calls an HTTP endpoint. Publishes response.status, response.body, response.headers and a parsed json object.",
+      "category": "HTTP",
+      "icon": "restapi",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["url", "method"],
+        "properties": {
+          "url": { "type": "string", "title": "URL" },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            "default": "GET"
+          },
+          "headers": { "type": "object", "additionalProperties": true, "title": "Headers" },
+          "queryParameters": { "type": "object", "additionalProperties": true, "title": "Query parameters" },
+          "body": { "type": "string", "format": "textarea", "title": "Body" },
+          "bearerTokenSecret": { "type": "string", "format": "secret-ref", "title": "Bearer token secret" },
+          "deduplicate": { "type": "boolean", "title": "Deduplicate retries", "default": false }
+        }
+      },
+      "outputPorts": []
+    }
+  ],
+  "dependencies": [],
+  "permissions": {
+    "network": ["*"],
+    "secrets": []
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "name": "Employee Approval",
+  "description": "Start, form, decision, SendGrid email on approval, end. The flow from the specification.",
+  "variables": {
+    "escalationThreshold": 10000,
+    "senderEmail": "hr@example.com"
+  },
+  "triggers": [
+    {
+      "id": "manual",
+      "type": "MANUAL",
+      "enabled": true
+    },
+    {
+      "id": "on-employee-created",
+      "type": "EVENT",
+      "enabled": true,
+      "eventName": "EMPLOYEE_CREATED",
+      "defaultInput": {
+        "source": "hr-system"
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "description": "Seeds workflow variables from the execution input",
+      "inputMapping": {
+        "employeeId": "${input.employeeId}",
+        "employeeName": "${input.employeeName}",
+        "amount": "${input.amount}",
+        "recipientEmail": "${input.managerEmail}"
+      },
+      "configuration": {
+        "variables": {
+          "approved": false,
+          "comments": ""
+        }
+      },
+      "presentation": { "x": 80, "y": 200 }
+    },
+    {
+      "id": "form-1",
+      "type": "FORM",
+      "name": "Employee Approval Form",
+      "formId": "employeeApproval",
+      "description": "Parks the execution until a manager submits a decision",
+      "waitForInput": true,
+      "inputMapping": {
+        "employeeId": "${employeeId}",
+        "employeeName": "${employeeName}",
+        "amount": "${amount}"
+      },
+      "outputMapping": {
+        "approved": "workflow.approved",
+        "comments": "workflow.comments"
+      },
+      "configuration": {
+        "assignee": "${input.managerEmail}",
+        "expiresInSeconds": 604800,
+        "fields": [
+          { "name": "approved", "type": "boolean", "label": "Approve this employee?", "required": true },
+          { "name": "comments", "type": "text", "label": "Comments", "required": false }
+        ]
+      },
+      "presentation": { "x": 280, "y": 200 }
+    },
+    {
+      "id": "decision-1",
+      "type": "DECISION",
+      "name": "Approval Decision",
+      "description": "Expressions may only read variables; no method calls or type references are permitted",
+      "conditions": [
+        {
+          "branch": "escalate",
+          "expression": "approved == true and amount > escalationThreshold",
+          "description": "Approved but large enough to need a second pair of eyes"
+        },
+        {
+          "branch": "approved",
+          "expression": "approved == true",
+          "description": "Approved within the threshold"
+        },
+        {
+          "branch": "rejected",
+          "expression": "approved == false",
+          "description": "Declined by the manager"
+        }
+      ],
+      "defaultBranch": "rejected",
+      "presentation": { "x": 500, "y": 200 }
+    },
+    {
+      "id": "sendgrid-1",
+      "type": "PLUGIN",
+      "name": "Notify Employee",
+      "description": "Contributed at runtime by sendgrid-plugin. The API key is referenced by secret name.",
+      "pluginId": "sendgrid",
+      "pluginVersion": "1.0.0",
+      "configuration": {
+        "apiKeySecret": "sendgrid.apiKey",
+        "from": "${senderEmail}",
+        "fromName": "People Operations",
+        "to": "${recipientEmail}",
+        "subject": "Approval complete for ${employeeName}",
+        "body": "Employee ${employeeName} (${employeeId}) was approved.\n\nComments: ${comments}",
+        "contentType": "text/plain"
+      },
+      "outputMapping": {
+        "messageId": "workflow.notificationId"
+      },
+      "retry": {
+        "enabled": true,
+        "maxAttempts": 3,
+        "backoffMillis": 5000,
+        "backoffMultiplier": 2.0,
+        "maxBackoffMillis": 60000
+      },
+      "errorPolicy": "CONTINUE",
+      "timeoutMillis": 30000,
+      "presentation": { "x": 740, "y": 120 }
+    },
+    {
+      "id": "escalation-form",
+      "type": "FORM",
+      "name": "Escalation Review",
+      "formId": "escalationReview",
+      "inputMapping": {
+        "employeeName": "${employeeName}",
+        "amount": "${amount}",
+        "managerComments": "${comments}"
+      },
+      "outputMapping": {
+        "approved": "workflow.approved"
+      },
+      "presentation": { "x": 500, "y": 60 }
+    },
+    {
+      "id": "end-approved",
+      "type": "END",
+      "name": "Approved",
+      "outputs": ["workflow.approved", "workflow.comments"],
+      "configuration": {
+        "resultStatus": "APPROVED",
+        "outputs": {
+          "employeeId": "${employeeId}",
+          "notificationId": "${workflow.notificationId}"
+        }
+      },
+      "presentation": { "x": 960, "y": 120 }
+    },
+    {
+      "id": "end-rejected",
+      "type": "END",
+      "name": "Rejected",
+      "configuration": {
+        "resultStatus": "REJECTED",
+        "outputs": {
+          "employeeId": "${employeeId}",
+          "comments": "${comments}"
+        }
+      },
+      "presentation": { "x": 740, "y": 300 }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "form-1" },
+    { "source": "form-1", "target": "decision-1" },
+    { "source": "decision-1", "sourcePort": "approved", "target": "sendgrid-1", "label": "approved" },
+    { "source": "decision-1", "sourcePort": "escalate", "target": "escalation-form", "label": "needs escalation" },
+    { "source": "decision-1", "sourcePort": "rejected", "target": "end-rejected", "label": "rejected" },
+    { "source": "escalation-form", "target": "decision-1", "label": "re-evaluate" },
+    { "source": "sendgrid-1", "target": "end-approved" }
+  ],
+  "metadata": {
+    "owner": "people-ops",
+    "tags": ["hr", "approval", "sample"]
+  }
+}

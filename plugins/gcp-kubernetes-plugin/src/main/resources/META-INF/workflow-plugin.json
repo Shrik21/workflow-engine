@@ -1,0 +1,102 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "GCP Kubernetes",
+  "version": "${project.version}",
+  "description": "GKE cluster and node-pool management plus Kubernetes workload operations, behind a provider abstraction that AWS EKS and Azure AKS can implement later.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "category": "CLOUD_INFRASTRUCTURE",
+  "supportsAI": true,
+  "providers": ["gcp-gke"],
+  "plannedProviders": ["aws-eks", "azure-aks"],
+  "capabilities": [
+    "gke.cluster.list", "gke.cluster.get", "gke.cluster.health", "gke.cluster.create", "gke.cluster.delete",
+    "gke.nodePool.list", "gke.nodePool.scale", "gke.nodePool.delete",
+    "kubernetes.namespace.list", "kubernetes.namespace.create", "kubernetes.namespace.delete",
+    "kubernetes.pod.list", "kubernetes.pod.get", "kubernetes.pod.logs", "kubernetes.pod.delete",
+    "kubernetes.deployment.list", "kubernetes.deployment.get", "kubernetes.deployment.health",
+    "kubernetes.deployment.create", "kubernetes.deployment.updateImage", "kubernetes.deployment.scale",
+    "kubernetes.deployment.restart", "kubernetes.deployment.rollback", "kubernetes.deployment.delete",
+    "kubernetes.service.list", "kubernetes.service.get", "kubernetes.service.delete",
+    "kubernetes.configmap.list", "kubernetes.configmap.get", "kubernetes.configmap.delete",
+    "kubernetes.secret.list", "kubernetes.secret.delete",
+    "kubernetes.job.list", "kubernetes.job.delete", "kubernetes.cronjob.list",
+    "kubernetes.statefulset.list", "kubernetes.statefulset.scale", "kubernetes.daemonset.list",
+    "kubernetes.ingress.list", "kubernetes.hpa.list", "kubernetes.event.list",
+    "kubernetes.manifest.validate", "kubernetes.manifest.apply", "kubernetes.manifest.delete"
+  ],
+  "notSupported": {
+    "kubernetes.pod.exec": "Executing commands inside a pod requires a SPDY/WebSocket protocol upgrade that the plugin HTTP transport does not carry. The node exists so the capability is visible and audited as refused; no workflow or AI Agent can obtain a shell in a cluster through this plugin.",
+    "kubernetes.pod.portForward": "Port forwarding requires the same streaming protocol upgrade as exec.",
+    "kubernetes.watch": "Watch streams are long-lived connections; the plugin polls instead, which is what the rollout wait does.",
+    "kubernetes.secret.read": "A Kubernetes Secret's values are never returned. Listing gives names, types and key names only, and there is deliberately no Get Secret node."
+  },
+  "nodes": [
+    { "nodeType": "GKE_LIST_CLUSTERS", "displayName": "List GKE Clusters", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "gke.cluster.list", "aiToolName": "gke_list_clusters" },
+    { "nodeType": "GKE_GET_CLUSTER", "displayName": "Get GKE Cluster", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "gke.cluster.get", "aiToolName": "gke_get_cluster" },
+    { "nodeType": "GKE_CLUSTER_HEALTH", "displayName": "GKE Cluster Health", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "gke.cluster.health", "aiToolName": "gke_cluster_health" },
+    { "nodeType": "GKE_CREATE_CLUSTER", "displayName": "Create GKE Cluster", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "gke.cluster.create", "aiToolName": "gke_create_cluster" },
+    { "nodeType": "GKE_DELETE_CLUSTER", "displayName": "Delete GKE Cluster", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": true, "riskLevel": "VERY_HIGH", "capability": "gke.cluster.delete", "aiToolName": "gke_delete_cluster" },
+    { "nodeType": "GKE_LIST_NODE_POOLS", "displayName": "List GKE Node Pools", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "gke.nodePool.list", "aiToolName": "gke_list_node_pools" },
+    { "nodeType": "GKE_SCALE_NODE_POOL", "displayName": "Scale GKE Node Pool", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "gke.nodePool.scale", "aiToolName": "gke_scale_node_pool" },
+    { "nodeType": "GKE_DELETE_NODE_POOL", "displayName": "Delete GKE Node Pool", "category": "GCP Kubernetes", "icon": "cloud", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "gke.nodePool.delete", "aiToolName": "gke_delete_node_pool" },
+
+    { "nodeType": "K8S_LIST_NAMESPACES", "displayName": "List Kubernetes Namespaces", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.namespace.list", "aiToolName": "k8s_list_namespaces" },
+    { "nodeType": "K8S_CREATE_NAMESPACE", "displayName": "Create Kubernetes Namespace", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "kubernetes.namespace.create", "aiToolName": "k8s_create_namespace" },
+    { "nodeType": "K8S_DELETE_NAMESPACE", "displayName": "Delete Kubernetes Namespace", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.namespace.delete", "aiToolName": "k8s_delete_namespace" },
+
+    { "nodeType": "K8S_LIST_PODS", "displayName": "List Kubernetes Pods", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.pod.list", "aiToolName": "k8s_list_pods" },
+    { "nodeType": "K8S_GET_POD", "displayName": "Get Kubernetes Pod", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.pod.get", "aiToolName": "k8s_get_pod" },
+    { "nodeType": "K8S_POD_LOGS", "displayName": "Get Kubernetes Pod Logs", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.pod.logs", "aiToolName": "k8s_pod_logs" },
+    { "nodeType": "K8S_DELETE_POD", "displayName": "Delete Kubernetes Pod", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.pod.delete", "aiToolName": "k8s_delete_pod" },
+    { "nodeType": "K8S_POD_EXEC", "displayName": "Execute In Kubernetes Pod", "category": "Kubernetes", "icon": "layers", "supportsAI": false, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.pod.exec", "aiToolName": null, "available": false, "unavailableReason": "Not supported by this runtime; the node always refuses. See notSupported." },
+
+    { "nodeType": "K8S_LIST_DEPLOYMENTS", "displayName": "List Kubernetes Deployments", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.deployment.list", "aiToolName": "k8s_list_deployments" },
+    { "nodeType": "K8S_GET_DEPLOYMENT", "displayName": "Get Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.deployment.get", "aiToolName": "k8s_get_deployment" },
+    { "nodeType": "K8S_DEPLOYMENT_HEALTH", "displayName": "Kubernetes Deployment Health", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.deployment.health", "aiToolName": "k8s_deployment_health" },
+    { "nodeType": "K8S_CREATE_DEPLOYMENT", "displayName": "Create Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "kubernetes.deployment.create", "aiToolName": "k8s_create_deployment" },
+    { "nodeType": "K8S_UPDATE_DEPLOYMENT_IMAGE", "displayName": "Update Kubernetes Deployment Image", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "kubernetes.deployment.updateImage", "aiToolName": "k8s_update_deployment_image" },
+    { "nodeType": "K8S_SCALE_DEPLOYMENT", "displayName": "Scale Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "LOW", "capability": "kubernetes.deployment.scale", "aiToolName": "k8s_scale_deployment" },
+    { "nodeType": "K8S_RESTART_DEPLOYMENT", "displayName": "Restart Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "LOW", "capability": "kubernetes.deployment.restart", "aiToolName": "k8s_restart_deployment" },
+    { "nodeType": "K8S_ROLLBACK_DEPLOYMENT", "displayName": "Rollback Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "kubernetes.deployment.rollback", "aiToolName": "k8s_rollback_deployment" },
+    { "nodeType": "K8S_DELETE_DEPLOYMENT", "displayName": "Delete Kubernetes Deployment", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.deployment.delete", "aiToolName": "k8s_delete_deployment" },
+
+    { "nodeType": "K8S_LIST_SERVICES", "displayName": "List Kubernetes Services", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.service.list", "aiToolName": "k8s_list_services" },
+    { "nodeType": "K8S_GET_SERVICE", "displayName": "Get Kubernetes Service", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.service.get", "aiToolName": "k8s_get_service" },
+    { "nodeType": "K8S_DELETE_SERVICE", "displayName": "Delete Kubernetes Service", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.service.delete", "aiToolName": "k8s_delete_service" },
+
+    { "nodeType": "K8S_LIST_CONFIGMAPS", "displayName": "List Kubernetes ConfigMaps", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.configmap.list", "aiToolName": "k8s_list_configmaps" },
+    { "nodeType": "K8S_GET_CONFIGMAP", "displayName": "Get Kubernetes ConfigMap", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.configmap.get", "aiToolName": "k8s_get_configmap" },
+    { "nodeType": "K8S_DELETE_CONFIGMAP", "displayName": "Delete Kubernetes ConfigMap", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.configmap.delete", "aiToolName": "k8s_delete_configmap" },
+
+    { "nodeType": "K8S_LIST_SECRETS", "displayName": "List Kubernetes Secrets", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.secret.list", "aiToolName": "k8s_list_secrets" },
+    { "nodeType": "K8S_DELETE_SECRET", "displayName": "Delete Kubernetes Secret", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.secret.delete", "aiToolName": "k8s_delete_secret" },
+
+    { "nodeType": "K8S_LIST_JOBS", "displayName": "List Kubernetes Jobs", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.job.list", "aiToolName": "k8s_list_jobs" },
+    { "nodeType": "K8S_DELETE_JOB", "displayName": "Delete Kubernetes Job", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.job.delete", "aiToolName": "k8s_delete_job" },
+    { "nodeType": "K8S_LIST_CRONJOBS", "displayName": "List Kubernetes CronJobs", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.cronjob.list", "aiToolName": "k8s_list_cronjobs" },
+
+    { "nodeType": "K8S_LIST_STATEFULSETS", "displayName": "List Kubernetes StatefulSets", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.statefulset.list", "aiToolName": "k8s_list_statefulsets" },
+    { "nodeType": "K8S_SCALE_STATEFULSET", "displayName": "Scale Kubernetes StatefulSet", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "LOW", "capability": "kubernetes.statefulset.scale", "aiToolName": "k8s_scale_statefulset" },
+    { "nodeType": "K8S_LIST_DAEMONSETS", "displayName": "List Kubernetes DaemonSets", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.daemonset.list", "aiToolName": "k8s_list_daemonsets" },
+    { "nodeType": "K8S_LIST_INGRESSES", "displayName": "List Kubernetes Ingresses", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.ingress.list", "aiToolName": "k8s_list_ingresses" },
+    { "nodeType": "K8S_LIST_HPAS", "displayName": "List Kubernetes Autoscalers", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.hpa.list", "aiToolName": "k8s_list_hpas" },
+    { "nodeType": "K8S_LIST_EVENTS", "displayName": "List Kubernetes Events", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.event.list", "aiToolName": "k8s_list_events" },
+
+    { "nodeType": "K8S_VALIDATE_MANIFEST", "displayName": "Validate Kubernetes Manifest", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "kubernetes.manifest.validate", "aiToolName": "k8s_validate_manifest" },
+    { "nodeType": "K8S_APPLY_MANIFEST", "displayName": "Apply Kubernetes Manifest", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "kubernetes.manifest.apply", "aiToolName": "k8s_apply_manifest" },
+    { "nodeType": "K8S_DELETE_MANIFEST", "displayName": "Delete Kubernetes Manifest Resource", "category": "Kubernetes", "icon": "layers", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "kubernetes.manifest.delete", "aiToolName": "k8s_delete_manifest" }
+  ],
+  "dependencies": [
+    { "groupId": "org.yaml", "artifactId": "snakeyaml", "version": "2.5", "bundled": true, "reason": "Kubernetes manifests are YAML; parsed with SafeConstructor, aliases disabled and a size limit." }
+  ],
+  "permissions": {
+    "network": ["container.googleapis.com", "oauth2.googleapis.com", "*.gke.goog"],
+    "secrets": ["gke."],
+    "notes": "Reads a GCP service-account key from a secret named with the gke. prefix. The credential never enters workflow configuration, node output, workflow variables, logs, audit records, or the AI Agent's context. container.googleapis.com serves cluster management; *.gke.goog is the DNS-based cluster control plane endpoint, which is the only cluster endpoint whose certificate the engine's shared HTTP client can verify."
+  }
+}

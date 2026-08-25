@@ -1,0 +1,181 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "GCP Compute Instance",
+  "version": "${project.version}",
+  "description": "Create, inspect and manage Google Cloud Compute Engine VM instances from workflows and AI Agents.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "provider": "GCP",
+  "supportsAI": true,
+  "operations": ["CREATE", "GET", "LIST", "START", "STOP", "RESTART", "RESET", "SUSPEND", "RESUME", "DELETE"],
+  "nodes": [
+    {
+      "nodeType": "GCP_COMPUTE_CREATE_INSTANCE",
+      "displayName": "Create GCP Compute Instance",
+      "description": "Creates a Compute Engine VM instance and, when configured to wait, returns its final state.",
+      "category": "GCP Compute",
+      "icon": "cloud",
+      "supportsAI": true,
+      "destructive": false,
+      "riskLevel": "MODIFY",
+      "aiToolName": "gcp_compute_create_instance",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["credentialsSecret", "projectId", "zone", "instanceName"],
+        "properties": {
+          "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+          "projectId": { "type": "string", "title": "Project ID" },
+          "zone": { "type": "string", "title": "Zone" },
+          "instanceName": { "type": "string", "title": "Instance name" },
+          "machineType": { "type": "string", "title": "Machine type", "default": "e2-medium" },
+          "imageProject": { "type": "string", "title": "Image project" },
+          "imageFamily": { "type": "string", "title": "Image family" },
+          "diskSizeGb": { "type": "integer", "title": "Boot disk size (GB)", "default": 30 },
+          "diskType": { "type": "string", "title": "Boot disk type", "enum": ["pd-standard", "pd-balanced", "pd-ssd", "hyperdisk-balanced"], "default": "pd-balanced" },
+          "network": { "type": "string", "title": "VPC network", "default": "default" },
+          "subnet": { "type": "string", "title": "Subnetwork" },
+          "externalIp": { "type": "string", "title": "External IP", "enum": ["EPHEMERAL", "NONE", "STATIC"], "default": "EPHEMERAL" },
+          "startupScript": { "type": "string", "format": "textarea", "title": "Startup script" },
+          "labels": { "type": "object", "additionalProperties": true, "title": "Labels" },
+          "tags": { "type": "string", "title": "Network tags (comma or space separated)" },
+          "serviceAccount": { "type": "string", "title": "Service account email" },
+          "deletionProtection": { "type": "boolean", "title": "Deletion protection", "default": false },
+          "ifExists": { "type": "string", "title": "If instance exists", "enum": ["FAIL", "USE_EXISTING"], "default": "FAIL" },
+          "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true },
+          "timeoutSeconds": { "type": "integer", "title": "Timeout (seconds)", "default": 600 },
+          "pollIntervalSeconds": { "type": "integer", "title": "Polling interval (seconds)", "default": 5 }
+        }
+      }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_GET_INSTANCE",
+      "displayName": "Get GCP Compute Instance",
+      "description": "Reads one instance: status, machine type, disks, network interfaces and labels.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "aiToolName": "gcp_compute_get_instance",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["credentialsSecret", "projectId", "zone", "instanceName"],
+        "properties": {
+          "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+          "projectId": { "type": "string", "title": "Project ID" },
+          "zone": { "type": "string", "title": "Zone" },
+          "instanceName": { "type": "string", "title": "Instance name" }
+        }
+      }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_LIST_INSTANCES",
+      "displayName": "List GCP Compute Instances",
+      "description": "Lists instances in a zone or across all zones, with an optional filter.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "aiToolName": "gcp_compute_list_instances",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["credentialsSecret", "projectId"],
+        "properties": {
+          "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+          "projectId": { "type": "string", "title": "Project ID" },
+          "zone": { "type": "string", "title": "Zone (optional)" },
+          "filter": { "type": "string", "title": "Filter (optional)" }
+        }
+      }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_START_INSTANCE",
+      "displayName": "Start GCP Compute Instance", "description": "Starts a stopped instance.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_start_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_STOP_INSTANCE",
+      "displayName": "Stop GCP Compute Instance", "description": "Stops a running instance.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_stop_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_RESTART_INSTANCE",
+      "displayName": "Restart GCP Compute Instance", "description": "Gracefully restarts (stop then start).",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_restart_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_RESET_INSTANCE",
+      "displayName": "Reset GCP Compute Instance", "description": "Hard-resets (power cycle) an instance.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_reset_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_SUSPEND_INSTANCE",
+      "displayName": "Suspend GCP Compute Instance", "description": "Suspends an instance, preserving memory.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_suspend_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_RESUME_INSTANCE",
+      "displayName": "Resume GCP Compute Instance", "description": "Resumes a suspended instance.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": false, "riskLevel": "MODIFY", "aiToolName": "gcp_compute_resume_instance",
+      "configurationSchema": { "type": "object", "required": ["credentialsSecret", "projectId", "zone", "instanceName"], "properties": {
+        "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+        "projectId": { "type": "string", "title": "Project ID" }, "zone": { "type": "string", "title": "Zone" },
+        "instanceName": { "type": "string", "title": "Instance name" },
+        "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true } } }
+    },
+    {
+      "nodeType": "GCP_COMPUTE_DELETE_INSTANCE",
+      "displayName": "Delete GCP Compute Instance",
+      "description": "Permanently deletes an instance. Destructive: a supervised AI Agent must have it approved.",
+      "category": "GCP Compute", "icon": "cloud",
+      "supportsAI": true, "destructive": true, "riskLevel": "DESTRUCTIVE", "aiToolName": "gcp_compute_delete_instance",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["credentialsSecret", "projectId", "zone", "instanceName"],
+        "properties": {
+          "credentialsSecret": { "type": "string", "format": "secret-ref", "title": "GCP credentials secret name" },
+          "projectId": { "type": "string", "title": "Project ID" },
+          "zone": { "type": "string", "title": "Zone" },
+          "instanceName": { "type": "string", "title": "Instance name" },
+          "requireConfirmation": { "type": "boolean", "title": "Require confirmation", "default": true },
+          "confirmed": { "type": "boolean", "title": "Confirmed", "default": false },
+          "waitForCompletion": { "type": "boolean", "title": "Wait for completion", "default": true }
+        }
+      }
+    }
+  ],
+  "dependencies": [],
+  "permissions": {
+    "network": ["compute.googleapis.com", "oauth2.googleapis.com"],
+    "secrets": ["gcp."],
+    "notes": "Calls the Compute Engine REST API and the Google OAuth2 token endpoint only. Reads the service-account key from a secret named with the gcp. prefix; the key is never placed in workflow configuration, output, logs, or exposed to the AI Agent."
+  }
+}

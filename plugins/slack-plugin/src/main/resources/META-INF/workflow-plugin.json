@@ -1,0 +1,36 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "Slack",
+  "version": "${project.version}",
+  "description": "Posts messages to Slack.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "nodes": [
+    {
+      "nodeType": "SLACK_MESSAGE",
+      "displayName": "Slack Message",
+      "description": "Posts a message to a Slack channel. Treats Slack's HTTP 200 with ok:false as the failure it is.",
+      "category": "Communication",
+      "icon": "chat",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["channel", "text"],
+        "properties": {
+          "channel": { "type": "string", "title": "Channel" },
+          "text": { "type": "string", "format": "textarea", "title": "Message" },
+          "username": { "type": "string", "title": "Post as" },
+          "tokenSecret": { "type": "string", "format": "secret-ref", "title": "Bot token secret" }
+        }
+      }
+    }
+  ],
+  "dependencies": [],
+  "permissions": {
+    "network": ["slack.com"],
+    "secrets": ["slack.botToken"]
+  }
+}

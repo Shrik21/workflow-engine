@@ -1,0 +1,5 @@
+# Failure analyzers run before the application context exists, so they cannot be beans and are still
+# discovered through spring.factories. This one turns a missing JWT or encryption key into a short,
+# actionable message instead of a deeply nested bean-creation stack trace.
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+com.orchpilot.workflow.auth.config.MissingSecurityKeyFailureAnalyzer

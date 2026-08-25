@@ -1,0 +1,62 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "Docker Registry",
+  "version": "${project.version}",
+  "description": "One capability model over Docker Hub, AWS ECR, Azure ACR, Google Artifact Registry and any OCI-compatible registry.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "category": "CONTAINER_REGISTRY",
+  "supportsAI": true,
+  "providers": ["DOCKER_HUB", "AWS_ECR", "AZURE_ACR", "GOOGLE_ARTIFACT_REGISTRY", "GENERIC"],
+  "capabilities": [
+    "container.registry.login",
+    "container.registry.listRepositories",
+    "container.registry.createRepository",
+    "container.registry.deleteRepository",
+    "container.registry.listTags",
+    "container.registry.listImages",
+    "container.registry.getImage",
+    "container.registry.getManifest",
+    "container.registry.getDigest",
+    "container.registry.exists",
+    "container.registry.search",
+    "container.registry.retag",
+    "container.registry.copyTag",
+    "container.registry.deleteImage"
+  ],
+  "notSupported": {
+    "container.registry.pushImage": "Layer blobs cannot pass through the plugin HTTP client, which carries String bodies under a size ceiling. Use a CI/CD step (for example a GitHub Actions run dispatched by the GitHub plugin) to push, then use this plugin to verify the digest.",
+    "container.registry.pullImage": "Same constraint as push. Use getManifest/getDigest to inspect an image without transferring it."
+  },
+  "nodes": [
+    { "nodeType": "REGISTRY_LOGIN", "displayName": "Registry Login / Test Connection", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.login", "aiToolName": "registry_login" },
+    { "nodeType": "REGISTRY_LIST_REPOSITORIES", "displayName": "List Registry Repositories", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.listRepositories", "aiToolName": "registry_list_repositories" },
+    { "nodeType": "REGISTRY_CREATE_REPOSITORY", "displayName": "Create Registry Repository", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "container.registry.createRepository", "aiToolName": "registry_create_repository" },
+    { "nodeType": "REGISTRY_DELETE_REPOSITORY", "displayName": "Delete Registry Repository", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "container.registry.deleteRepository", "aiToolName": "registry_delete_repository" },
+    { "nodeType": "REGISTRY_LIST_TAGS", "displayName": "List Image Tags", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.listTags", "aiToolName": "registry_list_tags" },
+    { "nodeType": "REGISTRY_LIST_IMAGES", "displayName": "List Images", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.listImages", "aiToolName": "registry_list_images" },
+    { "nodeType": "REGISTRY_GET_IMAGE", "displayName": "Get Image Metadata", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.getImage", "aiToolName": "registry_get_image" },
+    { "nodeType": "REGISTRY_GET_MANIFEST", "displayName": "Get Image Manifest", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.getManifest", "aiToolName": "registry_get_manifest" },
+    { "nodeType": "REGISTRY_GET_DIGEST", "displayName": "Get Image Digest", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.getDigest", "aiToolName": "registry_get_digest" },
+    { "nodeType": "REGISTRY_IMAGE_EXISTS", "displayName": "Check Image Exists", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.exists", "aiToolName": "registry_image_exists" },
+    { "nodeType": "REGISTRY_SEARCH", "displayName": "Search Images", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "READ_ONLY", "capability": "container.registry.search", "aiToolName": "registry_search" },
+    { "nodeType": "REGISTRY_RETAG", "displayName": "Retag Image", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "container.registry.retag", "aiToolName": "registry_retag" },
+    { "nodeType": "REGISTRY_COPY_TAG", "displayName": "Promote Image Within Registry", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": false, "riskLevel": "MEDIUM", "capability": "container.registry.copyTag", "aiToolName": "registry_copy_tag" },
+    { "nodeType": "REGISTRY_DELETE_IMAGE", "displayName": "Delete Image / Tag", "category": "Container Registry", "icon": "container", "supportsAI": true, "destructive": true, "riskLevel": "HIGH", "capability": "container.registry.deleteImage", "aiToolName": "registry_delete_image" }
+  ],
+  "dependencies": [],
+  "permissions": {
+    "network": [
+      "registry-1.docker.io", "hub.docker.com", "auth.docker.io",
+      "*.amazonaws.com",
+      "*.azurecr.io", "login.microsoftonline.com",
+      "*.pkg.dev", "artifactregistry.googleapis.com", "oauth2.googleapis.com"
+    ],
+    "secrets": ["registry."],
+    "notes": "Reads registry credentials from secrets named with the registry. prefix; a credential is never placed in workflow configuration, node output, logs, or exposed to the AI Agent. For a private or self-hosted registry, add its host to the allowed hosts at install time."
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "name": "Employee Salary Review — Excel",
+  "description": "Reads an uploaded employee workbook, validates it, raises IT salaries by 10%, produces a department summary and emails it. Requires the Excel Handler and Email plugins, and a file attached to this workflow version.",
+  "variables": {
+    "raisePercent": 1.10,
+    "reviewer": "platform@company.com"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    { "id": "start-1", "type": "START", "name": "Start" },
+
+    {
+      "id": "upload",
+      "type": "FORM",
+      "name": "Upload the employee workbook",
+      "configuration": {
+        "fields": [
+          { "name": "employeeFile", "type": "FILE", "label": "Employee workbook (.xlsx)", "required": true }
+        ]
+      },
+      "outputMapping": { "employeeFile": "workflow.employeeFileId" }
+    },
+
+    {
+      "id": "validate",
+      "type": "EXCEL_VALIDATE",
+      "name": "Validate the data",
+      "pluginId": "orchpilot-excel-handler",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "fileId": "${workflow.employeeFileId}",
+        "sheetName": "Employees",
+        "headerRow": -1,
+        "rules": [
+          { "column": "EmployeeId", "type": "REQUIRED" },
+          { "column": "Salary", "type": "NUMBER_RANGE", "min": 0 },
+          { "column": "Department", "type": "ALLOWED_VALUES",
+            "allowedValues": ["IT", "HR", "Finance", "Sales"] }
+        ],
+        "maxErrors": 100
+      },
+      "outputMapping": {
+        "valid": "workflow.dataValid",
+        "errors": "workflow.validationErrors"
+      }
+    },
+
+    {
+      "id": "gate-valid",
+      "type": "DECISION",
+      "name": "Is the data valid?",
+      "conditions": [
+        { "branch": "valid", "expression": "dataValid == true" }
+      ],
+      "defaultBranch": "invalid"
+    },
+
+    {
+      "id": "find-it",
+      "type": "EXCEL_FILTER",
+      "name": "Find IT employees",
+      "pluginId": "orchpilot-excel-handler",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "fileId": "${workflow.employeeFileId}",
+        "sheetName": "Employees",
+        "headerRow": -1,
+        "conditions": [
+          { "column": "Department", "operator": "EQUALS", "value": "IT" }
+        ],
+        "combine": "AND"
+      },
+      "outputMapping": {
+        "matchCount": "workflow.itHeadcount",
+        "data": "workflow.itEmployees"
+      }
+    },
+
+    {
+      "id": "raise",
+      "type": "EXCEL_TRANSFORM",
+      "name": "Raise IT salaries by 10%",
+      "pluginId": "orchpilot-excel-handler",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "fileId": "${workflow.employeeFileId}",
+        "sheetName": "Employees",
+        "headerRow": -1,
+        "steps": [
+          { "type": "CALCULATE", "column": "Salary", "target": "Salary",
+            "operator": "*", "operand": "${raisePercent}" },
+          { "type": "CALCULATE", "column": "Salary", "target": "AnnualSalary",
+            "operator": "*", "operand": 12 }
+        ],
+        "outputFileName": "employees-reviewed.xlsx"
+      },
+      "outputMapping": { "fileId": "workflow.reviewedFileId" }
+    },
+
+    {
+      "id": "summary",
+      "type": "EXCEL_GENERATE_REPORT",
+      "name": "Summarise by department",
+      "pluginId": "orchpilot-excel-handler",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "fileId": "${workflow.reviewedFileId}",
+        "sheetName": "Employees",
+        "headerRow": -1,
+        "groupBy": ["Department"],
+        "aggregations": [
+          { "column": "Salary", "function": "SUM", "alias": "TotalSalary" },
+          { "column": "Salary", "function": "AVERAGE", "alias": "AverageSalary" },
+          { "function": "COUNT", "alias": "Headcount" }
+        ],
+        "outputFileName": "salary-summary.xlsx"
+      },
+      "outputMapping": {
+        "fileId": "workflow.summaryFileId",
+        "data": "workflow.summaryRows"
+      }
+    },
+
+    {
+      "id": "notify",
+      "type": "EMAIL_SEND",
+      "name": "Email the summary",
+      "pluginId": "orchpilot-email",
+      "configuration": {
+        "to": "${reviewer}",
+        "subject": "Salary review complete — ${workflow.itHeadcount} IT employees updated",
+        "body": "The salary review has finished.\n\nDepartment summary:\n${workflow.summaryRows}\n\nReviewed workbook: ${workflow.reviewedFileId}\nSummary workbook: ${workflow.summaryFileId}"
+      },
+      "errorPolicy": "CONTINUE"
+    },
+
+    {
+      "id": "end-done",
+      "type": "END",
+      "name": "Done",
+      "configuration": {
+        "resultStatus": "REVIEW_COMPLETE",
+        "outputs": {
+          "reviewedFile": "${workflow.reviewedFileId}",
+          "summaryFile": "${workflow.summaryFileId}",
+          "itHeadcount": "${workflow.itHeadcount}"
+        }
+      }
+    },
+    {
+      "id": "end-invalid",
+      "type": "END",
+      "name": "Data rejected",
+      "configuration": {
+        "resultStatus": "VALIDATION_FAILED",
+        "outputs": { "errors": "${workflow.validationErrors}" }
+      }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "upload" },
+    { "source": "upload", "target": "validate" },
+    { "source": "validate", "target": "gate-valid" },
+    { "source": "gate-valid", "sourcePort": "valid", "target": "find-it" },
+    { "source": "gate-valid", "sourcePort": "invalid", "target": "end-invalid" },
+    { "source": "find-it", "target": "raise" },
+    { "source": "raise", "target": "summary" },
+    { "source": "summary", "target": "notify" },
+    { "source": "notify", "target": "end-done" }
+  ],
+  "metadata": {
+    "owner": "platform",
+    "tags": ["excel", "reporting", "sample"]
+  }
+}

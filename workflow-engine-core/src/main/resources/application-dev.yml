@@ -1,0 +1,43 @@
+# Local development profile. Activate with --spring.profiles.active=dev
+#
+# Exists so the engine starts on a fresh clone with no environment set up, which is the difference between
+# trying the project and giving up on it. Everything here is a development convenience and several of these
+# settings are actively wrong in production, which is why they live in a profile that has to be asked for by
+# name rather than in the defaults.
+
+security:
+  jwt:
+    # A fallback that only applies if the configured secret is blank, which it no longer is: application.yml
+    # now ships a working key. Kept for the case where someone deliberately clears the secret to avoid
+    # having any key on disk, so the application still starts rather than refusing.
+    #
+    # When it does apply, the key is random per process: tokens stop working across restarts and two
+    # instances cannot verify each other's. The engine says so loudly.
+    allow-ephemeral-secret: true
+
+    # Plain HTTP locally, so the Secure attribute would prevent the browser storing the refresh cookie.
+    cookie-secure: false
+
+  password:
+    # Argon2id at reduced cost. Correctness is identical; this only trades resistance to offline cracking for
+    # a faster sign-in while developing. Never lower these in production.
+    memory-kb: 4096
+    iterations: 1
+
+  lockout:
+    # Fewer surprises while testing a login form repeatedly. The throttle is still exercised, just later.
+    max-failed-attempts: 20
+    lockout-millis: 60000
+
+app:
+  bootstrap-admin:
+    # Still off, and still without a default password. Supply the three environment variables for a first
+    # run; there is deliberately no admin/admin even here, because a guessable account in a development
+    # database that later gets promoted is a real way this goes wrong.
+    enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}
+
+logging:
+  level:
+    com.orchpilot.workflow: DEBUG
+    # Useful when a request is unexpectedly answered with 401 or 403: shows which rule refused it.
+    org.springframework.security: INFO

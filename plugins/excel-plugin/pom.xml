@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>excel-plugin</artifactId>
+    <version>1.0.3</version>
+    <name>Excel Handler Workflow Plugin</name>
+    <description>Read, write, transform, validate, merge, split, compare and report on Excel workbooks from
+        OrchPilot workflows and the existing AI Agent.</description>
+
+    <properties>
+        <plugin.id>orchpilot-excel-handler</plugin.id>
+        <plugin.class>com.orchpilot.plugin.excel.ExcelPlugin</plugin.class>
+        <poi.version>5.2.2</poi.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          Apache POI, bundled into lib/ inside the archive the way the email and Kubernetes plugins bundle
+          theirs. poi-ooxml brings xlsx; poi alone brings the legacy xls format. Both are needed because the
+          two formats share almost no code inside POI.
+        -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>orchpilot-${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-runtime-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
