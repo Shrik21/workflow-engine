@@ -1,0 +1,202 @@
+services:
+
+  mongodb:
+    image: mongo:7.0
+    container_name: workflow-mongodb
+    restart: unless-stopped
+    # A single-node replica set, not a standalone. GridFS works either way, but a
+    # replica set is what production looks like and it is the only configuration
+    # in which MongoDB transactions and change streams are available, so testing
+    # against a standalone would be testing something you will not deploy.
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    environment:
+      MONGO_INITDB_DATABASE: workflow_engine
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Initiates the replica set on first start, then reports healthy once it is
+      # accepting writes.
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}).ok }
+        " | grep -q 1
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  plugin-registry:
+    build:
+      # The repository root, not plugin-server/: the registry compiles against the
+      # SDK, which is a sibling module.
+      context: .
+      dockerfile: plugin-server/Dockerfile
+    container_name: plugin-registry
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # Its own database on the same server. Separate deployables, separate data:
+      # the registry knows what a plugin is, the engine knows what it has done
+      # with it, and merging them would undo the reason for splitting the two.
+      MONGODB_URI: mongodb://mongodb:27017/plugin_registry?replicaSet=rs0
+      MONGODB_DATABASE: plugin_registry
+      SERVER_PORT: "8085"
+
+      # --- The shared credential ------------------------------------------
+      # HS256 is symmetric, so this secret must be byte-identical to the engine's
+      # JWT_SECRET or every token the engine presents is rejected. Both default to
+      # the committed development values in application.yml, which is why this
+      # file starts with no setup and why neither service will start under the
+      # prod profile while those values are in use.
+      #
+      #   PLUGIN_SERVER_JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET before starting}
+      #   PLUGIN_SERVICE_CLIENT_SECRET: ${PLUGIN_SERVER_CLIENT_SECRET:?...}
+      #
+      # Leave them unset rather than empty: an empty value overrides the default
+      # with a blank one, and a blank shared secret fails in a way that looks like
+      # a bug rather than a configuration choice.
+      PLUGIN_SERVER_JWT_ISSUER: ${JWT_ISSUER:-workflow-platform}
+
+      # A newly uploaded version lands in DRAFT and must be published before any
+      # engine can see it. False publishes on upload, which suits a single-operator
+      # installation and makes `docker compose up` immediately useful.
+      PLUGIN_PUBLISH_ON_UPLOAD: ${PLUGIN_PUBLISH_ON_UPLOAD:-false}
+
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75 -XX:+UseContainerSupport"
+    ports:
+      - "8085:8085"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8085/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+  workflow-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workflow-engine
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      # Started, not healthy. The engine is designed to survive an absent registry:
+      # it serves a cached catalogue and keeps executing installed plugins. Waiting
+      # for the registry to be healthy would turn a service the engine can lose into
+      # one it cannot start without, which is the opposite of the intent.
+      plugin-registry:
+        condition: service_started
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/workflow_engine?replicaSet=rs0
+      MONGODB_DATABASE: workflow_engine
+      SERVER_PORT: "8080"
+      PLUGIN_WORKSPACE_DIR: /var/lib/workflow-engine/plugins
+
+      # --- The plugin registry --------------------------------------------
+      # Reached over the compose network by service name. The client id and secret
+      # default to the committed development values, matching the registry's
+      # bootstrap client; override both together or neither.
+      PLUGIN_SERVER_URL: ${PLUGIN_SERVER_URL:-http://plugin-registry:8085}
+      PLUGIN_SYNC_ON_STARTUP: ${PLUGIN_SYNC_ON_STARTUP:-true}
+      PLUGIN_CACHE_DIR: /var/lib/workflow-engine/plugin-cache
+
+      # --- Authentication -------------------------------------------------
+      # Signing and encryption keys are NOT set here, so the container uses the
+      # values in application.yml and `docker compose up` works with no setup.
+      #
+      # Those values are committed to version control, so the engine warns about
+      # them on every start and refuses to start at all when SPRING_PROFILES_ACTIVE
+      # includes prod. Before this is reachable by anyone else, uncomment these and
+      # supply real values from your secret manager:
+      #
+      #   JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET before starting}
+      #   APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?set APP_ENCRYPTION_KEY before starting}
+      #   WORKFLOW_SECRETS_KEY: ${WORKFLOW_SECRETS_KEY:?set WORKFLOW_SECRETS_KEY before starting}
+      #   SPRING_PROFILES_ACTIVE: prod
+      #
+      # Leave them unset rather than empty: an empty environment variable overrides
+      # the application.yml default with a blank value and the engine will refuse
+      # to start, which looks like a bug rather than a configuration choice.
+      JWT_ISSUER: ${JWT_ISSUER:-workflow-platform}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-900000}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
+      # HS256 is correct while this service both issues and consumes its own
+      # tokens. Switch to RS256, supplying JWT_PRIVATE_KEY and JWT_PUBLIC_KEY,
+      # once another service needs to verify them without being able to forge.
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      # The console and API share an origin behind nginx, so the refresh cookie
+      # is SameSite=Strict. Set true when TLS terminates at a proxy the engine
+      # cannot see through, so the Secure attribute is still applied.
+      JWT_COOKIE_SECURE: ${JWT_COOKIE_SECURE:-false}
+
+      # Reversible encryption for plugin credentials comes from application.yml.
+      # See the note above. Never used for user passwords, which are hashed with
+      # Argon2id and cannot be recovered by design.
+
+      # --- First administrator --------------------------------------------
+      # Enabled in application.yml with a committed password, so a fresh database
+      # gets a usable administrator. Change it at first sign-in. Set these here to
+      # use your own instead; leave them unset rather than empty.
+      #   BOOTSTRAP_ADMIN_USERNAME / _EMAIL / _PASSWORD
+
+      # Self-registration. Turn off where an administrator provisions every
+      # account.
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+
+      # Browser origins allowed to call the API cross-origin. Empty is correct
+      # when nginx serves the console and the API from one origin.
+      WORKFLOW_ALLOWED_ORIGINS: ${FRONTEND_URL:-}
+
+      # The workflow secret storage key also comes from application.yml.
+
+      # Identifies this replica in execution ownership records. Leave unset to
+      # derive it from the hostname, which is what you want when scaling.
+      # WORKFLOW_INSTANCE_ID: engine-1
+
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75 -XX:+UseContainerSupport"
+    ports:
+      - "8080:8080"
+    volumes:
+      # Staged plugin JARs. Not the source of truth, which is GridFS, but keeping
+      # it avoids re-staging every plugin on each restart.
+      - plugin-workspace:/var/lib/workflow-engine/plugins
+      # Archives downloaded from the registry, verified against their published
+      # checksum on the way in. Also not a source of truth: deleting this volume
+      # costs one re-download, and the engine reloads from GridFS regardless.
+      - plugin-cache:/var/lib/workflow-engine/plugin-cache
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+  workflow-ui:
+    build:
+      context: ./workflow-engine-ui
+      dockerfile: Dockerfile
+    container_name: workflow-ui
+    restart: unless-stopped
+    depends_on:
+      workflow-engine:
+        condition: service_started
+    # The browser talks only to this server, which proxies /api to the engine. Same-origin by design:
+    # no CORS configuration to get wrong, and the engine need not be exposed directly.
+    ports:
+      - "4200:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/index.html"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongo-data:
+  plugin-workspace:
+  plugin-cache:

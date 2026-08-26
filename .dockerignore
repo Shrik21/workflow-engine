@@ -1,0 +1,13 @@
+target/
+*/target/
+*/*/target/
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+*.log
+docs/
+README.md
+ARCHITECTURE.md
+PLUGIN_DEVELOPMENT.md

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.orchpilot.workflow</groupId>
+    <artifactId>workflow-engine-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Workflow Engine Parent</name>
+    <description>Extensible workflow execution platform with runtime Java plugins</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- The plugin contract every module compiles against. See dependencyManagement below. -->
+        <workflow-plugin-sdk.version>1.0.0</workflow-plugin-sdk.version>
+
+        <spring-boot.version>4.0.7</spring-boot.version>
+        <springdoc.version>3.0.3</springdoc.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
+        <!--
+          BouncyCastle supplies the Argon2 implementation Spring Security's Argon2PasswordEncoder
+          delegates to. Not managed by the Spring Boot BOM, so the version is pinned here.
+        -->
+        <bouncycastle.version>1.85.2</bouncycastle.version>
+
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-dependency-plugin.version>3.7.1</maven-dependency-plugin.version>
+        <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
+        <!--
+          Bound by the default lifecycle rather than declared, so without a pin the version depends on which
+          Maven runs the build — and an offline build fails outright when that version is not in the local
+          repository. Pinned for the same reason the others above are.
+        -->
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+    </properties>
+
+    <modules>
+        <module>workflow-plugin-sdk</module>
+        <module>workflow-engine-core</module>
+        <!--
+          A second deployable service, built in the same reactor so it cannot disagree with the engine about
+          the plugin contract in workflow-plugin-sdk. It has its own database, port and image.
+        -->
+        <module>plugin-server</module>
+        <module>plugins/sendgrid-plugin</module>
+        <!--
+          Sends through any SMTP server rather than one provider's API, so the connection is configured on the
+          node. The only plugin here that bundles a dependency: Angus Mail ships inside its archive's lib/.
+        -->
+        <module>plugins/email-plugin</module>
+        <module>plugins/mongodb-plugin</module>
+        <module>plugins/vpn-plugin</module>
+        <module>plugins/restapi-plugin</module>
+        <module>plugins/slack-plugin</module>
+        <module>plugins/gcp-compute-instance-plugin</module>
+        <module>plugins/github-plugin</module>
+        <module>plugins/docker-registry-plugin</module>
+        <module>plugins/jira-plugin</module>
+        <module>plugins/gcp-kubernetes-plugin</module>
+        <module>plugins/excel-plugin</module>
+        <module>plugins/gcp-network-plugin</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--
+              Pinned to a property rather than ${project.version}.
+
+              ${project.version} is interpolated in the module that consumes this management, not here — so a
+              plugin module carrying its own version (a fix to an already-published plugin is a new version,
+              since a published registry version is immutable) would ask for an SDK of that same version and
+              fail to resolve. The SDK's version is a platform fact, not a per-module one.
+            -->
+            <dependency>
+                <groupId>com.orchpilot.workflow</groupId>
+                <artifactId>workflow-plugin-sdk</artifactId>
+                <version>${workflow-plugin-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <excludedGroups>integration</excludedGroups>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <configuration>
+                        <groups>integration</groups>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+                <!-- Used by plugin modules to bundle their runtime dependencies into lib/ inside the archive. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
