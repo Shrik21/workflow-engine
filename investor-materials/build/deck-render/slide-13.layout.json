@@ -1,0 +1,484 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/mok5d3",
+    "id": "mok5d3",
+    "slide": 13,
+    "layoutId": "c3f50454-19b7-4c95-bafe-71b313461f72",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#0B1736",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Arial"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c3f50454-19b7-4c95-bafe-71b313461f72",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/10ved8na",
+      "id": "1",
+      "bbox": [
+        60,
+        45,
+        250,
+        28
+      ],
+      "geometry": "rect",
+      "text": "ORCHPILOT",
+      "textPreview": "ORCHPILOT",
+      "resolvedFontSize": 15,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 15,
+        "typeface": "Arial",
+        "color": "#65C7F7",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ORCHPILOT"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ORCHPILOT",
+          "resolvedTextStyle": {
+            "fontSize": 15,
+            "typeface": "Arial",
+            "color": "#65C7F7",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ORCHPILOT",
+              "fontSize": 15,
+              "typeface": "Arial",
+              "color": "#65C7F7",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/exkfit4z",
+      "id": "2",
+      "bbox": [
+        60,
+        150,
+        1080,
+        150
+      ],
+      "geometry": "rect",
+      "text": "Make every critical workflow recoverable, governable and extensible.",
+      "textPreview": "Make every critical workflow recoverable, governable and extensible.",
+      "resolvedFontSize": 50,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 50,
+        "typeface": "Arial",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Make every critical workflow recoverable,"
+          },
+          {
+            "index": 2,
+            "text": "governable and extensible."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Make every critical workflow recoverable, governable and extensible.",
+          "resolvedTextStyle": {
+            "fontSize": 50,
+            "typeface": "Arial",
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Make every critical workflow recoverable, governable and extensible.",
+              "fontSize": 50,
+              "typeface": "Arial",
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fydwby54",
+      "id": "3",
+      "bbox": [
+        60,
+        365,
+        220,
+        35
+      ],
+      "geometry": "rect",
+      "text": "Seed objective",
+      "textPreview": "Seed objective",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 20,
+        "typeface": "Arial",
+        "color": "#65C7F7",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Seed objective"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Seed objective",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Arial",
+            "color": "#65C7F7",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Seed objective",
+              "fontSize": 20,
+              "typeface": "Arial",
+              "color": "#65C7F7",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sv2xgjmt",
+      "id": "4",
+      "bbox": [
+        60,
+        410,
+        830,
+        75
+      ],
+      "geometry": "rect",
+      "text": "Convert a working orchestration platform into repeatable enterprise adoption.",
+      "textPreview": "Convert a working orchestration platform into repeatable enterprise adoption.",
+      "resolvedFontSize": 27.25,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 28,
+        "typeface": "Arial",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.97,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Convert a working orchestration platform into repeatable"
+          },
+          {
+            "index": 2,
+            "text": "enterprise adoption."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Convert a working orchestration platform into repeatable enterprise adoption.",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Arial",
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Convert a working orchestration platform into repeatable enterprise adoption.",
+              "fontSize": 28,
+              "typeface": "Arial",
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/twbe9one",
+      "id": "5",
+      "bbox": [
+        60,
+        525,
+        1080,
+        70
+      ],
+      "geometry": "rect",
+      "text": "Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply",
+      "textPreview": "Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 21,
+        "typeface": "Arial",
+        "color": "#C9D5EE",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Arial",
+            "color": "#C9D5EE",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply",
+              "fontSize": 21,
+              "typeface": "Arial",
+              "color": "#C9D5EE",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/69kfe94n",
+      "id": "6",
+      "bbox": [
+        60,
+        635,
+        650,
+        22
+      ],
+      "geometry": "rect",
+      "text": "Funding amount and valuation: INSERT AFTER FOUNDER DECISION",
+      "textPreview": "Funding amount and valuation: INSERT AFTER FOUNDER DECISION",
+      "resolvedFontSize": 10.33,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 13,
+        "typeface": "Arial",
+        "color": "#8EA0C4",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.79,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Funding amount and valuation: INSERT AFTER FOUNDER DECISION"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Funding amount and valuation: INSERT AFTER FOUNDER DECISION",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "typeface": "Arial",
+            "color": "#8EA0C4",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Funding amount and valuation: INSERT AFTER FOUNDER DECISION",
+              "fontSize": 13,
+              "typeface": "Arial",
+              "color": "#8EA0C4",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

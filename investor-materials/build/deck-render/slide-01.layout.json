@@ -1,0 +1,397 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/isi054",
+    "id": "isi054",
+    "slide": 1,
+    "layoutId": "c3f50454-19b7-4c95-bafe-71b313461f72",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Arial"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c3f50454-19b7-4c95-bafe-71b313461f72",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "1f37d5ea-e490-4ee8-b9be-7cfbf42923df",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qhcr2x0n",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        18,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#276EF1",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dknqdsjy",
+      "id": "2",
+      "bbox": [
+        60,
+        48,
+        280,
+        30
+      ],
+      "geometry": "rect",
+      "text": "ORCHPILOT",
+      "textPreview": "ORCHPILOT",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 16,
+        "typeface": "Arial",
+        "color": "#276EF1",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ORCHPILOT"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ORCHPILOT",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Arial",
+            "color": "#276EF1",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ORCHPILOT",
+              "fontSize": 16,
+              "typeface": "Arial",
+              "color": "#276EF1",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sje94nid",
+      "id": "3",
+      "bbox": [
+        60,
+        138,
+        530,
+        230
+      ],
+      "geometry": "rect",
+      "text": "The governed orchestration layer for people, systems and AI",
+      "textPreview": "The governed orchestration layer for people, systems and AI",
+      "resolvedFontSize": 45.98,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 52,
+        "typeface": "Arial",
+        "color": "#0B1736",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.88,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The governed"
+          },
+          {
+            "index": 2,
+            "text": "orchestration layer for"
+          },
+          {
+            "index": 3,
+            "text": "people, systems and AI"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The governed orchestration layer for people, systems and AI",
+          "resolvedTextStyle": {
+            "fontSize": 52,
+            "typeface": "Arial",
+            "color": "#0B1736",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "The governed orchestration layer for people, systems and AI",
+              "fontSize": 52,
+              "typeface": "Arial",
+              "color": "#0B1736",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fm5sf2h4",
+      "id": "4",
+      "bbox": [
+        60,
+        395,
+        500,
+        88
+      ],
+      "geometry": "rect",
+      "text": "Durable workflows. Human accountability. Runtime-extensible integrations.",
+      "textPreview": "Durable workflows. Human accountability. Runtime-extensible integrations.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Arial",
+        "color": "#586174",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Durable workflows. Human accountability."
+          },
+          {
+            "index": 2,
+            "text": "Runtime-extensible integrations."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Durable workflows. Human accountability. Runtime-extensible integrations.",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Arial",
+            "color": "#586174",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Durable workflows. Human accountability. Runtime-extensible integrations.",
+              "fontSize": 24,
+              "typeface": "Arial",
+              "color": "#586174",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/elwr6x0j",
+      "id": "5",
+      "bbox": [
+        60,
+        620,
+        420,
+        28
+      ],
+      "geometry": "rect",
+      "text": "INVESTOR BRIEF • AUGUST 2026",
+      "textPreview": "INVESTOR BRIEF • AUGUST 2026",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 14,
+        "typeface": "Arial",
+        "color": "#586174",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "INVESTOR BRIEF • AUGUST 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "INVESTOR BRIEF • AUGUST 2026",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Arial",
+            "color": "#586174",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "INVESTOR BRIEF • AUGUST 2026",
+              "fontSize": 14,
+              "typeface": "Arial",
+              "color": "#586174",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/4ri1snil",
+      "id": "6",
+      "bbox": [
+        640,
+        70,
+        590,
+        570
+      ],
+      "geometry": "roundRect",
+      "alt": "OrchPilot visual workflow designer",
+      "contentType": "image/jpeg",
+      "imageFit": "cover",
+      "imageMask": {
+        "geometry": "roundRect",
+        "adjustmentList": [
+          {
+            "name": "adj",
+            "formula": "val 1754"
+          }
+        ]
+      },
+      "asset": {
+        "assetId": "67808f78-1346-4af3-8b75-b8aa2835a56f",
+        "contentType": "image/jpeg",
+        "byteLength": 42736
+      }
+    }
+  ],
+  "composeRuns": []
+}
