@@ -147,7 +147,7 @@ type Interaction =
               markerHeight="7"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1 L 9 5 L 0 9 z" fill="var(--hl-blue)" />
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="var(--link)" />
             </marker>
           </defs>
 
@@ -400,7 +400,7 @@ type Interaction =
       }
 
       .edge--selected .edge__line {
-        stroke: var(--hl-blue);
+        stroke: var(--link);
         stroke-width: 2.6;
       }
 
@@ -479,12 +479,12 @@ type Interaction =
       }
 
       .node--selected .node__name {
-        color: var(--hl-blue);
+        color: var(--link);
       }
 
       .node--unknown .node__body {
         border-style: dashed;
-        background: #fffaf3;
+        background: var(--canvas-unknown-bg);
       }
 
       .node__icon {
@@ -550,7 +550,7 @@ type Interaction =
         top: -9px;
         right: auto;
         left: 6px;
-        background: #fff3e0;
+        background: var(--canvas-warning-bg);
         border-color: var(--hl-orange);
         color: var(--hl-orange-alt);
       }

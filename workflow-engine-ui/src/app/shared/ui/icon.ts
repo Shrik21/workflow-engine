@@ -137,6 +137,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         @case ('close') {
           <path d="M6 6l12 12M18 6 6 18" />
         }
+        @case ('moon') {
+          <path d="M19 14.5A7.5 7.5 0 0 1 9.5 5 7.2 7.2 0 0 0 5 12a7.5 7.5 0 0 0 14 2.5z" />
+        }
+        @case ('sun') {
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" />
+        }
         @default {
           <circle cx="12" cy="12" r="8" />
         }
@@ -178,6 +185,8 @@ export class Icon {
     | 'groups'
     | 'menu'
     | 'close'
+    | 'moon'
+    | 'sun'
   >('run');
   readonly size = input<number>(16);
 }

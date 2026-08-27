@@ -737,8 +737,8 @@ import {
       }
 
       .tab--active {
-        color: var(--hl-blue);
-        border-bottom-color: var(--hl-blue);
+        color: var(--link);
+        border-bottom-color: var(--link);
         font-weight: bold;
       }
 

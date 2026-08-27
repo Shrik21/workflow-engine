@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { BrandMark } from '../../shared/ui/brand-mark';
+import { ThemeToggle } from '../../shared/ui/theme-toggle';
 
 /**
  * The sign-in screen.
@@ -16,9 +17,12 @@ import { BrandMark } from '../../shared/ui/brand-mark';
 @Component({
   selector: 'wf-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, BrandMark],
+  imports: [RouterLink, BrandMark, ThemeToggle],
   template: `
     <div class="auth">
+      <div class="auth__theme">
+        <wf-theme-toggle />
+      </div>
       <div class="auth__panel">
         <div class="auth__brand">
           <wf-brand-mark [size]="36" />
@@ -113,12 +117,19 @@ import { BrandMark } from '../../shared/ui/brand-mark';
   styles: [
     `
       .auth {
+        position: relative;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: var(--space-5);
-        background: linear-gradient(160deg, var(--hl-blue) 0%, #001b37 100%);
+        background: linear-gradient(160deg, var(--sidebar-bg) 0%, #001b37 100%);
+      }
+
+      .auth__theme {
+        position: absolute;
+        top: var(--space-4);
+        right: var(--space-4);
       }
 
       .auth__panel {
@@ -172,7 +183,7 @@ import { BrandMark } from '../../shared/ui/brand-mark';
       }
 
       .password__toggle:hover:not(:disabled) {
-        background: var(--hl-grey-100);
+        background: var(--control-hover);
         color: var(--text);
       }
 

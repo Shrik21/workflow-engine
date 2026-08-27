@@ -31,7 +31,7 @@ h4 {
   font-family: var(--font-brand);
   font-weight: 600;
   margin: 0;
-  color: var(--hl-blue);
+  color: var(--heading);
 }
 
 h1 {
@@ -48,7 +48,7 @@ h4 {
 }
 
 a {
-  color: var(--hl-accent-blue-alt);
+  color: var(--link);
   text-decoration: none;
 
   &:hover {
@@ -234,8 +234,8 @@ pre {
     color var(--motion-fast) var(--ease-standard);
 
   &:hover:not(:disabled) {
-    background: var(--hl-grey-100);
-    border-color: var(--hl-grey-500);
+    background: var(--control-hover);
+    border-color: var(--border-strong);
   }
 
   &:focus-visible {
@@ -250,9 +250,9 @@ pre {
 }
 
 .btn--primary {
-  background: var(--hl-blue);
-  border-color: var(--hl-blue);
-  color: var(--text-inverse);
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
 
   &:hover:not(:disabled) {
     background: var(--btn-primary-hover);
@@ -287,7 +287,7 @@ pre {
   color: var(--text-muted);
 
   &:hover:not(:disabled) {
-    background: var(--hl-grey-200);
+    background: var(--control-hover);
     color: var(--text);
   }
 }
@@ -334,7 +334,7 @@ pre {
 .field__label {
   font-size: var(--text-sm);
   font-weight: bold;
-  color: var(--hl-grey-800);
+  color: var(--text);
 
   .required {
     color: var(--hl-error);
@@ -380,7 +380,7 @@ textarea {
   }
 
   &:disabled {
-    background: var(--hl-grey-100);
+    background: var(--control-hover);
     color: var(--text-faint);
   }
 
@@ -439,12 +439,12 @@ input[type='checkbox'] {
 
   td {
     padding: var(--space-3);
-    border-bottom: 1px solid var(--hl-grey-200);
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
   }
 
   tbody tr:hover {
-    background: var(--hl-grey-50);
+    background: var(--row-hover);
   }
 
   .cell-actions {
@@ -472,8 +472,8 @@ input[type='checkbox'] {
   padding: 1px 7px;
   border-radius: 10px;
   font-size: var(--text-xs);
-  background: var(--hl-grey-200);
-  color: var(--hl-grey-800);
+  background: var(--tag-bg);
+  color: var(--tag-fg);
   white-space: nowrap;
 }
 

@@ -290,7 +290,7 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
     `
       .wf-name {
         font-weight: 600;
-        color: var(--hl-blue);
+        color: var(--link);
       }
 
       .wf-desc {

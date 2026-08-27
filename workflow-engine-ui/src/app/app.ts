@@ -20,7 +20,9 @@ import { AuthService } from './core/auth/auth.service';
 import { Permission } from './core/auth/auth.models';
 import { BrandMark } from './shared/ui/brand-mark';
 import { Icon } from './shared/ui/icon';
+import { ThemeToggle } from './shared/ui/theme-toggle';
 import { ToastHost } from './shared/ui/toast-host';
+import { ThemeService } from './core/theme.service';
 
 interface NavItem {
   path: string;
@@ -64,7 +66,7 @@ const MOBILE_NAV_MQ = '(max-width: 900px)';
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost, Icon, BrandMark],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost, Icon, BrandMark, ThemeToggle],
   template: `
     @if (chromeless()) {
       <router-outlet />
@@ -151,6 +153,7 @@ const MOBILE_NAV_MQ = '(max-width: 900px)';
           </nav>
 
           <div class="sidebar__footer">
+            <wf-theme-toggle [compact]="true" />
             <a class="identity" routerLink="/profile" (click)="onNavActivate()">
               <span class="identity__avatar" aria-hidden="true">{{ initials() }}</span>
               <span class="identity__text">
@@ -182,8 +185,8 @@ const MOBILE_NAV_MQ = '(max-width: 900px)';
         left: var(--space-3);
         top: -40px;
         z-index: calc(var(--z-toast) + 1);
-        background: var(--hl-white);
-        color: var(--hl-blue);
+        background: var(--surface);
+        color: var(--heading);
         padding: var(--space-2) var(--space-3);
         border-radius: var(--radius-sm);
         font-weight: 600;
@@ -202,7 +205,7 @@ const MOBILE_NAV_MQ = '(max-width: 900px)';
       .sidebar {
         display: flex;
         flex-direction: column;
-        background: var(--hl-blue);
+        background: var(--sidebar-bg);
         color: var(--text-inverse);
         min-height: 0;
         z-index: var(--z-sidebar);
@@ -440,7 +443,7 @@ const MOBILE_NAV_MQ = '(max-width: 900px)';
           border: 1px solid var(--border);
           border-radius: var(--radius);
           background: var(--surface);
-          color: var(--hl-blue);
+          color: var(--heading);
           box-shadow: var(--shadow-sm);
           cursor: pointer;
         }
@@ -543,6 +546,8 @@ export class App {
   ];
 
   protected readonly state = inject(AuthStateService);
+  /** Ensures the theme preference is applied even when the shell is chromeless. */
+  private readonly theme = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly auth = inject(AuthService);
