@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import com.orchpilot.workflow.model.PluginStatus;
+import com.orchpilot.workflow.model.PluginVersion;
+import com.orchpilot.workflow.repository.PluginVersionRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,14 +31,47 @@ class PluginStatusServiceTest {
     private PluginCatalogSyncService catalog;
     private InstalledPluginRepository installed;
     private PluginStatusService service;
+    private PluginVersionRepository engineVersions;
 
     @BeforeEach
     void setUp() {
         catalog = mock(PluginCatalogSyncService.class);
         installed = mock(InstalledPluginRepository.class);
-        service = new PluginStatusService(catalog, installed, new PluginCompatibilityService());
+        engineVersions = mock(PluginVersionRepository.class);
+        service = new PluginStatusService(catalog, installed, new PluginCompatibilityService(), engineVersions);
         when(installed.findAllByOrderByPluginIdAsc()).thenReturn(List.of());
         when(catalog.entries()).thenReturn(List.of());
+    }
+
+    @Test
+    void directUploadsAppearInListAndDetailWithoutRegistryRecords() {
+        PluginVersion version = new PluginVersion();
+        version.setPluginId("slack");
+        version.setVersion("1.0.1");
+        version.setName("Slack");
+        version.setStatus(PluginStatus.ACTIVE);
+        version.setNodeTypes(List.of("SLACK_MESSAGE"));
+        when(engineVersions.findAll()).thenReturn(List.of(version));
+        when(engineVersions.findByPluginIdOrderByUploadedAtDesc("slack")).thenReturn(List.of(version));
+        var row = service.statuses().get(0);
+        assertEquals("slack", row.pluginId());
+        assertEquals("1.0.1", row.installedVersion());
+        assertEquals(PluginSyncStatus.UNKNOWN_TO_REGISTRY, row.status());
+        assertEquals(List.of("SLACK_MESSAGE"), row.nodeTypes());
+        assertEquals(row, service.status("slack").orElseThrow());
+        org.mockito.Mockito.verify(installed, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void deletedDirectUploadsAreNotListed() {
+        PluginVersion version = new PluginVersion();
+        version.setPluginId("deleted");
+        version.setVersion("1.0.0");
+        version.setStatus(PluginStatus.DELETED);
+        when(engineVersions.findAll()).thenReturn(List.of(version));
+        when(engineVersions.findByPluginIdOrderByUploadedAtDesc("deleted")).thenReturn(List.of(version));
+        assertTrue(service.statuses().isEmpty());
+        assertTrue(service.status("deleted").isEmpty());
     }
 
     private static CatalogRecords.CatalogEntry offering(String id, String latest, String status,

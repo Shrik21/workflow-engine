@@ -1,6 +1,9 @@
 package com.orchpilot.workflow.pluginserver;
 
 import com.orchpilot.workflow.sdk.version.SemanticVersion;
+import com.orchpilot.workflow.model.PluginStatus;
+import com.orchpilot.workflow.model.PluginVersion;
+import com.orchpilot.workflow.repository.PluginVersionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,12 +36,14 @@ public class PluginStatusService {
     private final PluginCatalogSyncService catalog;
     private final InstalledPluginRepository installed;
     private final PluginCompatibilityService compatibility;
+    private final PluginVersionRepository engineVersions;
 
     public PluginStatusService(PluginCatalogSyncService catalog, InstalledPluginRepository installed,
-                              PluginCompatibilityService compatibility) {
+                               PluginCompatibilityService compatibility, PluginVersionRepository engineVersions) {
         this.catalog = catalog;
         this.installed = installed;
         this.compatibility = compatibility;
+        this.engineVersions = engineVersions;
     }
 
     /**
@@ -108,6 +113,9 @@ public class PluginStatusService {
         for (InstalledPlugin plugin : installed.findAllByOrderByPluginIdAsc()) {
             local.put(plugin.getPluginId(), plugin);
         }
+        // Direct uploads use the engine's version store, not the registry installation ledger.
+        // Project them for display only: do not manufacture registry installations or permissions.
+        mergeDirectUploads(local, engineVersions.findAll());
 
         List<String> ids = new ArrayList<>(available.keySet());
         for (String id : local.keySet()) {
@@ -134,7 +142,41 @@ public class PluginStatusService {
     public Optional<PluginStatusView> status(String pluginId) {
         CatalogRecords.CatalogEntry entry = catalog.entry(pluginId).orElse(null);
         InstalledPlugin local = installed.findById(pluginId).orElse(null);
+        Map<String, InstalledPlugin> locals = new LinkedHashMap<>();
+        if (local != null) {
+            locals.put(pluginId, local);
+        }
+        mergeDirectUploads(locals, engineVersions.findByPluginIdOrderByUploadedAtDesc(pluginId));
+        local = locals.get(pluginId);
         return entry == null && local == null ? Optional.empty() : Optional.of(view(entry, local));
+    }
+
+    private void mergeDirectUploads(Map<String, InstalledPlugin> local, List<PluginVersion> versions) {
+        for (PluginVersion version : versions) {
+            if (version.getStatus() == PluginStatus.DELETED) {
+                continue;
+            }
+            InstalledPlugin plugin = local.computeIfAbsent(version.getPluginId(), id -> {
+                InstalledPlugin projection = new InstalledPlugin();
+                projection.setPluginId(id);
+                projection.setName(version.getName());
+                return projection;
+            });
+            if (plugin.version(version.getVersion()).isPresent()) {
+                continue;
+            }
+            InstallState state = switch (version.getStatus()) {
+                case ACTIVE -> InstallState.ACTIVE;
+                case INSTALLED -> InstallState.INSTALLED;
+                case INACTIVE -> InstallState.DISABLED;
+                case FAILED -> InstallState.INSTALL_FAILED;
+                case DELETED -> throw new IllegalStateException("Deleted version was not filtered");
+            };
+            plugin.put(new InstalledPlugin.InstalledVersion(version.getVersion(), state,
+                    version.getSha256(), null, version.getJarSizeBytes(), null,
+                    version.getNodeTypes(), Map.of(), Map.of(), version.getUploadedAt(),
+                    version.getUploadedBy(), version.getLastLoadedAt(), version.getLoadError()));
+        }
     }
 
     /**
