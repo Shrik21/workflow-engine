@@ -683,8 +683,9 @@ import {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-3);
+        padding: var(--space-3) var(--space-4);
         border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--surface-sunken) 55%, transparent);
       }
 
       .panel__title {
@@ -692,38 +693,47 @@ import {
         min-width: 0;
         display: flex;
         flex-direction: column;
+        gap: 2px;
       }
 
       .panel__title strong {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        font-size: var(--text-md);
       }
 
       .panel__notice {
-        margin: var(--space-3);
+        margin: var(--space-3) var(--space-4) 0;
       }
 
       .tabs {
         display: flex;
         border-bottom: 1px solid var(--border);
-        padding: 0 var(--space-2);
+        padding: 0 var(--space-3);
         gap: 2px;
+        overflow-x: auto;
       }
 
       .tab {
         border: none;
         background: transparent;
-        padding: var(--space-2) var(--space-3);
+        padding: var(--space-3) var(--space-3);
         font-family: var(--font-body);
         font-size: var(--text-sm);
         color: var(--text-muted);
         cursor: pointer;
         border-bottom: 2px solid transparent;
+        white-space: nowrap;
       }
 
       .tab:hover {
         color: var(--text);
+      }
+
+      .tab:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
       }
 
       .tab--active {
@@ -737,6 +747,23 @@ import {
         min-height: 0;
         overflow-y: auto;
         padding: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+      }
+
+      .panel__body .field {
+        margin-bottom: var(--space-3);
+      }
+
+      .panel__body .field__hint {
+        margin-top: var(--space-1);
+        line-height: 1.45;
+      }
+
+      .panel__body .field__error {
+        margin-top: var(--space-1);
+        font-weight: 600;
       }
 
       .condition {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { BrandMark } from '../../shared/ui/brand-mark';
 
 /**
  * The sign-in screen.
@@ -15,19 +16,12 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'wf-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, BrandMark],
   template: `
     <div class="auth">
       <div class="auth__panel">
         <div class="auth__brand">
-          <span class="auth__mark" aria-hidden="true">
-            <svg width="36" height="36" viewBox="0 0 512 512">
-              <circle cx="256" cy="256" r="248" fill="#080D17" />
-              <circle cx="256" cy="256" r="148" fill="none" stroke="#3EC9D8" stroke-width="46" />
-              <circle cx="256" cy="256" r="62" fill="#3EC9D8" />
-              <path d="M 400 118 L 330 224 L 316 174 Z" fill="#F0A24B" />
-            </svg>
-          </span>
+          <wf-brand-mark [size]="36" />
           <div>
             <h1>OrchPilot</h1>
             <p>Workflow Platform</p>
@@ -37,7 +31,7 @@ import { AuthService } from '../../core/auth/auth.service';
         <h2>Sign in to your account</h2>
 
         @if (error(); as message) {
-          <div class="notice notice--error" role="alert">
+          <div class="notice notice--error" role="alert" id="login-error">
             <strong>{{ message }}</strong>
             @if (details().length > 0) {
               <ul>
@@ -60,6 +54,8 @@ import { AuthService } from '../../core/auth/auth.service';
               autocapitalize="none"
               spellcheck="false"
               required
+              [attr.aria-invalid]="error() ? 'true' : null"
+              [attr.aria-describedby]="error() ? 'login-error' : null"
               [value]="username()"
               [disabled]="busy()"
               (input)="username.set($any($event.target).value)"
@@ -75,6 +71,7 @@ import { AuthService } from '../../core/auth/auth.service';
                 [type]="revealed() ? 'text' : 'password'"
                 autocomplete="current-password"
                 required
+                [attr.aria-invalid]="error() ? 'true' : null"
                 [value]="password()"
                 [disabled]="busy()"
                 (input)="password.set($any($event.target).value)"
@@ -84,6 +81,7 @@ import { AuthService } from '../../core/auth/auth.service';
                 type="button"
                 [attr.aria-label]="revealed() ? 'Hide password' : 'Show password'"
                 [attr.aria-pressed]="revealed()"
+                [disabled]="busy()"
                 (click)="revealed.set(!revealed())"
               >
                 {{ revealed() ? 'Hide' : 'Show' }}
@@ -120,7 +118,6 @@ import { AuthService } from '../../core/auth/auth.service';
         align-items: center;
         justify-content: center;
         padding: var(--space-5);
-        /* The brand blue, so the sign-in page is unmistakably part of the platform. */
         background: linear-gradient(160deg, var(--hl-blue) 0%, #001b37 100%);
       }
 
@@ -138,11 +135,6 @@ import { AuthService } from '../../core/auth/auth.service';
         align-items: center;
         gap: var(--space-3);
         margin-bottom: var(--space-5);
-      }
-
-      .auth__mark {
-        color: var(--hl-green);
-        display: inline-flex;
       }
 
       .auth__brand h1 {
@@ -179,15 +171,26 @@ import { AuthService } from '../../core/auth/auth.service';
         color: var(--text-muted);
       }
 
-      .password__toggle:hover {
+      .password__toggle:hover:not(:disabled) {
         background: var(--hl-grey-100);
         color: var(--text);
+      }
+
+      .password__toggle:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .password__toggle:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .auth__submit {
         width: 100%;
         justify-content: center;
         margin-top: var(--space-2);
+        min-height: 38px;
       }
 
       .auth__footer {
@@ -205,6 +208,17 @@ import { AuthService } from '../../core/auth/auth.service';
         margin: var(--space-2) 0 0;
         padding-left: 18px;
         font-size: var(--text-sm);
+      }
+
+      @media (max-width: 480px) {
+        .auth {
+          padding: var(--space-4);
+          align-items: flex-start;
+        }
+
+        .auth__panel {
+          padding: var(--space-5);
+        }
       }
     `,
   ],

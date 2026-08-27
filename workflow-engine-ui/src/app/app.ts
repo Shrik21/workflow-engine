@@ -1,5 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs';
 import { MarketplaceApiService } from './core/api/marketplace-api.service';
 import { NodeApiService } from './core/api/node-api.service';
@@ -7,6 +18,7 @@ import { TaskApiService } from './core/api/task-api.service';
 import { AuthStateService } from './core/auth/auth-state.service';
 import { AuthService } from './core/auth/auth.service';
 import { Permission } from './core/auth/auth.models';
+import { BrandMark } from './shared/ui/brand-mark';
 import { Icon } from './shared/ui/icon';
 import { ToastHost } from './shared/ui/toast-host';
 
@@ -37,6 +49,8 @@ interface NavGroup {
   items: NavItem[];
 }
 
+const MOBILE_NAV_MQ = '(max-width: 900px)';
+
 /**
  * The application shell.
  *
@@ -50,20 +64,25 @@ interface NavGroup {
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost, Icon, BrandMark],
   template: `
     @if (chromeless()) {
       <router-outlet />
     } @else {
-      <div class="shell" [class.shell--nav-open]="mobileNavOpen()">
+      <div
+        class="shell"
+        [class.shell--nav-open]="mobileNavOpen()"
+        (document:keydown)="onDocumentKeydown($event)"
+      >
         <a class="skip-link" href="#main-content">Skip to content</a>
 
         <button
+          #navToggle
           class="nav-toggle"
           type="button"
           [attr.aria-expanded]="mobileNavOpen()"
           aria-controls="app-sidebar"
-          (click)="mobileNavOpen.set(!mobileNavOpen())"
+          (click)="toggleMobileNav()"
         >
           <wf-icon [name]="mobileNavOpen() ? 'close' : 'menu'" [size]="18" />
           <span class="sr-only">{{ mobileNavOpen() ? 'Close navigation' : 'Open navigation' }}</span>
@@ -73,21 +92,22 @@ interface NavGroup {
           <button
             class="nav-backdrop"
             type="button"
-            aria-label="Close navigation"
-            (click)="mobileNavOpen.set(false)"
+            tabindex="-1"
+            aria-hidden="true"
+            (click)="closeMobileNav()"
           ></button>
         }
 
-        <aside class="sidebar" id="app-sidebar" aria-label="Primary">
+        <aside
+          #sidebar
+          class="sidebar"
+          id="app-sidebar"
+          aria-label="Primary"
+          [attr.aria-hidden]="sidebarHidden() ? 'true' : null"
+          [attr.inert]="sidebarInert() ? '' : null"
+        >
           <div class="brand">
-            <span class="brand__mark" aria-hidden="true">
-              <svg width="30" height="30" viewBox="0 0 512 512">
-                <circle cx="256" cy="256" r="248" fill="#080D17" />
-                <circle cx="256" cy="256" r="148" fill="none" stroke="#3EC9D8" stroke-width="46" />
-                <circle cx="256" cy="256" r="62" fill="#3EC9D8" />
-                <path d="M 400 118 L 330 224 L 316 174 Z" fill="#F0A24B" />
-              </svg>
-            </span>
+            <wf-brand-mark [size]="30" />
             <span class="brand__text">
               <strong>OrchPilot</strong>
               <span>Workflow Engine</span>
@@ -105,7 +125,7 @@ interface NavGroup {
                     routerLinkActive="nav__link--active"
                     [routerLinkActiveOptions]="{ exact: item.exact }"
                     [attr.title]="item.label"
-                    (click)="mobileNavOpen.set(false)"
+                    (click)="onNavActivate()"
                   >
                     <wf-icon class="nav__icon" [name]="item.icon" [size]="16" />
                     <span class="nav__label">{{ item.label }}</span>
@@ -131,7 +151,7 @@ interface NavGroup {
           </nav>
 
           <div class="sidebar__footer">
-            <a class="identity" routerLink="/profile" (click)="mobileNavOpen.set(false)">
+            <a class="identity" routerLink="/profile" (click)="onNavActivate()">
               <span class="identity__avatar" aria-hidden="true">{{ initials() }}</span>
               <span class="identity__text">
                 <span class="identity__name">{{ state.displayName() }}</span>
@@ -142,7 +162,12 @@ interface NavGroup {
           </div>
         </aside>
 
-        <main class="content" id="main-content" tabindex="-1">
+        <main
+          class="content"
+          id="main-content"
+          tabindex="-1"
+          [attr.inert]="contentInert() ? '' : null"
+        >
           <router-outlet />
         </main>
       </div>
@@ -187,11 +212,8 @@ interface NavGroup {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-4) var(--space-4) var(--space-4);
-      }
-
-      .brand__mark {
-        display: inline-flex;
+        padding: var(--space-4);
+        flex: none;
       }
 
       .brand__text {
@@ -199,6 +221,7 @@ interface NavGroup {
         flex-direction: column;
         font-family: var(--font-brand);
         line-height: 1.2;
+        min-width: 0;
       }
 
       .brand__text strong {
@@ -217,6 +240,7 @@ interface NavGroup {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 0 var(--space-2) var(--space-3);
         gap: var(--space-3);
       }
@@ -263,6 +287,10 @@ interface NavGroup {
         box-shadow: inset 3px 0 0 var(--hl-green);
       }
 
+      .nav__link--active:focus-visible {
+        box-shadow: inset 3px 0 0 var(--hl-green), var(--focus-ring);
+      }
+
       .nav__icon {
         flex: none;
         opacity: 0.9;
@@ -296,6 +324,7 @@ interface NavGroup {
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
+        flex: none;
       }
 
       .identity {
@@ -359,10 +388,12 @@ interface NavGroup {
         background: transparent;
         color: rgba(255, 255, 255, 0.85);
         border-radius: var(--radius-sm);
-        padding: 5px;
+        padding: 7px var(--space-3);
         cursor: pointer;
         font-family: var(--font-body);
         font-size: var(--text-sm);
+        width: 100%;
+        text-align: center;
       }
 
       .signout:hover {
@@ -446,6 +477,12 @@ interface NavGroup {
           padding-top: 56px;
         }
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sidebar {
+          transition: none;
+        }
+      }
     `,
   ],
 })
@@ -506,6 +543,7 @@ export class App {
   ];
 
   protected readonly state = inject(AuthStateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly auth = inject(AuthService);
   private readonly tasks = inject(TaskApiService);
@@ -513,9 +551,21 @@ export class App {
   private readonly marketplace = inject(MarketplaceApiService);
   private readonly router = inject(Router);
 
+  private readonly navToggle = viewChild<ElementRef<HTMLButtonElement>>('navToggle');
+  private readonly sidebar = viewChild<ElementRef<HTMLElement>>('sidebar');
+
   protected readonly waitingCount = signal(0);
   protected readonly mobileNavOpen = signal(false);
+  protected readonly mobileCompact = signal(
+    typeof window !== 'undefined' ? window.matchMedia(MOBILE_NAV_MQ).matches : false,
+  );
   private readonly currentUrl = signal(this.router.url);
+
+  /** Closed drawer on a compact viewport must not accept keyboard or AT focus. */
+  protected readonly sidebarInert = computed(() => this.mobileCompact() && !this.mobileNavOpen());
+  protected readonly sidebarHidden = computed(() => this.sidebarInert());
+  /** Open drawer owns interaction; background content is inert. */
+  protected readonly contentInert = computed(() => this.mobileCompact() && this.mobileNavOpen());
 
   /** Sign-in, registration and the public form render without the shell. */
   protected readonly chromeless = computed(() => {
@@ -560,11 +610,26 @@ export class App {
   protected readonly roleLabel = computed(() => this.state.roles().join(', ') || 'no roles');
 
   constructor() {
+    if (typeof window !== 'undefined') {
+      const mq = window.matchMedia(MOBILE_NAV_MQ);
+      const syncViewport = () => {
+        const compact = mq.matches;
+        this.mobileCompact.set(compact);
+        if (!compact && this.mobileNavOpen()) {
+          this.mobileNavOpen.set(false);
+        }
+      };
+      syncViewport();
+      fromEvent<MediaQueryListEvent>(mq, 'change')
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => syncViewport());
+    }
+
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         this.currentUrl.set(event.urlAfterRedirects);
-        this.mobileNavOpen.set(false);
+        this.closeMobileNav(false);
         // Loaded lazily rather than at construction: an unauthenticated visitor on the sign-in page has no
         // token, and requesting the catalogue would produce a 401 before they have even signed in.
         if (this.state.isAuthenticated()) {
@@ -580,6 +645,45 @@ export class App {
     this.refreshWaitingCount();
     // A slow poll: the badge needs to be roughly right, not instantly right.
     setInterval(() => this.refreshWaitingCount(), 30_000);
+  }
+
+  protected onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.mobileNavOpen()) {
+      event.preventDefault();
+      this.closeMobileNav(true);
+    }
+  }
+
+  protected toggleMobileNav(): void {
+    if (this.mobileNavOpen()) {
+      this.closeMobileNav(true);
+    } else {
+      this.openMobileNav();
+    }
+  }
+
+  protected openMobileNav(): void {
+    this.mobileNavOpen.set(true);
+    queueMicrotask(() => {
+      const first = this.sidebar()?.nativeElement.querySelector<HTMLElement>(
+        'a.nav__link, a.identity, button.signout',
+      );
+      first?.focus();
+    });
+  }
+
+  protected closeMobileNav(restoreFocus = true): void {
+    if (!this.mobileNavOpen()) {
+      return;
+    }
+    this.mobileNavOpen.set(false);
+    if (restoreFocus) {
+      queueMicrotask(() => this.navToggle()?.nativeElement.focus());
+    }
+  }
+
+  protected onNavActivate(): void {
+    this.closeMobileNav(false);
   }
 
   protected signOut(): void {

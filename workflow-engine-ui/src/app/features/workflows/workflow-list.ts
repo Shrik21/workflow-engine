@@ -42,7 +42,7 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
     <div class="page">
       <wf-page-header
         title="Workflows"
-        description="A workflow is a graph of nodes. Publishing snapshots an immutable version that executions pin, so editing a workflow never changes a run already in flight."
+        description="Drafts are editable definitions. Publishing creates an immutable version that runs pin — so editing never changes a run already in flight."
       >
         @if (session.has('WORKFLOW_CREATE')) {
           <button class="btn" type="button" (click)="openImport()">
@@ -50,36 +50,41 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
             <span>Import</span>
           </button>
         }
-        <a class="btn btn--primary" routerLink="/workflows/new">New workflow</a>
+        <a class="btn btn--primary" routerLink="/workflows/new">
+          <wf-icon name="add" />
+          <span>New workflow</span>
+        </a>
       </wf-page-header>
 
       <div class="card">
-        <div class="card__header">
+        <div class="card__header list-toolbar">
           <input
             type="search"
-            style="max-width: 260px"
+            class="list-toolbar__search"
             placeholder="Search by name"
             aria-label="Search workflows by name"
             [value]="nameFilter()"
             (input)="onSearch($any($event.target).value)"
           />
-          <div class="btn-group">
+          <div class="btn-group" role="group" aria-label="Filter by status">
             @for (option of statusOptions; track option.value) {
               <button
                 class="btn btn--sm"
                 type="button"
                 [class.btn--primary]="statusFilter() === option.value"
+                [attr.aria-pressed]="statusFilter() === option.value"
                 (click)="setStatus(option.value)"
               >
                 {{ option.label }}
               </button>
             }
           </div>
-          <span class="spacer"></span>
-          <span class="small muted">{{ page().totalElements }} total</span>
-          <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="load()">
-            <wf-icon name="refresh" /><span>Refresh</span>
-          </button>
+          <div class="list-toolbar__meta">
+            <span class="small muted" aria-live="polite">{{ page().totalElements }} total</span>
+            <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="load()">
+              <wf-icon name="refresh" /><span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         @if (loading() && page().content.length === 0) {
@@ -92,7 +97,8 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
             <a class="btn btn--primary" routerLink="/workflows/new">New workflow</a>
           </wf-empty-state>
         } @else {
-          <table class="table table--clickable">
+          <div class="table-scroll">
+          <table class="table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -108,17 +114,22 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
               @for (workflow of page().content; track workflow.id) {
                 <tr>
                   <td>
-                    <a [routerLink]="['/workflows', workflow.id]">{{ workflow.name }}</a>
+                    <a class="wf-name" [routerLink]="['/workflows', workflow.id]">{{ workflow.name }}</a>
                     @if (workflow.description) {
-                      <div class="small muted truncate" style="max-width: 46ch">
+                      <div class="small muted truncate wf-desc">
                         {{ workflow.description }}
                       </div>
                     }
                   </td>
-                  <td><wf-status-pill [status]="workflow.status" /></td>
+                  <td>
+                    <wf-status-pill [status]="workflow.status" />
+                    @if (workflow.status === 'DRAFT' && workflow.publishedVersion !== null) {
+                      <div class="small muted">Draft over live v{{ workflow.publishedVersion }}</div>
+                    }
+                  </td>
                   <td>
                     @if (workflow.publishedVersion !== null) {
-                      <span class="tag">v{{ workflow.publishedVersion }}</span>
+                      <span class="tag" title="Version executions currently pin">v{{ workflow.publishedVersion }}</span>
                     } @else {
                       <span class="faint small">never published</span>
                     }
@@ -137,37 +148,40 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
                     {{ workflow.updatedAt | ago }}
                   </td>
                   <td class="cell-actions">
+                    <a
+                      class="btn btn--primary btn--sm"
+                      [routerLink]="['/workflows', workflow.id]"
+                      title="Open in the designer"
+                      [attr.aria-label]="'Open ' + workflow.name"
+                    >
+                      <wf-icon name="open" />
+                      <span class="action-label">Open</span>
+                    </a>
                     @if (session.has('WORKFLOW_EXECUTE')) {
                       @if (workflow.publishedVersion !== null) {
                         <a
-                          class="btn btn--accent btn--sm btn--icon"
+                          class="btn btn--accent btn--sm"
                           [routerLink]="['/workflows', workflow.id]"
                           [queryParams]="{ openRun: 1 }"
                           title="Run this workflow"
                           [attr.aria-label]="'Run ' + workflow.name"
                         >
                           <wf-icon name="run" />
+                          <span class="action-label">Run</span>
                         </a>
                       } @else {
                         <button
-                          class="btn btn--sm btn--icon"
+                          class="btn btn--sm"
                           type="button"
                           disabled
                           title="Publish the workflow before it can be run"
                           aria-label="Run (publish first)"
                         >
                           <wf-icon name="run" />
+                          <span class="action-label">Run</span>
                         </button>
                       }
                     }
-                    <a
-                      class="btn btn--sm btn--icon"
-                      [routerLink]="['/workflows', workflow.id]"
-                      title="Open in the designer"
-                      [attr.aria-label]="'Open ' + workflow.name"
-                    >
-                      <wf-icon name="open" />
-                    </a>
                     <a
                       class="btn btn--sm btn--icon"
                       [routerLink]="['/executions']"
@@ -200,6 +214,7 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
               }
             </tbody>
           </table>
+          </div>
 
           @if (page().totalPages > 1) {
             <div class="card__footer">
@@ -211,7 +226,7 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
               >
                 Previous
               </button>
-              <span class="small muted" style="align-self: center">
+              <span class="small muted page-indicator">
                 Page {{ page().number + 1 }} of {{ page().totalPages }}
               </span>
               <button
@@ -271,6 +286,37 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
       <wf-workflow-import-dialog (imported)="onImported()" (closed)="closeImport()" />
     }
   `,
+  styles: [
+    `
+      .wf-name {
+        font-weight: 600;
+        color: var(--hl-blue);
+      }
+
+      .wf-desc {
+        max-width: 46ch;
+        margin-top: 2px;
+      }
+
+      .page-indicator {
+        align-self: center;
+      }
+
+      .action-label {
+        display: inline;
+      }
+
+      @media (max-width: 900px) {
+        .action-label {
+          display: none;
+        }
+
+        td.cell-actions .btn:not(.btn--icon) {
+          padding: 5px;
+        }
+      }
+    `,
+  ],
 })
 export class WorkflowList {
   protected readonly statusOptions: Array<{ label: string; value: WorkflowStatus | null }> = [

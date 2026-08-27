@@ -32,16 +32,16 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
       </wf-page-header>
 
       <div class="card">
-        <div class="card__header">
+        <div class="card__header list-toolbar">
           <input
             type="search"
-            style="max-width: 260px"
+            class="list-toolbar__search"
             placeholder="Search by name"
             aria-label="Search forms by name"
             [value]="nameFilter()"
             (input)="onSearch($any($event.target).value)"
           />
-          <div class="btn-group">
+          <div class="btn-group" role="group" aria-label="Filter by status">
             @for (option of statusOptions; track option.label) {
               <button
                 class="btn btn--sm"
@@ -53,8 +53,9 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
               </button>
             }
           </div>
-          <span class="spacer"></span>
-          <span class="small muted">{{ page().totalElements }} total</span>
+          <div class="list-toolbar__meta">
+            <span class="small muted">{{ page().totalElements }} total</span>
+          </div>
         </div>
 
         @if (loading() && page().content.length === 0) {
@@ -67,6 +68,7 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
             <a class="btn btn--primary" routerLink="/forms/new">New form</a>
           </wf-empty-state>
         } @else {
+          <div class="table-scroll">
           <table class="table table--clickable">
             <thead>
               <tr>
@@ -110,6 +112,7 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
               }
             </tbody>
           </table>
+          </div>
         }
       </div>
     </div>

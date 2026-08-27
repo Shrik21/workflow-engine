@@ -30,9 +30,11 @@ import { PaletteItem, filterPaletteItems, toPaletteItems } from './plugin-operat
   template: `
     <div class="palette">
       <div class="palette__search">
+        <label class="palette__search-label" for="palette-search">Find a node</label>
         <input
+          id="palette-search"
           type="search"
-          placeholder="Search node types"
+          placeholder="Filter by name or category"
           aria-label="Search node types"
           [value]="query()"
           (input)="query.set($any($event.target).value)"
@@ -132,9 +134,24 @@ import { PaletteItem, filterPaletteItems, toPaletteItems } from './plugin-operat
         position: sticky;
         top: 0;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
         padding: var(--space-3);
         background: var(--surface);
         border-bottom: 1px solid var(--border);
+      }
+
+      .palette__search-label {
+        font-size: var(--text-xs);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .palette__search input {
+        width: 100%;
       }
 
       .palette__status {
@@ -155,20 +172,28 @@ import { PaletteItem, filterPaletteItems, toPaletteItems } from './plugin-operat
         align-items: center;
         gap: var(--space-2);
         width: 100%;
-        padding: var(--space-1) 0;
+        padding: var(--space-2) var(--space-2);
         margin-bottom: var(--space-2);
-        border: none;
-        background: none;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        background: var(--surface-sunken);
         cursor: pointer;
         font-size: var(--text-xs);
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.7px;
         color: var(--text-muted);
+        text-align: left;
       }
 
       .group__title:hover {
         color: var(--text);
+        border-color: var(--border);
+      }
+
+      .group__title:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
       }
 
       .group__chevron {

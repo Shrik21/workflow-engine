@@ -92,8 +92,8 @@ import { StatusPill } from '../../shared/ui/status-pill';
       }
 
       <div class="card">
-        <div class="card__header">
-          <div class="btn-group">
+        <div class="card__header list-toolbar">
+          <div class="btn-group" role="group" aria-label="Filter by status">
             @for (option of statusOptions; track option.value) {
               <button
                 class="btn btn--sm"
@@ -109,8 +109,9 @@ import { StatusPill } from '../../shared/ui/status-pill';
             <span class="tag tag--mono">workflow {{ workflowId() }}</span>
             <a class="btn btn--quiet btn--sm" routerLink="/executions">Clear</a>
           }
-          <span class="spacer"></span>
-          <span class="small muted">{{ page().totalElements }} total</span>
+          <div class="list-toolbar__meta">
+            <span class="small muted">{{ page().totalElements }} total</span>
+          </div>
         </div>
 
         @if (loading() && page().content.length === 0) {
@@ -123,6 +124,7 @@ import { StatusPill } from '../../shared/ui/status-pill';
             <a class="btn" routerLink="/workflows">Go to workflows</a>
           </wf-empty-state>
         } @else {
+          <div class="table-scroll">
           <table class="table table--clickable">
             <thead>
               <tr>
@@ -167,6 +169,7 @@ import { StatusPill } from '../../shared/ui/status-pill';
               }
             </tbody>
           </table>
+          </div>
 
           @if (page().totalPages > 1) {
             <div class="card__footer">
