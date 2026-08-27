@@ -10,7 +10,7 @@ const STORAGE_KEY = 'orchpilot.theme';
  *
  * Preference is local to the browser (localStorage). It never leaves the machine and does not touch
  * accounts, permissions or API contracts. `system` follows the OS colour scheme until the operator
- * picks light or dark explicitly.
+ * picks light or dark explicitly. When nothing is stored yet, the console opens in dark mode.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -111,7 +111,7 @@ function readStoredPreference(): ThemePreference {
   } catch {
     // Ignore.
   }
-  return 'system';
+  return 'dark';
 }
 
 function systemPrefersDark(): boolean {

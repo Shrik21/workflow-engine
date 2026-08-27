@@ -14,21 +14,22 @@ describe('ThemeService', () => {
     document.documentElement.style.colorScheme = '';
   });
 
-  it('defaults to system and cycles light → dark → system', () => {
+  it('defaults to dark and cycles system → light → dark', () => {
     const theme = TestBed.inject(ThemeService);
-    expect(theme.preference()).toBe('system');
-
-    theme.cycle();
-    expect(theme.preference()).toBe('light');
-    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
-    expect(localStorage.getItem('orchpilot.theme')).toBe('light');
-
-    theme.cycle();
     expect(theme.preference()).toBe('dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
 
     theme.cycle();
     expect(theme.preference()).toBe('system');
+    expect(localStorage.getItem('orchpilot.theme')).toBe('system');
+
+    theme.cycle();
+    expect(theme.preference()).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+
+    theme.cycle();
+    expect(theme.preference()).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   it('restores a stored preference', () => {

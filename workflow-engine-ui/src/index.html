@@ -14,7 +14,7 @@
       // Apply the stored theme before first paint to avoid a light flash when dark is preferred.
       (function () {
         try {
-          var preference = localStorage.getItem('orchpilot.theme') || 'system';
+          var preference = localStorage.getItem('orchpilot.theme') || 'dark';
           var dark =
             preference === 'dark' ||
             (preference === 'system' &&
