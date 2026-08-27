@@ -56,7 +56,7 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseContainerSupport -Djava.security.
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-    CMD wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' || exit 1
+    CMD wget -qO- http://127.0.0.1:8080/actuator/health/liveness | grep -q '"status":"UP"' || exit 1
 
 # exec form via sh so JAVA_OPTS is expanded, with exec so the JVM is PID 1 and
 # receives SIGTERM directly. Graceful shutdown depends on that signal arriving.

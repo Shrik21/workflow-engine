@@ -160,7 +160,17 @@ management:
         include: health,info,metrics,loggers
   endpoint:
     health:
+      # Expose dedicated liveness/readiness groups outside Kubernetes as well.
+      # Hosting platforms must probe liveness so a temporarily unavailable
+      # database does not cause an otherwise healthy JVM to be restarted.
+      probes:
+        enabled: true
       show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,mongo
   health:
     mongo:
       enabled: true
