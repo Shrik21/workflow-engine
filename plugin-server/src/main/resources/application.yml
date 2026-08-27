@@ -1,0 +1,159 @@
+server:
+  port: ${SERVER_PORT:8085}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: plugin-server
+
+  # Spring Boot 4 binds the Mongo connection from spring.mongodb.*, NOT spring.data.mongodb.*.
+  # A URI placed under the older prefix is ignored without complaint and the driver silently falls back to
+  # the "test" database. That has already cost this project an afternoon; see PluginServerMongoConfig, which
+  # logs the database it actually connected to for exactly that reason.
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/plugin_registry}
+    database: ${MONGODB_DATABASE:plugin_registry}
+
+  data:
+    mongodb:
+      auto-index-creation: true
+      gridfs:
+        bucket: plugin_jars
+
+  servlet:
+    multipart:
+      # A plugin archive with shaded dependencies is routinely tens of megabytes. The limit is here as well as
+      # in the service so an oversized upload is refused by the container before it is buffered.
+      max-file-size: ${PLUGIN_MAX_UPLOAD_SIZE:64MB}
+      max-request-size: ${PLUGIN_MAX_UPLOAD_SIZE:64MB}
+      file-size-threshold: 1MB
+
+  threads:
+    virtual:
+      enabled: true
+
+plugin-server:
+  # ------------------------------------------------------------------ accounts
+  #
+  # This registry authenticates its own users. Nothing here consults the workflow platform, and a token the
+  # platform issued is not accepted: publishing to this registry distributes executable code to every engine
+  # that reads it, so who may do that is a decision this service makes on its own.
+  auth:
+    # Browser origins allowed to call this API. Named explicitly, never a wildcard: a credentialed request
+    # from any origin is a request every site the operator's browser visits can make on their behalf.
+    allowed-origins: ${PLUGIN_SERVER_UI_URL:http://localhost:4300}
+
+    jwt:
+      # Short, because a token states what its holder may do and nothing is re-read per request. This is the
+      # bound on how long a permission removed from a role stays effective.
+      access-token-ttl: ${ACCESS_TOKEN_TTL:PT15M}
+      refresh-token-ttl: ${REFRESH_TOKEN_TTL:P7D}
+      issuer: plugin-registry
+      # RS256, preferred. Supplied from the environment or a mounted secret, never committed: with a key pair
+      # this service signs, and anything that only needs to verify can be given the public half alone.
+      private-key: ${JWT_PRIVATE_KEY:}
+      public-key: ${JWT_PUBLIC_KEY:}
+      # Development only. A symmetric secret means anything that can verify can also forge.
+      hmac-secret: ${JWT_HMAC_SECRET:}
+      # With no key configured, one is generated per start, so the registry runs on a laptop with no setup
+      # and every token dies with the process. Set false wherever that would be a surprise.
+      allow-ephemeral-key: ${JWT_ALLOW_EPHEMERAL_KEY:true}
+
+    # The refresh cookie.
+    #
+    # The name is what keeps this registry's session separate from the workflow platform's. Cookies are scoped
+    # by host and path and NOT by port, so two consoles on different ports of the same host share one cookie
+    # jar. The platform issues workflow_refresh_token; this registry issues its own name and touches nothing
+    # else. Making these match would mean signing in to either application silently ends the other's session.
+    cookie:
+      enabled: ${REFRESH_COOKIE_ENABLED:true}
+      name: ${REFRESH_COOKIE_NAME:plugin_registry_refresh}
+      path: /api/auth
+      same-site: Strict
+      # Set true wherever TLS terminates in front of this service. False by default only because a development
+      # console is served over plain HTTP, where a Secure cookie is silently dropped — which looks exactly
+      # like a broken session.
+      secure: ${REFRESH_COOKIE_SECURE:false}
+
+    password:
+      min-length: 12
+      require-uppercase: true
+      require-lowercase: true
+      require-digit: true
+      require-special: true
+
+    login:
+      max-failed-attempts: 5
+      # Timed, not permanent. A permanent lock turns a mistyped password into a support ticket, and hands
+      # anybody who knows a username a way to disable that account at will.
+      lock-duration: PT15M
+      failure-window: PT15M
+
+    registration:
+      # Off. A plugin registry is not a service people sign themselves up to.
+      enabled: ${REGISTRATION_ENABLED:false}
+      default-role: PLUGIN_VIEWER
+
+    initial-admin:
+      enabled: ${INITIAL_ADMIN_ENABLED:true}
+      username: ${INITIAL_ADMIN_USERNAME:admin}
+      email: ${INITIAL_ADMIN_EMAIL:admin@plugin-registry.local}
+      # Never defaulted. Absent, a strong password is generated, printed once to the log, and must be changed
+      # at first sign-in. A password shipped in a configuration file is a published password.
+      password: ${INITIAL_ADMIN_PASSWORD:}
+
+  registry:
+    # An archive larger than this is refused after upload with a readable message, which is a better answer
+    # than the container's generic 413 when the value is deliberately set low.
+    max-jar-size: ${PLUGIN_MAX_JAR_SIZE:64MB}
+    # A newly uploaded version lands in DRAFT and must be published before any workflow service can see it.
+    # Set false to publish on upload, which suits a single-operator installation.
+    publish-on-upload: ${PLUGIN_PUBLISH_ON_UPLOAD:false}
+  # A service client registered on first start, so a fresh installation works with no further setup. The
+  # secret is hashed with BCrypt before it is stored and an existing client is never overwritten, so
+  # redeploying with these values cannot reset a credential a running engine is using.
+  bootstrap-client:
+    client-id: ${PLUGIN_SERVICE_CLIENT_ID:workflow-service}
+    client-secret: ${PLUGIN_SERVICE_CLIENT_SECRET:r7lITM+Kv30KJNrcTKOJdzh1b+rRpDhMN1oLn817YFk=}
+
+  security:
+    # How tokens are verified. Exactly one of these must be set.
+    #   jwt-secret: symmetric HS256, the same secret the workflow platform signs with. Simple, and it means
+    #     both services share a secret, so either can mint a token the other trusts.
+    #   jwks-uri:   asymmetric, this service only verifies. Preferred for anything shared, because the
+    #     registry then holds no signing capability at all.
+    #
+    # The default below is a committed development secret: real randomness, and published, so every checkout
+    # shares it. It must match the workflow engine's security.jwt.secret, because HS256 is symmetric and both
+    # services verify each other's tokens with it. CommittedKeyDetector refuses to start under the prod
+    # profile while it is in use.
+    jwt-secret: ${PLUGIN_SERVER_JWT_SECRET:e/tS0wG7srmEpDabtR1DT5Vb+DYE8ztoz+THCMvsyYdReAWguOkUvFyMWz+w5V4/}
+    jwks-uri: ${PLUGIN_SERVER_JWKS_URI:}
+    issuer: ${PLUGIN_SERVER_JWT_ISSUER:orchpilot-workflow}
+    signature:
+      # Designed in, off by default. Turning it on refuses any archive that is not signed by a trusted
+      # certificate. Recommended for production, where a registry is a software distribution channel.
+      verification-enabled: ${PLUGIN_SIGNATURE_VERIFICATION:false}
+      truststore: ${PLUGIN_SIGNATURE_TRUSTSTORE:}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.orchpilot.pluginserver: ${PLUGIN_SERVER_LOG_LEVEL:INFO}

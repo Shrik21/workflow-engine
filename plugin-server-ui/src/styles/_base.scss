@@ -1,0 +1,465 @@
+// Base element styles and the small set of shared component classes.
+//
+// Kept global rather than duplicated per component: buttons, inputs, tables and cards appear on
+// almost every screen, and copying them into component styles is how a design system drifts.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--surface-sunken);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-brand);
+  font-weight: 600;
+  margin: 0;
+  color: var(--hl-blue);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+}
+h4 {
+  font-size: var(--text-md);
+}
+
+a {
+  color: var(--hl-accent-blue-alt);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// ------------------------------------------------------------------ layout
+
+.page {
+  padding: var(--space-5);
+  max-width: 1500px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.page-header__text {
+  p {
+    margin: var(--space-1) 0 0;
+    color: var(--text-muted);
+    max-width: 68ch;
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+// ------------------------------------------------------------------- cards
+
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card__header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  h3,
+  h4 {
+    margin: 0;
+  }
+}
+
+.card__body {
+  padding: var(--space-4);
+}
+
+.card__footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface-sunken);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+// ----------------------------------------------------------------- buttons
+
+.btn {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--hl-grey-100);
+    border-color: var(--hl-grey-500);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  background: var(--hl-blue);
+  border-color: var(--hl-blue);
+  color: var(--text-inverse);
+
+  &:hover:not(:disabled) {
+    background: #013e7a;
+    border-color: #013e7a;
+  }
+}
+
+.btn--accent {
+  background: var(--hl-green);
+  border-color: var(--hl-green);
+  color: var(--text-inverse);
+
+  &:hover:not(:disabled) {
+    background: var(--hl-green-alt);
+    border-color: var(--hl-green-alt);
+  }
+}
+
+.btn--danger {
+  border-color: var(--hl-error);
+  color: var(--hl-error);
+
+  &:hover:not(:disabled) {
+    background: #fdecec;
+    border-color: var(--hl-red-alt);
+  }
+}
+
+.btn--quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+
+  &:hover:not(:disabled) {
+    background: var(--hl-grey-200);
+    color: var(--text);
+  }
+}
+
+.btn--sm {
+  padding: 4px 9px;
+  font-size: var(--text-sm);
+}
+
+.btn-group {
+  display: inline-flex;
+
+  .btn {
+    border-radius: 0;
+    margin-left: -1px;
+
+    &:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      margin-left: 0;
+    }
+
+    &:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+  }
+}
+
+// ------------------------------------------------------------------- forms
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.field__label {
+  font-size: var(--text-sm);
+  font-weight: bold;
+  color: var(--hl-grey-800);
+
+  .required {
+    color: var(--hl-error);
+    margin-left: 2px;
+  }
+}
+
+.field__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.field__error {
+  font-size: var(--text-xs);
+  color: var(--hl-error);
+}
+
+input[type='text'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+input[type='email'],
+input[type='tel'],
+input[type='url'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='time'],
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  padding: 6px 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: var(--hl-accent-blue);
+    box-shadow: var(--focus-ring);
+  }
+
+  &:disabled {
+    background: var(--hl-grey-100);
+    color: var(--text-faint);
+  }
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
+}
+
+textarea {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  min-height: 78px;
+  resize: vertical;
+}
+
+input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--hl-blue);
+  cursor: pointer;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-base);
+}
+
+// ------------------------------------------------------------------ tables
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+
+  th {
+    text-align: left;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    font-weight: bold;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--hl-grey-200);
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: var(--hl-grey-50);
+  }
+
+  .cell-actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.table--clickable tbody tr {
+  cursor: pointer;
+}
+
+// ------------------------------------------------------------------- misc
+
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: var(--text-xs);
+  background: var(--hl-grey-200);
+  color: var(--hl-grey-800);
+  white-space: nowrap;
+}
+
+.tag--mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.faint {
+  color: var(--text-faint);
+}
+
+.small {
+  font-size: var(--text-sm);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--hl-info);
+  background: #eef7fb;
+  font-size: var(--text-base);
+}
+
+.notice--warning {
+  border-left-color: var(--hl-warning);
+  background: #fff8e6;
+}
+
+.notice--error {
+  border-left-color: var(--hl-error);
+  background: #fdecec;
+}
+
+.notice--success {
+  border-left-color: var(--hl-green);
+  background: #edf8ee;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-4) 0;
+}
+
+.scroll-y {
+  overflow-y: auto;
+}
+
+// Visually hidden but available to assistive technology.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

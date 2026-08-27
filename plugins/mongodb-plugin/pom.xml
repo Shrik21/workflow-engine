@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>mongodb-plugin</artifactId>
+    <!--
+      Versioned independently of the reactor.
+
+      A published registry version is immutable and a revoked one is gone for good: PluginStatus.canTransitionTo
+      refuses every transition out of REVOKED, because revoking means "this must not run anywhere". So a fix to
+      an already-published plugin is a new version, not a re-upload — which is also why this module cannot
+      simply inherit ${project.version} from the parent and move when the platform does.
+
+      1.0.1: node outputs are published as a nested object. 1.0.0 published them as dotted keys, which cannot be
+      persisted into the execution document, so a node wrote to the database and then left the workflow stuck in
+      RUNNING.
+    -->
+    <version>1.0.3</version>
+    <name>MongoDB Workflow Plugin</name>
+    <description>Reads and writes MongoDB from a workflow, with the connection configured on the node</description>
+
+    <properties>
+        <plugin.id>mongodb</plugin.id>
+        <plugin.class>com.orchpilot.workflow.plugins.mongodb.MongoDbPlugin</plugin.class>
+        <mongodb.driver.version>5.6.5</mongodb.driver.version>
+    </properties>
+
+    <dependencies>
+        <!--
+          provided: the SDK lives in the engine and is delegated parent-first by the plugin class loader.
+          Bundling it would create two incompatible copies of the API types.
+        -->
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          The MongoDB driver, bundled into lib/ inside the archive.
+
+          The engine has a driver of its own, for its own database, and this plugin must not use it: the plugin
+          class loader is child-first, so the copy here is what the plugin sees, and the engine's stays
+          untouched. That isolation is the point. A workflow talking to a MongoDB 4.4 deployment can bundle a
+          driver that supports it without constraining what the engine upgrades to, and the plugin cannot reach
+          the engine's own MongoTemplate — there is no path from PluginContext to it.
+        -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!--
+          Filtered so META-INF/workflow-plugin.json is generated from the same ${plugin.id}, ${plugin.class} and
+          ${project.version} the JAR manifest entries use.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+
+            <!--
+              Copies the runtime dependencies to lib/ inside the archive. The engine extracts anything under
+              lib/ into this plugin version's own class loader.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-runtime-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <excludeScope>provided</excludeScope>
+                            <excludeTransitive>false</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+          Integration tests need a MongoDB, so they are opt-in behind the same profile the engine's use:
+
+            mvn verify -Pintegration-tests -pl plugins/mongodb-plugin        (Testcontainers, needs Docker)
+            WORKFLOW_IT_MONGODB_URI=mongodb://localhost:27017 mvn verify -Pintegration-tests -pl plugins/mongodb-plugin
+                                                                            (an existing, expendable MongoDB)
+        -->
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

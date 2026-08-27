@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>sendgrid-plugin</artifactId>
+    <!--
+      Versioned independently of the reactor, as the other plugins are. A plugin's version is its identity in
+      the registry and is what a workflow pins, so it has to move when the plugin changes and stay still when
+      only the engine around it does.
+
+      Keep this in step with PLUGIN_VERSION in SendGridPlugin: the engine reads the version from the compiled
+      constant when it probes an archive, and refuses an upload whose declared version disagrees.
+    -->
+    <version>1.0.2</version>
+    <name>SendGrid Workflow Plugin</name>
+    <description>Sample node plugin: sends transactional email through the SendGrid v3 API</description>
+
+    <properties>
+        <plugin.id>sendgrid</plugin.id>
+        <plugin.class>com.orchpilot.workflow.plugins.sendgrid.SendGridPlugin</plugin.class>
+    </properties>
+
+    <dependencies>
+        <!--
+          provided: the SDK lives in the engine and is delegated parent-first by the plugin class
+          loader. Bundling it would create two incompatible copies of the API types.
+        -->
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!--
+          Filtered so META-INF/workflow-plugin.json is generated from the same ${plugin.id}, ${plugin.class} and
+          ${project.version} the JAR manifest entries use. Hand-maintaining the version in two places is how a
+          plugin comes to declare 1.0.0 while being built as 1.1.0, which the registry would then record wrongly.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

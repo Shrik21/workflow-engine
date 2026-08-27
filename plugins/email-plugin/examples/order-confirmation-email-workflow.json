@@ -1,0 +1,167 @@
+{
+  "name": "Order Confirmation Email",
+  "description": "Tests the SMTP connection, emails the customer their confirmation with the invoice attached, and alerts the operations mailbox when the send fails permanently.",
+  "variables": {
+    "smtpHost": "smtp.company.com",
+    "supportMailbox": "support@company.com"
+  },
+  "triggers": [
+    {
+      "id": "on-order-confirmed",
+      "type": "EVENT",
+      "enabled": true,
+      "eventName": "ORDER_CONFIRMED"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "inputMapping": {
+        "orderId": "${input.orderId}",
+        "customerEmail": "${input.customerEmail}",
+        "customerName": "${input.customerName}",
+        "invoicePdfBase64": "${input.invoicePdfBase64}"
+      }
+    },
+    {
+      "id": "verify-smtp",
+      "type": "PLUGIN",
+      "name": "Verify SMTP Connection",
+      "description": "DNS, TCP, TLS and AUTH, then disconnect. Proves the settings before anything is addressed to a customer.",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "TEST_CONNECTION",
+        "smtpHost": "${smtpHost}",
+        "smtpPort": 587,
+        "security": "STARTTLS",
+        "authenticationRequired": true,
+        "username": "notifications@company.com",
+        "passwordSecret": "smtp.password"
+      },
+      "errorPolicy": "FAIL_WORKFLOW",
+      "retry": {
+        "enabled": true,
+        "maxAttempts": 3,
+        "backoffMillis": 2000,
+        "backoffMultiplier": 2.0
+      }
+    },
+    {
+      "id": "send-confirmation",
+      "type": "PLUGIN",
+      "name": "Email Confirmation",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "SEND",
+        "smtpHost": "${smtpHost}",
+        "smtpPort": 587,
+        "security": "STARTTLS",
+        "authenticationRequired": true,
+        "username": "notifications@company.com",
+        "passwordSecret": "smtp.password",
+        "fromEmail": "notifications@company.com",
+        "fromName": "Company Orders",
+        "replyTo": "${supportMailbox}",
+        "to": ["${customerEmail}"],
+        "bcc": ["orders-archive@company.com"],
+        "subject": "Order ${orderId} confirmed",
+        "bodyType": "HTML",
+        "body": "<p>Hello ${customerName},</p><p>Your order <strong>${orderId}</strong> is confirmed. The invoice is attached.</p><p>If anything looks wrong, reply to this message.</p>",
+        "attachments": [
+          {
+            "fileName": "invoice-${orderId}.pdf",
+            "source": "BASE64",
+            "value": "${invoicePdfBase64}",
+            "contentType": "application/pdf"
+          }
+        ],
+        "connectionTimeoutMillis": 15000,
+        "readTimeoutMillis": 30000
+      },
+      "outputMapping": {
+        "email.messageId": "workflow.confirmationMessageId",
+        "email.sentAt": "workflow.confirmationSentAt",
+        "failed": "workflow.emailFailed",
+        "errorCode": "workflow.emailErrorCode",
+        "errorMessage": "workflow.emailErrorMessage"
+      },
+      "retry": {
+        "enabled": true,
+        "maxAttempts": 4,
+        "backoffMillis": 5000,
+        "backoffMultiplier": 2.0
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "delivered-decision",
+      "type": "DECISION",
+      "name": "Delivered?",
+      "description": "CONTINUE publishes failed / errorCode / errorMessage as node outputs, which is what this branches on.",
+      "conditions": [
+        { "branch": "failed", "expression": "workflow.emailFailed == true" },
+        { "branch": "delivered", "expression": "workflow.emailFailed != true" }
+      ],
+      "defaultBranch": "delivered"
+    },
+    {
+      "id": "alert-operations",
+      "type": "PLUGIN",
+      "name": "Alert Operations",
+      "description": "Reached when the customer send failed after its retries — a refused address or a rejected password, neither of which another attempt fixes.",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "SEND",
+        "provider": "MICROSOFT365",
+        "credentialId": "company-alerts-smtp",
+        "fromEmail": "alerts@company.com",
+        "to": ["${supportMailbox}"],
+        "subject": "Confirmation email failed for order ${orderId}",
+        "bodyType": "TEXT",
+        "body": "The confirmation email for order ${orderId} could not be delivered to ${customerEmail}.\n\n${workflow.emailErrorCode}: ${workflow.emailErrorMessage}"
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "end-sent",
+      "type": "END",
+      "name": "Confirmation Sent",
+      "configuration": {
+        "resultStatus": "CONFIRMED",
+        "outputs": {
+          "orderId": "${orderId}",
+          "messageId": "${workflow.confirmationMessageId}"
+        }
+      }
+    },
+    {
+      "id": "end-not-sent",
+      "type": "END",
+      "name": "Confirmation Not Sent",
+      "configuration": {
+        "resultStatus": "EMAIL_FAILED",
+        "outputs": {
+          "orderId": "${orderId}",
+          "errorCode": "${workflow.emailErrorCode}"
+        }
+      }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "verify-smtp" },
+    { "source": "verify-smtp", "target": "send-confirmation" },
+    { "source": "send-confirmation", "target": "delivered-decision" },
+    { "source": "delivered-decision", "sourcePort": "delivered", "target": "end-sent" },
+    { "source": "delivered-decision", "sourcePort": "failed", "target": "alert-operations" },
+    { "source": "alert-operations", "target": "end-not-sent" }
+  ],
+  "metadata": {
+    "owner": "orders",
+    "tags": ["email", "sample"]
+  }
+}

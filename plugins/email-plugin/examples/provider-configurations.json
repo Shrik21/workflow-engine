@@ -1,0 +1,197 @@
+{
+  "_": "Node configurations for each supported provider. Drop one into a PLUGIN node's 'configuration' with pluginId 'email'. Every one of them names a secret rather than holding a password: store the value with the engine's secret management first, under the name given in passwordSecret (or as <credentialId>.username / <credentialId>.password).",
+
+  "gmail": {
+    "_notes": [
+      "Requires an app password: Google account -> Security -> 2-Step Verification -> App passwords.",
+      "A normal account password is refused by Gmail's SMTP endpoint and comes back as SMTP_AUTHENTICATION_FAILED, which this plugin never retries.",
+      "Google Workspace accounts may have SMTP AUTH disabled by an administrator.",
+      "smtp-relay.gmail.com on 465 with SSL_TLS is the alternative for Workspace relay; set smtpHost and security explicitly to use it."
+    ],
+    "provider": "GMAIL",
+    "authenticationRequired": true,
+    "username": "notifications@yourcompany.com",
+    "passwordSecret": "gmail.appPassword",
+    "fromEmail": "notifications@yourcompany.com",
+    "fromName": "Workflow Automation",
+    "to": ["${customer.email}"],
+    "subject": "Order ${order.id} confirmed",
+    "bodyType": "HTML",
+    "body": "<p>Hello ${customer.name}, your order is confirmed.</p>"
+  },
+
+  "microsoft365": {
+    "_notes": [
+      "SMTP AUTH is disabled tenant-wide by default on Microsoft 365. An administrator must enable it for the sending mailbox (Set-CASMailbox -SmtpClientAuthenticationDisabled $false).",
+      "Security defaults or Conditional Access can block basic authentication regardless of that setting.",
+      "The from address must be the authenticated mailbox, or one it has Send As rights over. Microsoft enforces this at the server; no client setting works around it.",
+      "Port 25 with a connector is the high-volume alternative and needs no credentials — set authenticationRequired to false and security to NONE only if the connector is restricted by IP."
+    ],
+    "provider": "MICROSOFT365",
+    "authenticationRequired": true,
+    "username": "notifications@yourcompany.com",
+    "passwordSecret": "m365.password",
+    "fromEmail": "notifications@yourcompany.com",
+    "fromName": "Workflow Automation",
+    "to": ["${approver.email}"],
+    "subject": "Approval needed: ${request.title}",
+    "bodyType": "HTML",
+    "body": "<p>${request.summary}</p><p><a href=\"${request.url}\">Open the request</a></p>"
+  },
+
+  "sendgrid": {
+    "_notes": [
+      "The username is the literal string 'apikey' for every account. It is not a secret and not derived from one.",
+      "The API key is the password, and needs only the Mail Send permission.",
+      "The from address must belong to a verified sender or an authenticated domain, or SendGrid refuses the message with a 550."
+    ],
+    "provider": "SENDGRID",
+    "authenticationRequired": true,
+    "username": "apikey",
+    "passwordSecret": "sendgrid.apiKey",
+    "fromEmail": "notifications@yourcompany.com",
+    "fromName": "Workflow Automation",
+    "to": ["${customer.email}"],
+    "subject": "Your receipt",
+    "bodyType": "HTML",
+    "body": "<p>Thank you. Your receipt is attached.</p>",
+    "attachments": [
+      {
+        "fileName": "receipt.pdf",
+        "source": "BASE64",
+        "value": "${receipt.pdfBase64}",
+        "contentType": "application/pdf"
+      }
+    ]
+  },
+
+  "zoho": {
+    "_notes": [
+      "The host is region-dependent: smtp.zoho.com, smtp.zoho.eu, smtp.zoho.in, smtp.zoho.com.au. The preset uses the .com endpoint; set smtpHost for any other region.",
+      "An application-specific password is required when two-factor authentication is on.",
+      "465 with SSL_TLS is also offered; the preset uses 587 with STARTTLS."
+    ],
+    "provider": "ZOHO",
+    "smtpHost": "smtp.zoho.eu",
+    "authenticationRequired": true,
+    "username": "notifications@yourcompany.com",
+    "passwordSecret": "zoho.appPassword",
+    "fromEmail": "notifications@yourcompany.com",
+    "to": ["${customer.email}"],
+    "subject": "Ticket ${ticket.id} updated",
+    "bodyType": "TEXT",
+    "body": "Ticket ${ticket.id} is now ${ticket.status}."
+  },
+
+  "amazonSes": {
+    "_notes": [
+      "SES has no default host: the endpoint is regional, so smtpHost must be set. email-smtp.<region>.amazonaws.com.",
+      "The credentials are SES SMTP credentials, generated in the SES console. An AWS access key id and secret key will not authenticate here.",
+      "A new account is in the SES sandbox and can only send to verified addresses.",
+      "465 with SSL_TLS and 2587 / 2465 are also available where 587 is blocked by the network."
+    ],
+    "provider": "AMAZON_SES",
+    "smtpHost": "email-smtp.eu-west-1.amazonaws.com",
+    "smtpPort": 587,
+    "security": "STARTTLS",
+    "authenticationRequired": true,
+    "username": "${ses.smtpUsername}",
+    "credentialId": "aws-ses-eu-west-1",
+    "fromEmail": "notifications@yourcompany.com",
+    "to": ["${customer.email}"],
+    "subject": "Your order has shipped",
+    "bodyType": "HTML",
+    "body": "<p>Tracking: ${shipment.trackingNumber}</p>"
+  },
+
+  "mailgun": {
+    "_notes": [
+      "The username is the domain's postmaster address; the password is that domain's SMTP password from the Mailgun dashboard.",
+      "EU domains use smtp.eu.mailgun.org — set smtpHost for those.",
+      "The from address must be on the sending domain."
+    ],
+    "provider": "MAILGUN",
+    "authenticationRequired": true,
+    "username": "postmaster@mg.yourcompany.com",
+    "passwordSecret": "mailgun.smtpPassword",
+    "fromEmail": "notifications@mg.yourcompany.com",
+    "to": ["${customer.email}"],
+    "subject": "Password reset requested",
+    "bodyType": "HTML",
+    "body": "<p><a href=\"${reset.url}\">Reset your password</a>. The link expires in one hour.</p>"
+  },
+
+  "yahoo": {
+    "_notes": [
+      "An app password is required; the account password is refused.",
+      "Rate limits are low enough that this is a poor choice for anything but occasional mail."
+    ],
+    "provider": "YAHOO",
+    "authenticationRequired": true,
+    "username": "you@yahoo.com",
+    "passwordSecret": "yahoo.appPassword",
+    "fromEmail": "you@yahoo.com",
+    "to": ["${customer.email}"],
+    "subject": "Notification",
+    "bodyType": "TEXT",
+    "body": "${message.text}"
+  },
+
+  "customSmtpAuthenticated": {
+    "_notes": [
+      "Any SMTP server: a company relay, a hosted mailbox, a self-run Postfix.",
+      "587 with STARTTLS is the usual pairing. 465 expects SSL_TLS instead — a mismatch here produces SMTP_SSL_FAILED or SMTP_TLS_FAILED rather than a timeout.",
+      "The host may itself come from a variable, so one workflow can point at different relays per environment."
+    ],
+    "provider": "CUSTOM",
+    "smtpHost": "${smtp.host}",
+    "smtpPort": 587,
+    "security": "STARTTLS",
+    "authenticationRequired": true,
+    "username": "${smtp.username}",
+    "credentialId": "company-smtp-prod",
+    "fromEmail": "workflow@yourcompany.com",
+    "fromName": "Workflow Automation",
+    "replyTo": "support@yourcompany.com",
+    "to": ["${approvers.emails}"],
+    "cc": ["audit@yourcompany.com"],
+    "subject": "[${environment}] ${notification.subject}",
+    "bodyType": "HTML",
+    "body": "${notification.html}",
+    "connectionTimeoutMillis": 15000,
+    "readTimeoutMillis": 30000
+  },
+
+  "internalRelayUnauthenticated": {
+    "_notes": [
+      "An internal relay that accepts mail from the engine's own network without credentials.",
+      "NONE means everything on the wire is readable by anything on the path. Legitimate inside a trusted network; wrong for anything reached over the internet.",
+      "No username or password is needed, and none should be configured: sending credentials over an unencrypted connection is worse than not authenticating."
+    ],
+    "provider": "CUSTOM",
+    "smtpHost": "mail-relay.internal",
+    "smtpPort": 25,
+    "security": "NONE",
+    "authenticationRequired": false,
+    "fromEmail": "workflow@yourcompany.com",
+    "to": ["ops@yourcompany.com"],
+    "subject": "Nightly reconciliation complete",
+    "bodyType": "TEXT",
+    "body": "${report.summary}"
+  },
+
+  "testConnectionOnly": {
+    "_notes": [
+      "Run this on its own from the designer to prove a configuration works. It performs DNS, TCP, TLS and AUTH and disconnects without sending anything.",
+      "Outputs email.connectionVerified, email.host, email.port and email.security."
+    ],
+    "operation": "TEST_CONNECTION",
+    "provider": "CUSTOM",
+    "smtpHost": "smtp.yourcompany.com",
+    "smtpPort": 587,
+    "security": "STARTTLS",
+    "authenticationRequired": true,
+    "username": "workflow@yourcompany.com",
+    "passwordSecret": "smtp.password"
+  }
+}

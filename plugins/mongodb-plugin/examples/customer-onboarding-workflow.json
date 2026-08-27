@@ -1,0 +1,153 @@
+{
+  "name": "Customer Onboarding",
+  "description": "A form raises a customer, MongoDB is checked for a duplicate, the record is written, and the customer is emailed. Exercises form → MongoDB, MongoDB → decision, and MongoDB → email in one workflow.",
+  "variables": {
+    "mongoUri": "mongodb://mongo.internal:27017/customers"
+  },
+  "triggers": [
+    { "id": "on-signup", "type": "EVENT", "enabled": true, "eventName": "CUSTOMER_SIGNUP" }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "inputMapping": {
+        "form.firstName": "${input.firstName}",
+        "form.lastName": "${input.lastName}",
+        "form.email": "${input.email}",
+        "form.department": "${input.department}"
+      }
+    },
+    {
+      "id": "find-existing",
+      "type": "PLUGIN",
+      "name": "Existing Customer?",
+      "pluginId": "mongodb",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "FIND_ONE",
+        "connectionUri": "${mongoUri}",
+        "collection": "customers",
+        "username": "workflow",
+        "passwordSecret": "mongodb.password",
+        "filter": { "email": "${form.email}" },
+        "projection": { "_id": 1, "email": 1, "status": 1 },
+        "outputVariable": "existing"
+      },
+      "outputMapping": {
+        "existing.found": "workflow.customerExists",
+        "existing._id": "workflow.existingCustomerId"
+      },
+      "retry": { "enabled": true, "maxAttempts": 3, "backoffMillis": 2000 },
+      "errorPolicy": "FAIL_WORKFLOW"
+    },
+    {
+      "id": "duplicate-decision",
+      "type": "DECISION",
+      "name": "Already Registered?",
+      "conditions": [
+        { "branch": "duplicate", "expression": "workflow.customerExists == true" },
+        { "branch": "new", "expression": "workflow.customerExists != true" }
+      ],
+      "defaultBranch": "new"
+    },
+    {
+      "id": "insert-customer",
+      "type": "PLUGIN",
+      "name": "Create Customer",
+      "pluginId": "mongodb",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "INSERT_ONE",
+        "connectionUri": "${mongoUri}",
+        "collection": "customers",
+        "username": "workflow",
+        "passwordSecret": "mongodb.password",
+        "documents": [
+          {
+            "firstName": "${form.firstName}",
+            "lastName": "${form.lastName}",
+            "email": "${form.email}",
+            "department": "${form.department}",
+            "status": "ACTIVE",
+            "createdAt": { "$date": "${system.currentTime}" }
+          }
+        ],
+        "outputVariable": "created"
+      },
+      "outputMapping": { "created.insertedId": "workflow.customerId" },
+      "retry": { "enabled": true, "maxAttempts": 3, "backoffMillis": 3000 },
+      "errorPolicy": "FAIL_WORKFLOW"
+    },
+    {
+      "id": "welcome-email",
+      "type": "PLUGIN",
+      "name": "Welcome Email",
+      "description": "MongoDB → email: the id the insert published is quoted back to the customer.",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "SEND",
+        "provider": "MICROSOFT365",
+        "credentialId": "company-smtp",
+        "fromEmail": "welcome@company.com",
+        "fromName": "Company",
+        "to": ["${form.email}"],
+        "subject": "Welcome, ${form.firstName}",
+        "bodyType": "HTML",
+        "body": "<p>Hello ${form.firstName},</p><p>Your account is active. Your reference is <strong>${workflow.customerId}</strong>.</p>"
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "record-duplicate",
+      "type": "PLUGIN",
+      "name": "Record Duplicate Attempt",
+      "pluginId": "mongodb",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "UPDATE_ONE",
+        "connectionUri": "${mongoUri}",
+        "collection": "customers",
+        "username": "workflow",
+        "passwordSecret": "mongodb.password",
+        "filter": { "_id": { "$oid": "${workflow.existingCustomerId}" } },
+        "update": {
+          "$inc": { "duplicateSignups": 1 },
+          "$currentDate": { "lastSignupAttempt": true }
+        },
+        "outputVariable": "recorded"
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "end-created",
+      "type": "END",
+      "name": "Customer Created",
+      "configuration": {
+        "resultStatus": "CREATED",
+        "outputs": { "customerId": "${workflow.customerId}", "email": "${form.email}" }
+      }
+    },
+    {
+      "id": "end-duplicate",
+      "type": "END",
+      "name": "Already Registered",
+      "configuration": {
+        "resultStatus": "DUPLICATE",
+        "outputs": { "customerId": "${workflow.existingCustomerId}" }
+      }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "find-existing" },
+    { "source": "find-existing", "target": "duplicate-decision" },
+    { "source": "duplicate-decision", "sourcePort": "new", "target": "insert-customer" },
+    { "source": "duplicate-decision", "sourcePort": "duplicate", "target": "record-duplicate" },
+    { "source": "insert-customer", "target": "welcome-email" },
+    { "source": "welcome-email", "target": "end-created" },
+    { "source": "record-duplicate", "target": "end-duplicate" }
+  ],
+  "metadata": { "owner": "customer-operations", "tags": ["mongodb", "sample"] }
+}

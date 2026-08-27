@@ -1,0 +1,38 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "SendGrid",
+  "version": "${project.version}",
+  "description": "Sends transactional email through SendGrid.",
+  "vendor": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+  "nodes": [
+    {
+      "nodeType": "SENDGRID_EMAIL",
+      "displayName": "Send Email",
+      "description": "Sends an email through SendGrid. Declared non-idempotent, so a retry replays the recorded send rather than sending twice.",
+      "category": "Communication",
+      "icon": "email",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["to", "subject"],
+        "properties": {
+          "to": { "type": "string", "title": "To", "description": "Recipient address" },
+          "from": { "type": "string", "title": "From" },
+          "subject": { "type": "string", "title": "Subject" },
+          "body": { "type": "string", "format": "textarea", "title": "Body" },
+          "templateId": { "type": "string", "title": "Template id" },
+          "apiKeySecret": { "type": "string", "format": "secret-ref", "title": "API key secret" }
+        }
+      }
+    }
+  ],
+  "dependencies": [],
+  "permissions": {
+    "network": ["api.sendgrid.com"],
+    "secrets": ["sendgrid.apiKey"]
+  }
+}

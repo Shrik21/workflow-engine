@@ -1,0 +1,83 @@
+{
+  "name": "GitHub: Branch, Commit a File, Open PR",
+  "description": "Creates a branch, commits a file to it, and opens a pull request. Store a Personal Access Token (repo scope) as a secret named github.prod.token before running.",
+  "variables": {
+    "owner": "octo",
+    "repo": "demo",
+    "featureBranch": "orchpilot/automated-change"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    { "id": "start-1", "type": "START", "name": "Start" },
+    {
+      "id": "create-branch",
+      "type": "GITHUB_CREATE_BRANCH",
+      "name": "Create Branch",
+      "pluginId": "orchpilot-github",
+      "pluginVersion": "1.0.2",
+      "configuration": {
+        "credentialsSecret": "github.prod.token",
+        "owner": "${owner}",
+        "repo": "${repo}",
+        "sourceBranch": "main",
+        "newBranch": "${featureBranch}"
+      }
+    },
+    {
+      "id": "commit-file",
+      "type": "GITHUB_PUT_FILE",
+      "name": "Commit File",
+      "pluginId": "orchpilot-github",
+      "pluginVersion": "1.0.2",
+      "configuration": {
+        "credentialsSecret": "github.prod.token",
+        "owner": "${owner}",
+        "repo": "${repo}",
+        "branch": "${featureBranch}",
+        "path": "ORCHPILOT.md",
+        "message": "chore: add OrchPilot marker",
+        "content": "# Managed by OrchPilot\n\nThis file was created by a workflow."
+      }
+    },
+    {
+      "id": "open-pr",
+      "type": "GITHUB_CREATE_PULL_REQUEST",
+      "name": "Open Pull Request",
+      "pluginId": "orchpilot-github",
+      "pluginVersion": "1.0.2",
+      "configuration": {
+        "credentialsSecret": "github.prod.token",
+        "owner": "${owner}",
+        "repo": "${repo}",
+        "title": "Automated change from OrchPilot",
+        "head": "${featureBranch}",
+        "base": "main",
+        "body": "Opened automatically by an OrchPilot workflow."
+      },
+      "outputMapping": {
+        "number": "workflow.prNumber",
+        "htmlUrl": "workflow.prUrl"
+      }
+    },
+    {
+      "id": "end-1",
+      "type": "END",
+      "name": "Done",
+      "configuration": {
+        "outputs": { "pullRequest": "${workflow.prUrl}" }
+      }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "create-branch" },
+    { "source": "create-branch", "target": "commit-file" },
+    { "source": "commit-file", "target": "open-pr" },
+    { "source": "open-pr", "target": "end-1" }
+  ],
+  "metadata": {
+    "owner": "platform",
+    "tags": ["github", "sample"]
+  }
+}

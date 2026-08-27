@@ -1,0 +1,156 @@
+{
+  "name": "Order Fulfilment",
+  "description": "Fully automated: event-triggered, calls a REST API, branches on the response, notifies Slack. Uses two plugins that the engine has no knowledge of.",
+  "variables": {
+    "inventoryApi": "https://api.example.com/inventory"
+  },
+  "triggers": [
+    {
+      "id": "on-order-created",
+      "type": "EVENT",
+      "enabled": true,
+      "eventName": "ORDER_CREATED"
+    },
+    {
+      "id": "nightly-sweep",
+      "type": "SCHEDULE",
+      "enabled": true,
+      "cron": "0 0 9 * * *",
+      "timezone": "Asia/Kolkata",
+      "defaultInput": {
+        "orderId": "SWEEP",
+        "sku": "ALL"
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "inputMapping": {
+        "orderId": "${input.orderId}",
+        "sku": "${input.sku}",
+        "quantity": "${input.quantity}"
+      }
+    },
+    {
+      "id": "check-stock",
+      "type": "PLUGIN",
+      "name": "Check Stock",
+      "pluginId": "restapi",
+      "pluginVersion": "1.0.0",
+      "configuration": {
+        "method": "POST",
+        "url": "${inventoryApi}/reservations",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-Id": "${system.executionId}"
+        },
+        "body": {
+          "orderId": "${orderId}",
+          "sku": "${sku}",
+          "quantity": "${quantity}"
+        },
+        "bearerTokenSecret": "inventory.apiToken",
+        "timeoutMillis": 30000,
+        "failOnErrorStatus": true,
+        "deduplicate": true
+      },
+      "outputMapping": {
+        "statusCode": "workflow.stockStatus",
+        "json.reserved": "workflow.reserved"
+      },
+      "retry": {
+        "enabled": true,
+        "maxAttempts": 4,
+        "backoffMillis": 2000,
+        "backoffMultiplier": 2.0
+      },
+      "errorPolicy": "COMPENSATE",
+      "compensationNodeId": "release-reservation"
+    },
+    {
+      "id": "stock-decision",
+      "type": "DECISION",
+      "name": "Stock Available?",
+      "conditions": [
+        { "branch": "reserved", "expression": "reserved == true" },
+        { "branch": "backorder", "expression": "reserved == false" }
+      ],
+      "defaultBranch": "backorder"
+    },
+    {
+      "id": "notify-warehouse",
+      "type": "PLUGIN",
+      "name": "Notify Warehouse",
+      "pluginId": "slack",
+      "pluginVersion": "1.0.0",
+      "configuration": {
+        "botTokenSecret": "slack.botToken",
+        "channel": "#warehouse",
+        "text": "Order ${orderId}: ${quantity} x ${sku} reserved and ready to pick."
+      },
+      "errorPolicy": "CONTINUE",
+      "retry": { "enabled": true, "maxAttempts": 3, "backoffMillis": 3000 }
+    },
+    {
+      "id": "notify-backorder",
+      "type": "PLUGIN",
+      "name": "Notify Backorder",
+      "pluginId": "slack",
+      "pluginVersion": "1.0.0",
+      "configuration": {
+        "botTokenSecret": "slack.botToken",
+        "channel": "#sales",
+        "text": "Order ${orderId} is on backorder: ${sku} is out of stock."
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "release-reservation",
+      "type": "PLUGIN",
+      "name": "Release Reservation (compensation)",
+      "description": "Runs only when check-stock fails after retries, to undo a partial reservation",
+      "pluginId": "restapi",
+      "pluginVersion": "1.0.0",
+      "configuration": {
+        "method": "DELETE",
+        "url": "${inventoryApi}/reservations/${orderId}",
+        "bearerTokenSecret": "inventory.apiToken",
+        "failOnErrorStatus": false
+      }
+    },
+    {
+      "id": "end-fulfilled",
+      "type": "END",
+      "name": "Fulfilled",
+      "configuration": {
+        "resultStatus": "FULFILLED",
+        "outputs": { "orderId": "${orderId}", "reserved": "${workflow.reserved}" }
+      }
+    },
+    {
+      "id": "end-backorder",
+      "type": "END",
+      "name": "Backordered",
+      "configuration": {
+        "resultStatus": "BACKORDERED",
+        "outputs": { "orderId": "${orderId}" }
+      }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "check-stock" },
+    { "source": "check-stock", "target": "stock-decision" },
+    { "source": "stock-decision", "sourcePort": "reserved", "target": "notify-warehouse" },
+    { "source": "stock-decision", "sourcePort": "backorder", "target": "notify-backorder" },
+    { "source": "notify-warehouse", "target": "end-fulfilled" },
+    { "source": "notify-backorder", "target": "end-backorder" },
+    { "source": "release-reservation", "target": "end-backorder" }
+  ],
+  "metadata": {
+    "owner": "fulfilment",
+    "tags": ["orders", "sample"]
+  }
+}

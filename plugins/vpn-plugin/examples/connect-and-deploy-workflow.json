@@ -1,0 +1,111 @@
+{
+  "name": "VPN Then Deploy",
+  "description": "Reports the VPN's state, waits until it is CONNECTED, and branches: connected deploys, anything else emails operations. Exercises VPN → wait → decision → (deploy | email).",
+  "variables": {
+    "region": "ap-south-1",
+    "vpnConnectionId": "vpn-0abc123",
+    "opsMailbox": "network-ops@company.com"
+  },
+  "triggers": [
+    { "id": "on-deploy-requested", "type": "EVENT", "enabled": true, "eventName": "DEPLOY_REQUESTED" }
+  ],
+  "nodes": [
+    {
+      "id": "start-1",
+      "type": "START",
+      "name": "Start",
+      "inputMapping": { "environment": "${input.environment}" }
+    },
+    {
+      "id": "vpn-wait",
+      "type": "PLUGIN",
+      "name": "Wait for VPN",
+      "description": "Polls the AWS Site-to-Site tunnel telemetry until a tunnel is UP, or fails with VPN_CONNECTION_TIMEOUT.",
+      "pluginId": "vpn",
+      "pluginVersion": "1.0.2",
+      "configuration": {
+        "provider": "AWS",
+        "operation": "WAIT_UNTIL_CONNECTED",
+        "connectionProfile": "aws-network-prod",
+        "connectionId": "${vpnConnectionId}",
+        "region": "${region}",
+        "timeoutSeconds": 300,
+        "pollIntervalSeconds": 15,
+        "outputVariable": "vpn"
+      },
+      "outputMapping": {
+        "vpn.status": "workflow.vpnStatus",
+        "vpn.connectionId": "workflow.vpnConnectionId"
+      },
+      "retry": { "enabled": true, "maxAttempts": 2, "backoffMillis": 5000 },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "vpn-decision",
+      "type": "DECISION",
+      "name": "Connected?",
+      "description": "Branches on the standard status the VPN node published — provider-independent.",
+      "conditions": [
+        { "branch": "connected", "expression": "workflow.vpnStatus == 'CONNECTED'" },
+        { "branch": "not-connected", "expression": "workflow.vpnStatus != 'CONNECTED'" }
+      ],
+      "defaultBranch": "not-connected"
+    },
+    {
+      "id": "deploy",
+      "type": "PLUGIN",
+      "name": "Deploy Application",
+      "description": "Reached only once the tunnel is confirmed up, so the deploy call has a path to the private environment.",
+      "pluginId": "restapi",
+      "pluginVersion": "1.0.2",
+      "configuration": {
+        "method": "POST",
+        "url": "https://deployer.internal/api/deploy",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "environment": "${environment}", "over": "${workflow.vpnConnectionId}" },
+        "bearerTokenSecret": "deployer.apiToken"
+      },
+      "errorPolicy": "FAIL_WORKFLOW"
+    },
+    {
+      "id": "alert-ops",
+      "type": "PLUGIN",
+      "name": "Alert Network Ops",
+      "description": "The VPN never reached CONNECTED — a timeout or a down tunnel. A human decides, because bringing a Site-to-Site tunnel up is a gateway-side action this workflow cannot take.",
+      "pluginId": "email",
+      "pluginVersion": "1.0.3",
+      "configuration": {
+        "operation": "SEND",
+        "provider": "MICROSOFT365",
+        "credentialId": "company-smtp",
+        "fromEmail": "workflow@company.com",
+        "to": ["${opsMailbox}"],
+        "subject": "VPN not connected for a deploy to ${environment}",
+        "bodyType": "TEXT",
+        "body": "The VPN ${vpnConnectionId} reported ${workflow.vpnStatus}, so the deploy to ${environment} was held. Check the tunnel on the customer gateway."
+      },
+      "errorPolicy": "CONTINUE"
+    },
+    {
+      "id": "end-deployed",
+      "type": "END",
+      "name": "Deployed",
+      "configuration": { "resultStatus": "DEPLOYED", "outputs": { "environment": "${environment}" } }
+    },
+    {
+      "id": "end-held",
+      "type": "END",
+      "name": "Held",
+      "configuration": { "resultStatus": "VPN_NOT_CONNECTED", "outputs": { "vpnStatus": "${workflow.vpnStatus}" } }
+    }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "vpn-wait" },
+    { "source": "vpn-wait", "target": "vpn-decision" },
+    { "source": "vpn-decision", "sourcePort": "connected", "target": "deploy" },
+    { "source": "vpn-decision", "sourcePort": "not-connected", "target": "alert-ops" },
+    { "source": "deploy", "target": "end-deployed" },
+    { "source": "alert-ops", "target": "end-held" }
+  ],
+  "metadata": { "owner": "platform", "tags": ["vpn", "network", "sample"] }
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Filled ground so the mark holds its shape in a browser tab, light or dark chrome -->
+  <circle cx="256" cy="256" r="248" fill="#080D17"/>
+
+  <!-- Bolder ratios than the master mark: this glyph has to survive 16px -->
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#3EC9D8" stroke-width="46"/>
+  <circle cx="256" cy="256" r="62" fill="#3EC9D8"/>
+
+  <!-- A filled wedge instead of a stroked line: solid shapes hold up at tiny sizes, thin strokes don't.
+       Tucked tight against the ring so it stays a visible mass rather than a thinning sliver at 16px. -->
+  <path d="M 400 118 L 330 224 L 316 174 Z" fill="#F0A24B"/>
+</svg>

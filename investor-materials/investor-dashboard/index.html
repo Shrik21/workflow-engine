@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OrchPilot — Investor Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip" href="#overview">Skip to dashboard</a>
+
+  <header class="topbar" data-reveal>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">OrchPilot</span>
+    </div>
+    <nav class="top-nav" aria-label="Primary">
+      <a href="#overview">Overview</a>
+      <a href="#product">Product</a>
+      <a href="#wedge">Wedge</a>
+      <a href="#foundation">Foundation</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <a class="btn btn-solid" href="#close">Request briefing</a>
+  </header>
+
+  <section class="hero" aria-label="OrchPilot investor introduction">
+    <div class="hero-media" aria-hidden="true">
+      <img src="assets/orchpilot-hero-atmosphere.png" alt="" />
+      <div class="hero-veil"></div>
+    </div>
+    <div class="hero-content" data-reveal>
+      <p class="brand-hero">OrchPilot</p>
+      <h1>The governed orchestration layer for people, systems, and AI.</h1>
+      <p class="hero-lede">
+        Durable workflows. Human accountability. Runtime-extensible integrations—built for operations that cannot fail quietly.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="#overview">Open investor dashboard</a>
+        <a class="btn btn-ghost" href="#product">See the product</a>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section id="overview" class="panel overview" data-reveal>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Investor dashboard</p>
+          <h2>One control plane for long-running work</h2>
+          <p class="section-copy">
+            Illustrative operating view for diligence conversations. Metrics below are demo scenario data—not company traction.
+          </p>
+        </div>
+        <div class="live-chip" aria-live="polite">
+          <span class="pulse"></span>
+          Live scenario · Aug 2026
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <article class="kpi">
+          <p class="kpi-label">Workflows in scenario</p>
+          <p class="kpi-value" data-count="24">0</p>
+          <p class="kpi-note">Approval-heavy ops templates</p>
+        </article>
+        <article class="kpi">
+          <p class="kpi-label">Executions (30d)</p>
+          <p class="kpi-value" data-count="1842">0</p>
+          <p class="kpi-note">Illustrative volume band</p>
+        </article>
+        <article class="kpi">
+          <p class="kpi-label">Completion rate</p>
+          <p class="kpi-value"><span data-count="97">0</span>%</p>
+          <p class="kpi-note">With recovery after stalls</p>
+        </article>
+        <article class="kpi">
+          <p class="kpi-label">Human tasks closed</p>
+          <p class="kpi-value" data-count="612">0</p>
+          <p class="kpi-note">Accountable approvals retained</p>
+        </article>
+      </div>
+
+      <div class="overview-grid">
+        <article class="surface chart-panel">
+          <div class="surface-head">
+            <h3>Execution rhythm</h3>
+            <p>Successful vs recovered runs · scenario</p>
+          </div>
+          <div class="chart" role="img" aria-label="Bar chart of weekly executions">
+            <svg viewBox="0 0 560 220" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0F766E" />
+                  <stop offset="100%" stop-color="#0F766E" stop-opacity="0.35" />
+                </linearGradient>
+              </defs>
+              <g class="grid-lines" stroke="rgba(15,39,64,0.08)" stroke-width="1">
+                <line x1="40" y1="40" x2="540" y2="40" />
+                <line x1="40" y1="90" x2="540" y2="90" />
+                <line x1="40" y1="140" x2="540" y2="140" />
+                <line x1="40" y1="190" x2="540" y2="190" />
+              </g>
+              <g id="bars"></g>
+              <g class="axis-labels" fill="#5B6B7C" font-size="11" font-family="Figtree, sans-serif"></g>
+            </svg>
+            <div class="chart-legend">
+              <span><i class="swatch teal"></i> Completed</span>
+              <span><i class="swatch ink"></i> Recovered</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="surface flow-panel">
+          <div class="surface-head">
+            <h3>Active orchestration</h3>
+            <p>Employee access request · live path</p>
+          </div>
+          <ol class="flow">
+            <li class="done"><span>Request intake</span><em>Form</em></li>
+            <li class="done"><span>Policy decision</span><em>Rules</em></li>
+            <li class="active"><span>Manager approval</span><em>Human task</em></li>
+            <li><span>Provision access</span><em>Plugins</em></li>
+            <li><span>Notify &amp; audit</span><em>Close</em></li>
+          </ol>
+          <div class="flow-meta">
+            <div>
+              <strong>Pinned version</strong>
+              <span>v12 · immutable</span>
+            </div>
+            <div>
+              <strong>Waiting</strong>
+              <span>4h 12m · assignee claimed</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="surface activity-panel">
+          <div class="surface-head">
+            <h3>Governance signals</h3>
+            <p>What diligence teams look for</p>
+          </div>
+          <ul class="signal-list">
+            <li>
+              <strong>Immutable publish</strong>
+              <span>In-flight runs never silently adopt edits</span>
+            </li>
+            <li>
+              <strong>Assignee integrity</strong>
+              <span>Only the assignee can submit an approval</span>
+            </li>
+            <li>
+              <strong>Secret scoping</strong>
+              <span>Credentials referenced, never embedded</span>
+            </li>
+            <li>
+              <strong>Bounded AI</strong>
+              <span>Models propose; policy and humans decide</span>
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="product" class="panel product" data-reveal>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Product evidence</p>
+          <h2>Built, running, and designed for operators</h2>
+          <p class="section-copy">
+            Captured from the authenticated OrchPilot console—visual design, governance, plugins, and AI configuration.
+          </p>
+        </div>
+      </div>
+
+      <div class="gallery">
+        <figure class="shot featured">
+          <img src="assets/03-workflow-designer.png" alt="OrchPilot workflow designer with Start and End nodes on the canvas" />
+          <figcaption>
+            <strong>Visual designer</strong>
+            Graph editing with validation before publish
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="assets/01-workflows-dashboard.png" alt="Workflows catalogue in the OrchPilot console" />
+          <figcaption>
+            <strong>Workflow catalogue</strong>
+            Draft, published, and archived states
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="assets/04-user-governance.png" alt="User and role governance screen" />
+          <figcaption>
+            <strong>User governance</strong>
+            Roles, permissions, and access control
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="assets/05-ai-providers.png" alt="AI provider configuration screen" />
+          <figcaption>
+            <strong>AI providers</strong>
+            Models inside deterministic workflow policy
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="assets/02-node-catalog.png" alt="Node type catalogue including plugin nodes" />
+          <figcaption>
+            <strong>Node catalogue</strong>
+            Built-ins plus runtime plugin nodes
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="wedge" class="panel wedge" data-reveal>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Market position</p>
+          <h2>Not another connector race</h2>
+          <p class="section-copy">
+            Win where approval, durability, private plugins, and auditability matter more than commodity automation.
+          </p>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-col">
+          <h3>Category noise</h3>
+          <ul>
+            <li>Zapier / Make / n8n — fast connectors</li>
+            <li>Camunda — heavy BPM suites</li>
+            <li>Temporal — code-first durability</li>
+            <li>AI agent kits — autonomy without governance</li>
+          </ul>
+        </div>
+        <div class="compare-col accent">
+          <h3>OrchPilot wedge</h3>
+          <ul>
+            <li>Governed control plane for long-running ops</li>
+            <li>Human tasks as first-class, auditable steps</li>
+            <li>Runtime Java plugins without engine rebuilds</li>
+            <li>AI bounded by workflow policy and review</li>
+          </ul>
+        </div>
+      </div>
+
+      <blockquote class="pitch">
+        Companies do not merely need more automation. They need automation they can trust, explain, recover, and govern.
+      </blockquote>
+    </section>
+
+    <section id="foundation" class="panel foundation" data-reveal>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Technical foundation</p>
+          <h2>Evidence from the codebase</h2>
+          <p class="section-copy">
+            Reviewed from the local <code>workflow-engine</code> repository on 26 August 2026. Counts describe volume, not capacity claims.
+          </p>
+        </div>
+      </div>
+
+      <div class="foundation-grid">
+        <article>
+          <strong>~80k</strong>
+          <span>Java production lines</span>
+        </article>
+        <article>
+          <strong>~21k</strong>
+          <span>Java test lines</span>
+        </article>
+        <article>
+          <strong>160</strong>
+          <span>REST handlers</span>
+        </article>
+        <article>
+          <strong>13</strong>
+          <span>Plugin modules</span>
+        </article>
+        <article>
+          <strong>~28k</strong>
+          <span>Angular UI lines</span>
+        </article>
+        <article>
+          <strong>Java 17</strong>
+          <span>Spring Boot · MongoDB · Angular 20</span>
+        </article>
+      </div>
+
+      <div class="capability-strip">
+        <span>Immutable versions</span>
+        <span>Crash recovery</span>
+        <span>Retry &amp; compensate</span>
+        <span>RBAC + JWT</span>
+        <span>AES secrets</span>
+        <span>Plugin registry</span>
+        <span>.orchpilot portability</span>
+      </div>
+    </section>
+
+    <section id="roadmap" class="panel roadmap" data-reveal>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Path to proof</p>
+          <h2>Focus before feature sprawl</h2>
+          <p class="section-copy">
+            Recommended commercial path: prove one expensive process, then expand the governance and plugin surface.
+          </p>
+        </div>
+      </div>
+
+      <div class="phases">
+        <article>
+          <p class="phase-tag">0–3 months</p>
+          <h3>Prove the wedge</h3>
+          <p>Five design partners. One approval-heavy workflow. Time-to-value instrumentation. Clear security guide.</p>
+        </article>
+        <article>
+          <p class="phase-tag">4–9 months</p>
+          <h3>Enterprise readiness</h3>
+          <p>SSO / SCIM, managed secrets, HA evidence, migration tooling, three paid pilots.</p>
+        </article>
+        <article>
+          <p class="phase-tag">10–18 months</p>
+          <h3>Ecosystem</h3>
+          <p>Certified plugins, stronger sandboxing, template library, second-department expansion.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="close" class="panel close" data-reveal>
+      <div class="close-inner">
+        <p class="brand-hero">OrchPilot</p>
+        <h2>Become the layer where operational responsibility is enforced.</h2>
+        <p>
+          Visual workflows. Durable execution. Human accountability. Runtime extensibility for private systems.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href="../ORCHPILOT-END-TO-END-GUIDE.md">Open full guide</a>
+          <a class="btn btn-ghost" href="../OrchPilot-Investor-Pitch.pptx">Open pitch deck</a>
+        </div>
+        <p class="fineprint">Investor materials · August 2026 · Demo metrics are illustrative only</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

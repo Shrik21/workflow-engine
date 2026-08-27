@@ -1,0 +1,251 @@
+{"kind":"deck","id":"pr/fgzc9f","name":"Deck"}
+{"kind":"layout","layoutId":"1f37d5ea-e490-4ee8-b9be-7cfbf42923df","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"c3f50454-19b7-4c95-bafe-71b313461f72","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/isi054","slide":1,"title":"ORCHPILOT","textShapes":4}
+{"kind":"shape","id":"sh/qhcr2x0n","slide":1,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/dknqdsjy","slide":1,"text":"ORCHPILOT","textPreview":"ORCHPILOT","textChars":9,"textLines":1,"bbox":[60,48,280,30]}
+{"kind":"textbox","id":"sh/sje94nid","slide":1,"text":"The governed orchestration layer for people, systems and AI","textPreview":"The governed orchestration layer for people, systems and AI","textChars":59,"textLines":1,"bbox":[60,138,530,230]}
+{"kind":"textbox","id":"sh/fm5sf2h4","slide":1,"text":"Durable workflows. Human accountability. Runtime-extensible integrations.","textPreview":"Durable workflows. Human accountability. Runtime-extensible integrations.","textChars":73,"textLines":1,"bbox":[60,395,500,88]}
+{"kind":"textbox","id":"sh/elwr6x0j","slide":1,"text":"INVESTOR BRIEF • AUGUST 2026","textPreview":"INVESTOR BRIEF • AUGUST 2026","textChars":28,"textLines":1,"bbox":[60,620,420,28]}
+{"kind":"image","id":"im/4ri1snil","slide":1,"name":"","geometry":"roundRect","alt":"OrchPilot visual workflow designer","bbox":[640,70,590,570]}
+{"kind":"notes","id":"nt/isi054","slide":1,"text":"Open with the category: governed orchestration, not task automation.\nThe product is working locally; the screenshot is from the authenticated application. \n\n[Sources]\n- Local OrchPilot application screenshot, captured 2026-08-26."}
+{"kind":"slide","id":"sl/ylzjqm","slide":2,"title":"THE PROBLEM","textShapes":15}
+{"kind":"textbox","id":"sh/za9obaxo","slide":2,"text":"THE PROBLEM","textPreview":"THE PROBLEM","textChars":11,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/kb2pkvy9","slide":2,"text":"Enterprise automation fails at the handoffs","textPreview":"Enterprise automation fails at the handoffs","textChars":43,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/lcb6d0fu","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/a50nelg7","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[60,165,70,50]}
+{"kind":"textbox","id":"sh/b69o7qxc","slide":2,"text":"Systems","textPreview":"Systems","textChars":7,"textLines":1,"bbox":[150,165,190,40]}
+{"kind":"textbox","id":"sh/c7i5gvyx","slide":2,"text":"Point integrations move data but do not own the end-to-end outcome.","textPreview":"Point integrations move data but do not own the end-to-end outcome.","textChars":67,"textLines":1,"bbox":[350,165,830,64]}
+{"kind":"textbox","id":"sh/x8r690fi","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[60,280,70,50]}
+{"kind":"textbox","id":"sh/2hgnalgv","slide":2,"text":"People","textPreview":"People","textChars":6,"textLines":1,"bbox":[150,280,190,40]}
+{"kind":"textbox","id":"sh/nipo3qxg","slide":2,"text":"Approvals, exceptions and accountability are often bolted on after design.","textPreview":"Approvals, exceptions and accountability are often bolted on after design.","textChars":74,"textLines":1,"bbox":[350,280,830,64]}
+{"kind":"textbox","id":"sh/7690n2xs","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[60,395,70,50]}
+{"kind":"textbox","id":"sh/m50juxw7","slide":2,"text":"AI","textPreview":"AI","textChars":2,"textLines":1,"bbox":[150,395,190,40]}
+{"kind":"textbox","id":"sh/98ripcfy","slide":2,"text":"Agents add adaptability—but also nondeterminism, cost and governance risk.","textPreview":"Agents add adaptability—but also nondeterminism, cost and governance risk.","textChars":74,"textLines":1,"bbox":[350,395,830,64]}
+{"kind":"textbox","id":"sh/87i1w7ed","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[60,510,70,50]}
+{"kind":"textbox","id":"sh/va90rmx4","slide":2,"text":"Operations","textPreview":"Operations","textChars":10,"textLines":1,"bbox":[150,510,190,40]}
+{"kind":"textbox","id":"sh/u90jyhwj","slide":2,"text":"Retries, versioning, audit and recovery become custom plumbing in every team.","textPreview":"Retries, versioning, audit and recovery become custom plumbing in every team.","textChars":77,"textLines":1,"bbox":[350,510,830,64]}
+{"kind":"notes","id":"nt/ylzjqm","slide":2,"text":"Frame the customer pain as fragmented ownership, not a shortage of automation tools.\nThe investor question this sets up: who governs the full journey when people, systems and AI all participate? \n\n[Sources]\n- Camunda platform positioning: https://camunda.com/platform/\n- Gartner BOAT forecast: https://www.gartner.com/en/documents/6530402"}
+{"kind":"slide","id":"sl/z8qwf9","slide":3,"title":"THE PRODUCT","textShapes":9}
+{"kind":"textbox","id":"sh/ja1kvq58","slide":3,"text":"THE PRODUCT","textPreview":"THE PRODUCT","textChars":11,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/kbul4vmt","slide":3,"text":"One canvas models the journey; one engine owns the outcome","textPreview":"One canvas models the journey; one engine owns the outcome","textChars":58,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/lc32x0ne","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/7el4zq5k","slide":3,"text":"Built-in control points","textPreview":"Built-in control points","textChars":23,"textLines":1,"bbox":[910,160,300,38]}
+{"kind":"shape","id":"sh/8ful8vm5","slide":3,"bbox":[910,225,275,60]}
+{"kind":"shape","id":"sh/tg3m10na","slide":3,"bbox":[925,242,12,26]}
+{"kind":"textbox","id":"sh/mh83u14f","slide":3,"text":"AI Agent","textPreview":"AI Agent","textChars":8,"textLines":1,"bbox":[952,232,215,38]}
+{"kind":"shape","id":"sh/nihkn650","slide":3,"bbox":[910,307,275,60]}
+{"kind":"shape","id":"sh/r2hon65k","slide":3,"bbox":[925,324,12,26]}
+{"kind":"textbox","id":"sh/6187u14z","slide":3,"text":"Human Form","textPreview":"Human Form","textChars":10,"textLines":1,"bbox":[952,314,215,38]}
+{"kind":"shape","id":"sh/t4jqpgnq","slide":3,"bbox":[910,389,275,60]}
+{"kind":"shape","id":"sh/s3apwbm5","slide":3,"bbox":[925,406,12,26]}
+{"kind":"textbox","id":"sh/jehoz65o","slide":3,"text":"Decision","textPreview":"Decision","textChars":8,"textLines":1,"bbox":[952,396,215,38]}
+{"kind":"shape","id":"sh/id87q143","slide":3,"bbox":[910,471,275,60]}
+{"kind":"shape","id":"sh/50z61wnu","slide":3,"bbox":[925,488,12,26]}
+{"kind":"textbox","id":"sh/4fqpsrm9","slide":3,"text":"Immutable publish","textPreview":"Immutable publish","textChars":17,"textLines":1,"bbox":[952,478,215,38]}
+{"kind":"textbox","id":"sh/vaxovm5c","slide":3,"text":"The UI is schema-driven: plugins can publish node definitions without a front-end release.","textPreview":"The UI is schema-driven: plugins can publish node definitions without a front-end release.","textChars":90,"textLines":1,"bbox":[910,565,280,72]}
+{"kind":"image","id":"im/r29onup8","slide":3,"name":"","geometry":"roundRect","alt":"Workflow designer with AI, flow and human nodes","bbox":[55,145,810,515]}
+{"kind":"notes","id":"nt/z8qwf9","slide":3,"text":"Demonstrate that AI and human tasks are first-class nodes alongside deterministic control flow.\nThe schema-driven UI is the bridge from extensibility to product velocity. \n\n[Sources]\n- Local OrchPilot application screenshot, captured 2026-08-26.\n- Repository README.md and ARCHITECTURE.md."}
+{"kind":"slide","id":"sl/snkoew","slide":4,"title":"ARCHITECTURE","textShapes":15}
+{"kind":"textbox","id":"sh/nqpgjq54","slide":4,"text":"ARCHITECTURE","textPreview":"ARCHITECTURE","textChars":12,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/oryxcv6p","slide":4,"text":"A control plane separates process intent from integration code","textPreview":"A control plane separates process intent from integration code","textChars":62,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/9s7yl0na","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"shape","id":"sh/e1wf6lon","slide":4,"bbox":[70,205,235,245]}
+{"kind":"textbox","id":"sh/z2pgfq58","slide":4,"text":"Design","textPreview":"Design","textChars":6,"textLines":1,"bbox":[92,235,190,42]}
+{"kind":"textbox","id":"sh/0nyx8b6d","slide":4,"text":"Visual graph\nVersions + triggers","textPreview":"Visual graph | Versions + triggers","textChars":32,"textLines":2,"bbox":[92,300,190,95]}
+{"kind":"textbox","id":"sh/1o7yhgny","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[310,290,35,45]}
+{"kind":"shape","id":"sh/yx0fi5or","slide":4,"bbox":[345,205,235,245]}
+{"kind":"textbox","id":"sh/jy9gra5c","slide":4,"text":"Execute","textPreview":"Execute","textChars":7,"textLines":1,"bbox":[367,235,190,42]}
+{"kind":"textbox","id":"sh/jix0riho","slide":4,"text":"Durable state\nRetries + compensation","textPreview":"Durable state | Retries + compensation","textChars":36,"textLines":2,"bbox":[367,300,190,95]}
+{"kind":"textbox","id":"sh/yhojyd03","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[585,290,35,45]}
+{"kind":"shape","id":"sh/5kzitszu","slide":4,"bbox":[620,205,235,245]}
+{"kind":"textbox","id":"sh/kjq10ni9","slide":4,"text":"Extend","textPreview":"Extend","textChars":6,"textLines":1,"bbox":[642,235,190,42]}
+{"kind":"textbox","id":"sh/7mh0vihk","slide":4,"text":"Isolated plugin JARs\nRuntime registration","textPreview":"Isolated plugin JARs | Runtime registration","textChars":41,"textLines":2,"bbox":[642,300,190,95]}
+{"kind":"textbox","id":"sh/6l8j2d0z","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[860,290,35,45]}
+{"kind":"shape","id":"sh/tozixszq","slide":4,"bbox":[895,205,235,245]}
+{"kind":"textbox","id":"sh/snq14ni5","slide":4,"text":"Govern","textPreview":"Govern","textChars":6,"textLines":1,"bbox":[917,235,190,42]}
+{"kind":"textbox","id":"sh/fq10z2hw","slide":4,"text":"RBAC + audit\nEncrypted secrets","textPreview":"RBAC + audit | Encrypted secrets","textChars":30,"textLines":2,"bbox":[917,300,190,95]}
+{"kind":"shape","id":"sh/up8j6x0b","slide":4,"bbox":[70,510,1060,82]}
+{"kind":"textbox","id":"sh/qxwvelov","slide":4,"text":"MongoDB persistence • execution checkpoints • event and schedule entry points • REST API","textPreview":"MongoDB persistence • execution checkpoints • event and schedule entry points • REST API","textChars":88,"textLines":1,"bbox":[95,525,1010,50]}
+{"kind":"notes","id":"nt/snkoew","slide":4,"text":"The architectural claim is separation: workflows remain stable while integrations evolve as plugins.\nCheckpointed execution and immutable versions support long-running, auditable work. \n\n[Sources]\n- Repository ARCHITECTURE.md, SECURITY.md, WORKFLOW_INSTANCE_LIFECYCLE.md."}
+{"kind":"slide","id":"sl/cy162s","slide":5,"title":"WHAT IS BUILT","textShapes":11}
+{"kind":"textbox","id":"sh/yxkzutkr","slide":5,"text":"WHAT IS BUILT","textPreview":"WHAT IS BUILT","textChars":13,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/l0bi58ji","slide":5,"text":"This is a platform foundation—not a prototype shell","textPreview":"This is a platform foundation—not a prototype shell","textChars":51,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/kz2hw32x","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/bu90zy1g","slide":5,"text":"Architecture-wide review of source-only files (excluding generated targets and dependencies).","textPreview":"Architecture-wide review of source-only files (excluding generated targets and dependencies).","textChars":93,"textLines":1,"bbox":[56,130,1100,45]}
+{"kind":"shape","id":"sh/at0zqtkv","slide":5,"bbox":[56,235,360,265]}
+{"kind":"textbox","id":"sh/xwbi1oj6","slide":5,"text":"80K+","textPreview":"80K+","textChars":4,"textLines":1,"bbox":[80,275,310,90]}
+{"kind":"textbox","id":"sh/cv2hs32l","slide":5,"text":"Java production lines","textPreview":"Java production lines","textChars":21,"textLines":1,"bbox":[80,385,310,54]}
+{"kind":"shape","id":"sh/vqd0bi1k","slide":5,"bbox":[456,235,360,265]}
+{"kind":"textbox","id":"sh/up4z2d0z","slide":5,"text":"160","textPreview":"160","textChars":3,"textLines":1,"bbox":[480,275,310,90]}
+{"kind":"textbox","id":"sh/8rydcjmd","slide":5,"text":"REST handlers","textPreview":"REST handlers","textChars":13,"textLines":1,"bbox":[480,385,310,54]}
+{"kind":"shape","id":"sh/9s7elony","slide":5,"bbox":[856,235,360,265]}
+{"kind":"textbox","id":"sh/mpgva94n","slide":5,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[880,275,310,90]}
+{"kind":"textbox","id":"sh/nqpwje5s","slide":5,"text":"plugin modules","textPreview":"plugin modules","textChars":14,"textLines":1,"bbox":[880,385,310,54]}
+{"kind":"textbox","id":"sh/0ned8jmh","slide":5,"text":"Also: 73 core-engine test classes • 28.6K Angular source lines • 27 REST controllers","textPreview":"Also: 73 core-engine test classes • 28.6K Angular source lines • 27 REST controllers","textChars":84,"textLines":1,"bbox":[56,545,1160,55]}
+{"kind":"notes","id":"nt/cy162s","slide":5,"text":"Use these as engineering-evidence metrics, not traction metrics.\nAvoid implying code volume equals product-market fit; it establishes implementation depth and raises the diligence baseline. \n\n[Sources]\n- Local source inventory from Workflow-OrchPilot/workflow-engine, counted 2026-08-26."}
+{"kind":"slide","id":"sl/bht3gu","slide":6,"title":"WHY IT CAN WIN","textShapes":11}
+{"kind":"textbox","id":"sh/bmpkfuhk","slide":6,"text":"WHY IT CAN WIN","textPreview":"WHY IT CAN WIN","textChars":14,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/wnylozy5","slide":6,"text":"The moat compounds at the boundary between reliability and extensibility","textPreview":"The moat compounds at the boundary between reliability and extensibility","textChars":72,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/xor2h4zq","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"shape","id":"sh/mxgjipg3","slide":6,"bbox":[56,160,1165,88]}
+{"kind":"textbox","id":"sh/nypkbaho","slide":6,"text":"Runtime plugin economy","textPreview":"Runtime plugin economy","textChars":22,"textLines":1,"bbox":[78,178,295,48]}
+{"kind":"textbox","id":"sh/ozylkfy9","slide":6,"text":"Validated JARs load in isolated classloaders; new node types appear without engine restart.","textPreview":"Validated JARs load in isolated classloaders; new node types appear without engine restart.","textChars":91,"textLines":1,"bbox":[390,172,800,60]}
+{"kind":"shape","id":"sh/9072dkzu","slide":6,"bbox":[56,275,1165,88]}
+{"kind":"textbox","id":"sh/6t03u9g7","slide":6,"text":"Execution trust","textPreview":"Execution trust","textChars":15,"textLines":1,"bbox":[78,293,295,48]}
+{"kind":"textbox","id":"sh/7u9knexs","slide":6,"text":"Immutable published versions, checkpoint recovery, deterministic idempotency keys and compensation policies.","textPreview":"Immutable published versions, checkpoint recovery, deterministic idempotency keys and compensation policies.","textChars":108,"textLines":1,"bbox":[390,287,800,60]}
+{"kind":"shape","id":"sh/vyhc7eds","slide":6,"bbox":[56,390,1165,88]}
+{"kind":"textbox","id":"sh/uxoby9c7","slide":6,"text":"Human accountability","textPreview":"Human accountability","textChars":20,"textLines":1,"bbox":[78,408,295,48]}
+{"kind":"textbox","id":"sh/h0zu9ovy","slide":6,"text":"Server-validated forms, assignment rules, history and non-repudiable completion semantics.","textPreview":"Server-validated forms, assignment rules, history and non-repudiable completion semantics.","textChars":90,"textLines":1,"bbox":[390,402,800,60]}
+{"kind":"shape","id":"sh/wzqt0jud","slide":6,"bbox":[56,505,1165,88]}
+{"kind":"textbox","id":"sh/jmhcbydo","slide":6,"text":"AI with guardrails","textPreview":"AI with guardrails","textChars":18,"textLines":1,"bbox":[78,523,295,48]}
+{"kind":"textbox","id":"sh/i18b2tcj","slide":6,"text":"Provider abstraction, encrypted credentials, usage visibility and deterministic workflow boundaries.","textPreview":"Provider abstraction, encrypted credentials, usage visibility and deterministic workflow boundaries.","textChars":100,"textLines":1,"bbox":[390,517,800,60]}
+{"kind":"notes","id":"nt/bht3gu","slide":6,"text":"The moat is not the canvas. It is the operational contract across plugins, state, humans and AI.\nA future plugin marketplace can turn integration supply into a distribution and revenue loop. \n\n[Sources]\n- Repository ARCHITECTURE.md, PLUGIN_OPERATION_FRAMEWORK.md, AI_AGENT_NODE.md, SECURITY.md."}
+{"kind":"slide","id":"sl/w3ludv","slide":7,"title":"MARKET TIMING","textShapes":7}
+{"kind":"textbox","id":"sh/rad4v2pg","slide":7,"text":"MARKET TIMING","textPreview":"MARKET TIMING","textChars":13,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/svm54761","slide":7,"text":"Orchestration spending is consolidating into a strategic control layer","textPreview":"Orchestration spending is consolidating into a strategic control layer","textChars":70,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/twvmxc7m","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/fyd4zmpc","slide":7,"text":"3×","textPreview":"3×","textChars":2,"textLines":1,"bbox":[825,190,300,100]}
+{"kind":"textbox","id":"sh/gzm58r6x","slide":7,"text":"projected expansion\nin consolidated BOAT spending","textPreview":"projected expansion | in consolidated BOAT spending","textChars":49,"textLines":2,"bbox":[825,290,340,88]}
+{"kind":"textbox","id":"sh/10vm1w7i","slide":7,"text":"Adjacent hyperautomation software is projected to reach $119.2B by 2028.","textPreview":"Adjacent hyperautomation software is projected to reach $119.2B by 2028.","textChars":72,"textLines":1,"bbox":[825,420,340,95]}
+{"kind":"textbox","id":"sh/21onaho3","slide":7,"text":"Market figures are third-party forecasts—not OrchPilot revenue projections.","textPreview":"Market figures are third-party forecasts—not OrchPilot revenue projections.","textChars":75,"textLines":1,"bbox":[825,555,340,42]}
+{"kind":"chart","id":"ch/m1ojmhcv","slide":7,"name":"","chartType":"bar","bbox":[60,175,700,395]}
+{"kind":"notes","id":"nt/w3ludv","slide":7,"text":"Lead with the smaller, more directly relevant BOAT market; use hyperautomation only as adjacent context.\nThe implied 2025–2029 growth is directionally strong; do not overstate addressable share. \n\n[Sources]\n- Gartner BOAT forecast: https://www.gartner.com/en/documents/6530402\n- Gartner hyperautomation market map: https://www.gartner.com/en/documents/6165623"}
+{"kind":"slide","id":"sl/f29er3","slide":8,"title":"COMPETITIVE WEDGE","textShapes":40}
+{"kind":"textbox","id":"sh/hkjix87a","slide":8,"text":"COMPETITIVE WEDGE","textPreview":"COMPETITIVE WEDGE","textChars":17,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/uhszmtoj","slide":8,"text":"OrchPilot should own the governed middle—not compete on connector count","textPreview":"OrchPilot should own the governed middle—not compete on connector count","textChars":71,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/vi10vyp4","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/8fqhkj6d","slide":8,"text":"Capability","textPreview":"Capability","textChars":10,"textLines":1,"bbox":[56,160,215,38]}
+{"kind":"textbox","id":"sh/tgzito7y","slide":8,"text":"OrchPilot","textPreview":"OrchPilot","textChars":9,"textLines":1,"bbox":[285,160,175,38]}
+{"kind":"textbox","id":"sh/6t8ziton","slide":8,"text":"n8n","textPreview":"n8n","textChars":3,"textLines":1,"bbox":[480,160,175,38]}
+{"kind":"textbox","id":"sh/7eh0ryps","slide":8,"text":"Camunda","textPreview":"Camunda","textChars":7,"textLines":1,"bbox":[675,160,175,38]}
+{"kind":"textbox","id":"sh/cbu1wn6x","slide":8,"text":"Temporal","textPreview":"Temporal","textChars":8,"textLines":1,"bbox":[870,160,175,38]}
+{"kind":"textbox","id":"sh/dc3i5s72","slide":8,"text":"Zapier","textPreview":"Zapier","textChars":6,"textLines":1,"bbox":[1065,160,175,38]}
+{"kind":"shape","id":"sh/lwrelczu","slide":8,"bbox":[56,215,215,64]}
+{"kind":"textbox","id":"sh/kvixcri9","slide":8,"text":"Visual business workflow","textPreview":"Visual business workflow","textChars":24,"textLines":1,"bbox":[62,222,203,50]}
+{"kind":"shape","id":"sh/ju9wjm14","slide":8,"bbox":[285,215,175,64]}
+{"kind":"textbox","id":"sh/ytgvah0j","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[291,222,163,50]}
+{"kind":"shape","id":"sh/xs7ehcjy","slide":8,"bbox":[480,215,175,64]}
+{"kind":"textbox","id":"sh/wryd87id","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[486,222,163,50]}
+{"kind":"shape","id":"sh/bqpwf21s","slide":8,"bbox":[675,215,175,64]}
+{"kind":"textbox","id":"sh/apgv6x07","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[681,222,163,50]}
+{"kind":"shape","id":"sh/hobetwz2","slide":8,"bbox":[870,215,175,64]}
+{"kind":"textbox","id":"sh/gn2xkbih","slide":8,"text":"Code-first","textPreview":"Code-first","textChars":10,"textLines":1,"bbox":[876,222,163,50]}
+{"kind":"shape","id":"sh/03upczu5","slide":8,"bbox":[1065,215,175,64]}
+{"kind":"textbox","id":"sh/143q54bq","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[1071,222,163,50]}
+{"kind":"textbox","id":"sh/e1s7a9cz","slide":8,"text":"Durable execution","textPreview":"Durable execution","textChars":17,"textLines":1,"bbox":[62,298,203,50]}
+{"kind":"textbox","id":"sh/z2l83etk","slide":8,"text":"Built","textPreview":"Built","textChars":5,"textLines":1,"bbox":[291,298,163,50]}
+{"kind":"textbox","id":"sh/cfap8zut","slide":8,"text":"Partial","textPreview":"Partial","textChars":7,"textLines":1,"bbox":[486,298,163,50]}
+{"kind":"textbox","id":"sh/d0jq14be","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[681,298,163,50]}
+{"kind":"textbox","id":"sh/qds76pc3","slide":8,"text":"Category leader","textPreview":"Category leader","textChars":15,"textLines":1,"bbox":[876,298,163,50]}
+{"kind":"textbox","id":"sh/re18zut8","slide":8,"text":"Limited","textPreview":"Limited","textChars":7,"textLines":1,"bbox":[1071,298,163,50]}
+{"kind":"shape","id":"sh/4bap4fux","slide":8,"bbox":[56,367,215,64]}
+{"kind":"textbox","id":"sh/pcj6xkbi","slide":8,"text":"Human tasks + forms","textPreview":"Human tasks + forms","textChars":19,"textLines":1,"bbox":[62,374,203,50]}
+{"kind":"shape","id":"sh/76h87ax4","slide":8,"bbox":[285,367,175,64]}
+{"kind":"textbox","id":"sh/658re5wj","slide":8,"text":"Built","textPreview":"Built","textChars":5,"textLines":1,"bbox":[291,374,163,50]}
+{"kind":"shape","id":"sh/t8zq9kfa","slide":8,"bbox":[480,367,175,64]}
+{"kind":"textbox","id":"sh/s7q9gfep","slide":8,"text":"Workflow step","textPreview":"Workflow step","textChars":13,"textLines":1,"bbox":[486,374,163,50]}
+{"kind":"shape","id":"sh/fah8buxg","slide":8,"bbox":[675,367,175,64]}
+{"kind":"textbox","id":"sh/u98ripwv","slide":8,"text":"Strong","textPreview":"Strong","textChars":6,"textLines":1,"bbox":[681,374,163,50]}
+{"kind":"shape","id":"sh/hcjqd4f6","slide":8,"bbox":[870,367,175,64]}
+{"kind":"textbox","id":"sh/gba9kze1","slide":8,"text":"Custom","textPreview":"Custom","textChars":6,"textLines":1,"bbox":[876,374,163,50]}
+{"kind":"shape","id":"sh/3y18fuxc","slide":8,"bbox":[1065,367,175,64]}
+{"kind":"textbox","id":"sh/2dsrmpwr","slide":8,"text":"Basic","textPreview":"Basic","textChars":5,"textLines":1,"bbox":[1071,374,163,50]}
+{"kind":"textbox","id":"sh/2h0bid43","slide":8,"text":"Runtime plugin isolation","textPreview":"Runtime plugin isolation","textChars":24,"textLines":1,"bbox":[62,450,203,50]}
+{"kind":"textbox","id":"sh/ni9srilo","slide":8,"text":"Differentiator","textPreview":"Differentiator","textChars":14,"textLines":1,"bbox":[291,450,163,50]}
+{"kind":"textbox","id":"sh/ojitk3m9","slide":8,"text":"Node ecosystem","textPreview":"Node ecosystem","textChars":14,"textLines":1,"bbox":[486,450,163,50]}
+{"kind":"textbox","id":"sh/pkrat83u","slide":8,"text":"Connectors","textPreview":"Connectors","textChars":10,"textLines":1,"bbox":[681,450,163,50]}
+{"kind":"textbox","id":"sh/a50bmd4z","slide":8,"text":"Activities","textPreview":"Activities","textChars":10,"textLines":1,"bbox":[876,450,163,50]}
+{"kind":"textbox","id":"sh/b69svilk","slide":8,"text":"App ecosystem","textPreview":"App ecosystem","textChars":13,"textLines":1,"bbox":[1071,450,163,50]}
+{"kind":"shape","id":"sh/c72tonm5","slide":8,"bbox":[56,519,215,64]}
+{"kind":"textbox","id":"sh/x8baxs3q","slide":8,"text":"Self-host / control","textPreview":"Self-host / control","textChars":19,"textLines":1,"bbox":[62,526,203,50]}
+{"kind":"shape","id":"sh/qpgrat4v","slide":8,"bbox":[285,519,175,64]}
+{"kind":"textbox","id":"sh/rapsjylg","slide":8,"text":"Built","textPreview":"Built","textChars":5,"textLines":1,"bbox":[291,526,163,50]}
+{"kind":"shape","id":"sh/94vepwny","slide":8,"bbox":[480,519,175,64]}
+{"kind":"textbox","id":"sh/83mdgr6d","slide":8,"text":"Available","textPreview":"Available","textChars":9,"textLines":1,"bbox":[486,526,163,50]}
+{"kind":"shape","id":"sh/72dwnm5s","slide":8,"bbox":[675,519,175,64]}
+{"kind":"textbox","id":"sh/m14veho7","slide":8,"text":"Available","textPreview":"Available","textChars":9,"textLines":1,"bbox":[681,526,163,50]}
+{"kind":"shape","id":"sh/h8fetwnu","slide":8,"bbox":[870,519,175,64]}
+{"kind":"textbox","id":"sh/w76dkr6p","slide":8,"text":"Available","textPreview":"Available","textChars":9,"textLines":1,"bbox":[876,526,163,50]}
+{"kind":"shape","id":"sh/v6xwr654","slide":8,"bbox":[1065,519,175,64]}
+{"kind":"textbox","id":"sh/u54vi1oj","slide":8,"text":"Cloud-first","textPreview":"Cloud-first","textChars":11,"textLines":1,"bbox":[1071,526,163,50]}
+{"kind":"textbox","id":"sh/xcbuhcnq","slide":8,"text":"Positioning thesis: more governed than low-code automation; more accessible and extensible than developer-only orchestration.","textPreview":"Positioning thesis: more governed than low-code automation; more accessible and extensible than developer-only orchestration.","textChars":125,"textLines":1,"bbox":[56,620,1165,42]}
+{"kind":"notes","id":"nt/f29er3","slide":8,"text":"This is a strategic comparison, not a feature-completeness certification.\nDo not attack established vendors. Use them to define the white space. \n\n[Sources]\n- n8n: https://n8n.io/pricing/\n- Camunda: https://camunda.com/platform/\n- Temporal: https://temporal.io/\n- Zapier partner introduction: https://partnerportal.zapier.com/sys/document/openpdfpreview/Introduction%20to%20Zapier.pdf"}
+{"kind":"slide","id":"sl/w78u7x","slide":9,"title":"BEACHHEAD CUSTOMERS","textShapes":13}
+{"kind":"textbox","id":"sh/4zitsnqd","slide":9,"text":"BEACHHEAD CUSTOMERS","textPreview":"BEACHHEAD CUSTOMERS","textChars":19,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/jy9czips","slide":9,"text":"Start where workflows are long-lived, audited and integration-heavy","textPreview":"Start where workflows are long-lived, audited and integration-heavy","textChars":67,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/ix0bqx87","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/hwruxs72","slide":9,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[56,180,70,50]}
+{"kind":"textbox","id":"sh/wbitonqh","slide":9,"text":"Platform engineering","textPreview":"Platform engineering","textChars":20,"textLines":1,"bbox":[56,245,340,58]}
+{"kind":"textbox","id":"sh/vapcvipw","slide":9,"text":"Cloud provisioning, access approvals, environment lifecycle and safe rollback.","textPreview":"Cloud provisioning, access approvals, environment lifecycle and safe rollback.","textChars":78,"textLines":1,"bbox":[56,325,340,130]}
+{"kind":"textbox","id":"sh/u9gbmd8b","slide":9,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[456,180,70,50]}
+{"kind":"textbox","id":"sh/987ut87q","slide":9,"text":"Regulated operations","textPreview":"Regulated operations","textChars":20,"textLines":1,"bbox":[456,245,340,58]}
+{"kind":"textbox","id":"sh/87ytk3q5","slide":9,"text":"Customer onboarding, compliance review, exception handling and evidentiary audit.","textPreview":"Customer onboarding, compliance review, exception handling and evidentiary audit.","textChars":81,"textLines":1,"bbox":[456,325,340,130]}
+{"kind":"textbox","id":"sh/yd47mxgr","slide":9,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[856,180,70,50]}
+{"kind":"textbox","id":"sh/zed8fihw","slide":9,"text":"IT service delivery","textPreview":"IT service delivery","textChars":19,"textLines":1,"bbox":[856,245,340,58]}
+{"kind":"textbox","id":"sh/0fm9onyh","slide":9,"text":"Cross-system incidents, remediation, human escalation and post-action records.","textPreview":"Cross-system incidents, remediation, human escalation and post-action records.","textChars":78,"textLines":1,"bbox":[856,325,340,130]}
+{"kind":"shape","id":"sh/lgfqhsz2","slide":9,"bbox":[56,525,1165,76]}
+{"kind":"textbox","id":"sh/q947idgf","slide":9,"text":"Ideal design partner: 500–5,000 employees • hybrid infrastructure • recurring approval-heavy process • clear compliance owner","textPreview":"Ideal design partner: 500–5,000 employees • hybrid infrastructure • recurring approval-heavy process • clear compliance owner","textChars":125,"textLines":1,"bbox":[80,538,1115,48]}
+{"kind":"notes","id":"nt/w78u7x","slide":9,"text":"Focus avoids the connector-count arms race and selects processes where governance and recovery are budget-worthy.\nDesign partners should bring one painful process, an executive owner and a measurable baseline. \n\n[Sources]\n- Temporal platform-engineering use cases: https://temporal.io/solutions/platform-engineering\n- Camunda use cases: https://camunda.com/platform/use-cases/"}
+{"kind":"slide","id":"sl/g1eltp","slide":10,"title":"PROPOSED BUSINESS MODEL","textShapes":16}
+{"kind":"textbox","id":"sh/xw3e5orq","slide":10,"text":"PROPOSED BUSINESS MODEL","textPreview":"PROPOSED BUSINESS MODEL","textChars":23,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/atcva9sf","slide":10,"text":"A hybrid platform model can align price with operational value","textPreview":"A hybrid platform model can align price with operational value","textChars":62,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/bulw3e9k","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"textbox","id":"sh/orud8za9","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[65,160,55,55]}
+{"kind":"textbox","id":"sh/ps3e14ru","slide":10,"text":"Platform subscription","textPreview":"Platform subscription","textChars":21,"textLines":1,"bbox":[145,160,330,52]}
+{"kind":"textbox","id":"sh/2pcv69s3","slide":10,"text":"Annual fee for environments, governance, collaboration, support and deployment choice.","textPreview":"Annual fee for environments, governance, collaboration, support and deployment choice.","textChars":86,"textLines":1,"bbox":[485,160,700,66]}
+{"kind":"textbox","id":"sh/nqlwze9o","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[65,272,55,55]}
+{"kind":"textbox","id":"sh/03ad4zax","slide":10,"text":"Execution bands","textPreview":"Execution bands","textChars":15,"textLines":1,"bbox":[145,272,330,52]}
+{"kind":"textbox","id":"sh/14jex4ri","slide":10,"text":"Usage grows with completed workflow value—not seats or number of design drafts.","textPreview":"Usage grows with completed workflow value—not seats or number of design drafts.","textChars":79,"textLines":1,"bbox":[485,272,700,66]}
+{"kind":"textbox","id":"sh/dwz21ofi","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[65,384,55,55]}
+{"kind":"textbox","id":"sh/cvq1sjyx","slide":10,"text":"Private plugin marketplace","textPreview":"Private plugin marketplace","textChars":26,"textLines":1,"bbox":[145,384,330,52]}
+{"kind":"textbox","id":"sh/ruhkzexc","slide":10,"text":"Paid certified integrations, partner revenue share and enterprise connector packs.","textPreview":"Paid certified integrations, partner revenue share and enterprise connector packs.","textChars":82,"textLines":1,"bbox":[485,384,700,66]}
+{"kind":"textbox","id":"sh/qt8jq9g7","slide":10,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[65,496,55,55]}
+{"kind":"textbox","id":"sh/psf2x4fm","slide":10,"text":"Implementation partners","textPreview":"Implementation partners","textChars":23,"textLines":1,"bbox":[145,496,330,52]}
+{"kind":"textbox","id":"sh/4r61ozy1","slide":10,"text":"Fixed-scope launch packages; services taper as partner capacity compounds.","textPreview":"Fixed-scope launch packages; services taper as partner capacity compounds.","textChars":74,"textLines":1,"bbox":[485,496,700,66]}
+{"kind":"textbox","id":"sh/3qxkvuxg","slide":10,"text":"Recommendation—not current pricing. Validate willingness-to-pay with five design partners before fixing tiers.","textPreview":"Recommendation—not current pricing. Validate willingness-to-pay with five design partners before fixing tiers.","textChars":110,"textLines":1,"bbox":[56,625,1160,34]}
+{"kind":"notes","id":"nt/g1eltp","slide":10,"text":"Pricing is intentionally presented as a hypothesis.\nExecution-based value metrics are legible, but large customers will still demand predictable commitments and overage protection. \n\n[Sources]\n- n8n pricing model context: https://n8n.io/pricing/"}
+{"kind":"slide","id":"sl/ihttym","slide":11,"title":"DE-RISKING PLAN","textShapes":13}
+{"kind":"textbox","id":"sh/jql4b65s","slide":11,"text":"DE-RISKING PLAN","textPreview":"DE-RISKING PLAN","textChars":15,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/kru5kbmx","slide":11,"text":"Eighteen months turns strong engineering into an investable company","textPreview":"Eighteen months turns strong engineering into an investable company","textChars":67,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/ls3mdgni","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"shape","id":"sh/6tcnml43","slide":11,"bbox":[80,340,1060,3]}
+{"kind":"shape","id":"sh/7ul4fq5o","slide":11,"bbox":[100,329,24,24]}
+{"kind":"textbox","id":"sh/8vu5ovm9","slide":11,"text":"0–3 months","textPreview":"0–3 months","textChars":10,"textLines":1,"bbox":[95,275,230,35]}
+{"kind":"textbox","id":"sh/tw36h0nu","slide":11,"text":"Prove wedge","textPreview":"Prove wedge","textChars":11,"textLines":1,"bbox":[95,390,290,44]}
+{"kind":"textbox","id":"sh/uxwnql4f","slide":11,"text":"5 design partners\n1 repeatable process","textPreview":"5 design partners | 1 repeatable process","textChars":38,"textLines":2,"bbox":[95,445,290,80]}
+{"kind":"shape","id":"sh/vy5ojq5k","slide":11,"bbox":[440,329,24,24]}
+{"kind":"textbox","id":"sh/bm58rq10","slide":11,"text":"4–9 months","textPreview":"4–9 months","textChars":10,"textLines":1,"bbox":[435,275,230,35]}
+{"kind":"textbox","id":"sh/qlw7ylkf","slide":11,"text":"Enterprise readiness","textPreview":"Enterprise readiness","textChars":20,"textLines":1,"bbox":[435,390,290,44]}
+{"kind":"textbox","id":"sh/do7qt0jq","slide":11,"text":"SSO/SCIM • HA\nobservability • policy","textPreview":"SSO/SCIM • HA | observability • policy","textChars":36,"textLines":2,"bbox":[435,445,290,80]}
+{"kind":"shape","id":"sh/cnep0v2l","slide":11,"bbox":[780,329,24,24]}
+{"kind":"textbox","id":"sh/3i5on61o","slide":11,"text":"10–18 months","textPreview":"10–18 months","textChars":12,"textLines":1,"bbox":[775,275,230,35]}
+{"kind":"textbox","id":"sh/2xw7u1k3","slide":11,"text":"Scale distribution","textPreview":"Scale distribution","textChars":18,"textLines":1,"bbox":[775,390,290,44]}
+{"kind":"textbox","id":"sh/pknqpgju","slide":11,"text":"3 paid pilots\npartner/plugin program","textPreview":"3 paid pilots | partner/plugin program","textChars":36,"textLines":2,"bbox":[775,445,290,80]}
+{"kind":"textbox","id":"sh/ojepwb29","slide":11,"text":"North-star validation: time-to-first-production workflow, successful execution rate, human wait time, and expansion to a second process.","textPreview":"North-star validation: time-to-first-production workflow, successful execution rate, human wait time, and expansion to a second process.","textChars":136,"textLines":1,"bbox":[80,585,1060,48]}
+{"kind":"notes","id":"nt/ihttym","slide":11,"text":"Tie spend to de-risking, not feature volume.\nThe second production process is the early signal that OrchPilot is becoming a platform rather than a project. \n\n[Sources]\n- Roadmap is a recommendation derived from repository assessment and competitor expectations."}
+{"kind":"slide","id":"sl/wy9wq7","slide":12,"title":"RISKS AND ANSWERS","textShapes":11}
+{"kind":"textbox","id":"sh/2lor6h4b","slide":12,"text":"RISKS AND ANSWERS","textPreview":"RISKS AND ANSWERS","textChars":17,"textLines":1,"bbox":[56,32,500,26]}
+{"kind":"textbox","id":"sh/p8fq1w32","slide":12,"text":"The biggest risk is breadth before proof—not technical feasibility","textPreview":"The biggest risk is breadth before proof—not technical feasibility","textChars":66,"textLines":1,"bbox":[56,62,1168,68]}
+{"kind":"textbox","id":"sh/on698rmh","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1180,670,44,18]}
+{"kind":"shape","id":"sh/fix8vm50","slide":12,"bbox":[56,160,300,78]}
+{"kind":"textbox","id":"sh/eh4r2h4f","slide":12,"text":"Crowded category","textPreview":"Crowded category","textChars":16,"textLines":1,"bbox":[72,172,268,50]}
+{"kind":"textbox","id":"sh/1kfqxcn6","slide":12,"text":"Anchor on governed, approval-heavy orchestration; avoid generic automation messaging.","textPreview":"Anchor on governed, approval-heavy orchestration; avoid generic automation messaging.","textChars":85,"textLines":1,"bbox":[390,165,800,70]}
+{"kind":"shape","id":"sh/gj6947ml","slide":12,"bbox":[56,272,300,78]}
+{"kind":"textbox","id":"sh/zehs76l4","slide":12,"text":"Enterprise trust gap","textPreview":"Enterprise trust gap","textChars":20,"textLines":1,"bbox":[72,284,268,50]}
+{"kind":"textbox","id":"sh/yd8re14j","slide":12,"text":"Prioritize SSO/SCIM, HA benchmarks, deployment automation, security review and support SLAs.","textPreview":"Prioritize SSO/SCIM, HA benchmarks, deployment automation, security review and support SLAs.","textChars":92,"textLines":1,"bbox":[390,277,800,70]}
+{"kind":"shape","id":"sh/4futcv25","slide":12,"bbox":[56,384,300,78]}
+{"kind":"textbox","id":"sh/pg3u503a","slide":12,"text":"Connector cold start","textPreview":"Connector cold start","textChars":20,"textLines":1,"bbox":[72,396,268,50]}
+{"kind":"textbox","id":"sh/2dcbalkz","slide":12,"text":"Ship certified packs for one vertical and expose a stable SDK/marketplace path.","textPreview":"Ship certified packs for one vertical and expose a stable SDK/marketplace path.","textChars":79,"textLines":1,"bbox":[390,389,800,70]}
+{"kind":"shape","id":"sh/3elc3qlk","slide":12,"bbox":[56,496,300,78]}
+{"kind":"textbox","id":"sh/grut8v2t","slide":12,"text":"Founder-market evidence","textPreview":"Founder-market evidence","textChars":23,"textLines":1,"bbox":[72,508,268,50]}
+{"kind":"textbox","id":"sh/hs3u103e","slide":12,"text":"Run structured discovery; publish quantified before/after outcomes from pilots.","textPreview":"Run structured discovery; publish quantified before/after outcomes from pilots.","textChars":79,"textLines":1,"bbox":[390,501,800,70]}
+{"kind":"notes","id":"nt/wy9wq7","slide":12,"text":"Investors will find these gaps. Naming them builds credibility and shows capital discipline.\nDo not claim enterprise readiness solely from feature presence; prove operational scale and procurement readiness. \n\n[Sources]\n- Repository assessment and current competitor positioning."}
+{"kind":"slide","id":"sl/mok5d3","slide":13,"title":"ORCHPILOT","textShapes":6}
+{"kind":"textbox","id":"sh/10ved8na","slide":13,"text":"ORCHPILOT","textPreview":"ORCHPILOT","textChars":9,"textLines":1,"bbox":[60,45,250,28]}
+{"kind":"textbox","id":"sh/exkfit4z","slide":13,"text":"Make every critical workflow recoverable, governable and extensible.","textPreview":"Make every critical workflow recoverable, governable and extensible.","textChars":68,"textLines":1,"bbox":[60,150,1080,150]}
+{"kind":"textbox","id":"sh/fydwby54","slide":13,"text":"Seed objective","textPreview":"Seed objective","textChars":14,"textLines":1,"bbox":[60,365,220,35]}
+{"kind":"textbox","id":"sh/sv2xgjmt","slide":13,"text":"Convert a working orchestration platform into repeatable enterprise adoption.","textPreview":"Convert a working orchestration platform into repeatable enterprise adoption.","textChars":77,"textLines":1,"bbox":[60,410,830,75]}
+{"kind":"textbox","id":"sh/twbe9one","slide":13,"text":"Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply","textPreview":"Use of funds: enterprise readiness • 5 design partners • 3 paid pilots • partner-led integration supply","textChars":103,"textLines":1,"bbox":[60,525,1080,70]}
+{"kind":"textbox","id":"sh/69kfe94n","slide":13,"text":"Funding amount and valuation: INSERT AFTER FOUNDER DECISION","textPreview":"Funding amount and valuation: INSERT AFTER FOUNDER DECISION","textChars":59,"textLines":1,"bbox":[60,635,650,22]}
+{"kind":"notes","id":"nt/mok5d3","slide":13,"text":"Close on the mission and the next proof points.\nInsert the actual raise amount, runway, founder story and current traction before external distribution. \n\n[Sources]\n- Milestones are proposed; no funding amount or traction was provided."}

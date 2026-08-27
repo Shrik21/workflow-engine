@@ -1,0 +1,88 @@
+{
+  "name": "Audit firewall exposure, then tear down a sandbox VPC",
+  "description": "Inspects a sandbox VPC, asks a human to approve the teardown, then deletes the VPC. The delete refuses on its own if anything still references the network — dependents are never removed automatically.",
+  "variables": {
+    "gcpProject": "acme-sandbox",
+    "vpcName": "sandbox-vpc"
+  },
+  "triggers": [
+    { "id": "manual", "type": "MANUAL", "enabled": true }
+  ],
+  "nodes": [
+    { "id": "start-1", "type": "START", "name": "Start" },
+    {
+      "id": "list-firewalls",
+      "type": "GCP_NET_LIST_FIREWALLS",
+      "name": "List firewall rules",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.sandbox.network",
+        "project": "${gcpProject}",
+        "network": "${vpcName}"
+      },
+      "outputMapping": {
+        "count": "workflow.firewallCount",
+        "items": "workflow.firewallRules"
+      }
+    },
+    {
+      "id": "inspect",
+      "type": "GCP_NET_INSPECT",
+      "name": "Inspect before deleting",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.sandbox.network",
+        "project": "${gcpProject}",
+        "vpcName": "${vpcName}"
+      },
+      "outputMapping": {
+        "counts": "workflow.networkCounts"
+      }
+    },
+    {
+      "id": "approve-teardown",
+      "type": "APPROVAL",
+      "name": "Approve teardown",
+      "configuration": {
+        "title": "Delete ${vpcName}?",
+        "message": "The VPC ${vpcName} in ${gcpProject} currently has ${workflow.firewallCount} firewall rule(s). Deleting it is irreversible.",
+        "approvers": ["cloud-ops"]
+      },
+      "outputMapping": {
+        "approved": "workflow.teardownApproved"
+      }
+    },
+    {
+      "id": "delete-vpc",
+      "type": "GCP_NET_DELETE_VPC",
+      "name": "Delete the sandbox VPC",
+      "pluginId": "orchpilot-gcp-network",
+      "pluginVersion": "1.0.1",
+      "configuration": {
+        "connection": "gcp.sandbox.network",
+        "project": "${gcpProject}",
+        "vpcName": "${vpcName}",
+        "requireConfirmation": true,
+        "confirmed": "${workflow.teardownApproved}",
+        "waitForCompletion": true
+      },
+      "outputMapping": {
+        "deleted": "workflow.vpcDeleted"
+      }
+    },
+    { "id": "end-1", "type": "END", "name": "Done" }
+  ],
+  "connections": [
+    { "source": "start-1", "target": "list-firewalls" },
+    { "source": "list-firewalls", "target": "inspect" },
+    { "source": "inspect", "target": "approve-teardown" },
+    { "source": "approve-teardown", "target": "delete-vpc" },
+    { "source": "delete-vpc", "target": "end-1" }
+  ],
+  "metadata": {
+    "owner": "cloud-ops",
+    "tags": ["gcp", "network", "teardown", "sample"]
+  }
+}

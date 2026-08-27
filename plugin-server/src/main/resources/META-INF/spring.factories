@@ -1,0 +1,4 @@
+# Failure analyzers are still registered through spring.factories: they run before the application context
+# exists, so they cannot be beans and are not discoverable through AutoConfiguration.imports.
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+com.orchpilot.pluginserver.config.PluginServerConfigurationFailureAnalyzer

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.orchpilot.workflow</groupId>
+        <artifactId>workflow-engine-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>gcp-network-plugin</artifactId>
+    <version>1.0.1</version>
+    <name>GCP Network Workflow Plugin</name>
+    <description>VPCs, subnets, firewall rules, routes, Cloud Routers, Cloud NAT and VPC peering, over the
+        Compute Engine REST API.</description>
+
+    <properties>
+        <plugin.id>orchpilot-gcp-network</plugin.id>
+        <plugin.class>com.orchpilot.plugin.gcp.network.GcpNetworkPlugin</plugin.class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.orchpilot.workflow</groupId>
+            <artifactId>workflow-plugin-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          No Google Cloud SDK dependency, deliberately.
+
+          The specification asks for google-cloud-compute. That library is not resolvable in this build
+          environment (Maven runs offline and neither it, nor gax, nor protobuf, nor gRPC is present), so a
+          plugin depending on it could not be compiled here at all. It would also be the largest dependency
+          tree of any plugin in this repository, loaded into the engine's own JVM behind an isolating class
+          loader.
+
+          Everything this plugin needs is in the Compute Engine v1 REST API, reached through the engine's
+          allow-listed HTTP client — the same approach the GCP Compute Instance and GCP Kubernetes plugins
+          already use in production here. Authentication is the standard service-account JWT-bearer exchange,
+          signed with the JDK's own RS256. See ComputeClient and GcpAuth.
+        -->
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>orchpilot-${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Workflow-Plugin-Class>${plugin.class}</Workflow-Plugin-Class>
+                            <Workflow-Plugin-Id>${plugin.id}</Workflow-Plugin-Id>
+                            <Workflow-Plugin-Version>${project.version}</Workflow-Plugin-Version>
+                            <Workflow-Plugin-Api-Version>1</Workflow-Plugin-Api-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

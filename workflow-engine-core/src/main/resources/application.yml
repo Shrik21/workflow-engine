@@ -1,0 +1,318 @@
+spring:
+  application:
+    name: workflow-engine
+
+  # Connection settings live under spring.mongodb, NOT spring.data.mongodb.
+  #
+  # Spring Boot 4 accepts both prefixes but binds the connection from spring.mongodb.*; anything set under
+  # spring.data.mongodb.uri is silently ignored, and the driver then falls back to its own defaults,
+  # localhost:27017 and the database named "test". That failure is quiet and expensive: the application
+  # starts, works, and writes everything to the wrong database. The startup line
+  # "Connected to MongoDB database '...'" exists to make it visible.
+  #
+  # Never hardcode credentials. Supply MONGODB_URI from the environment or a secret manager.
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/workflow_engine}
+    # Wins over any database named in the URI, so an overridden MONGODB_URI that points at a different
+    # database, or names none at all, still lands here.
+    database: ${MONGODB_DATABASE:workflow_engine}
+
+  data:
+    mongodb:
+      # These two genuinely belong under spring.data.mongodb: they configure the Spring Data mapping
+      # layer rather than the driver connection.
+      #
+      # Indexes declared with @Indexed and @CompoundIndex are created at startup. Collections that
+      # plugins write into have no model class and are indexed by MongoIndexInitializer instead.
+      auto-index-creation: true
+      gridfs:
+        bucket: plugin_jars
+
+  servlet:
+    multipart:
+      # A plugin JAR that bundles its own dependencies is easily tens of megabytes.
+      max-file-size: 64MB
+      max-request-size: 80MB
+
+  threads:
+    virtual:
+      # Left off deliberately. Plugin code is arbitrary third-party code and may block in ways that
+      # pin a carrier thread; a bounded platform-thread pool with a queue is the predictable choice.
+      enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+# ===================================================================================================
+# Authentication and authorization.
+#
+#  READ THIS BEFORE DEPLOYING ANYWHERE SHARED
+#
+#  The keys below are real, working values committed to this file so the application starts with no
+#  environment setup. That is a development convenience and a deliberate trade, not a recommendation:
+#
+#    * They are in version control. Anyone who can read this repository can mint a valid access token
+#      for any user, including an administrator, and can decrypt every stored secret.
+#    * They are identical in every checkout and every image built from it.
+#
+#  The engine detects these committed values at startup and warns on every boot. With the "prod"
+#  profile active it refuses to start at all, so they cannot reach production unnoticed.
+#
+#  To use your own instead, either replace the values below, or set the environment variables shown in
+#  each ${...} default, which take precedence without editing this file:
+#
+#      openssl rand -base64 48   # JWT_SECRET
+#      openssl rand -base64 32   # APP_ENCRYPTION_KEY   (must decode to exactly 32 bytes)
+#      openssl rand -base64 32   # WORKFLOW_SECRETS_KEY (must decode to exactly 32 bytes)
+#
+#  On Windows without openssl, ./run-local.ps1 generates them into a gitignored .env.local.
+# ===================================================================================================
+security:
+  jwt:
+    # HS256 signs and verifies with one secret, which is correct while this service both issues and
+    # consumes its own tokens. Switch to RS256, supplying private-key and public-key, as soon as another
+    # service needs to validate these tokens: it can then verify without holding anything that forges.
+    algorithm: ${JWT_ALGORITHM:HS256}
+    # Committed development key. See the warning block above. Overridden by JWT_SECRET when set.
+    secret: ${JWT_SECRET:UAWPiV9j6JIG+UpiPcoiObQLUyt/c10V2Gokz9ahQvv4u3kY7hJke40GDAVFiWOV}
+    private-key: ${JWT_PRIVATE_KEY:}
+    public-key: ${JWT_PUBLIC_KEY:}
+    key-id: ${JWT_KEY_ID:workflow-key-1}
+    issuer: ${JWT_ISSUER:workflow-platform}
+    # 15 minutes. Short on purpose: a revoked role or a disabled account is fully effective within this
+    # window even in the worst case, and the console refreshes transparently.
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:900000}
+    # 7 days, rotated on every use.
+    refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
+    # "cookie" puts the refresh token in an HttpOnly SameSite=Strict cookie, unreadable by script.
+    # "body" returns it in JSON for non-browser clients, which means script can read it: a real
+    # downgrade, and the reason cookie is the default.
+    refresh-token-transport: ${JWT_REFRESH_TOKEN_TRANSPORT:cookie}
+    cookie-name: workflow_refresh_token
+    cookie-path: /api/auth
+    cookie-same-site: Strict
+    # Set automatically for HTTPS requests; force it on when a proxy terminates TLS opaquely.
+    cookie-secure: ${JWT_COOKIE_SECURE:false}
+    max-sessions-per-user: 10
+
+  password:
+    # Enforced on the server for every path that sets a password. The Angular form applies the same rules
+    # for immediate feedback and is never trusted.
+    min-length: ${PASSWORD_MIN_LENGTH:12}
+    max-length: 128
+    require-uppercase: true
+    require-lowercase: true
+    require-digit: true
+    require-special: true
+    # Argon2id cost. The OWASP recommendation; raise memory-kb if the hardware allows.
+    salt-length: 16
+    hash-length: 32
+    parallelism: 1
+    memory-kb: ${PASSWORD_ARGON2_MEMORY_KB:19456}
+    iterations: ${PASSWORD_ARGON2_ITERATIONS:2}
+
+  lockout:
+    enabled: true
+    max-failed-attempts: ${LOGIN_MAX_ATTEMPTS:5}
+    lockout-millis: ${LOGIN_LOCKOUT_MILLIS:900000}
+    window-millis: 900000
+    # Counted as well as per-username: one stops a distributed attack on a single account, the other stops
+    # one host spraying a common password across many accounts.
+    track-by-ip-address: true
+    max-failed-attempts-per-ip: 25
+
+  registration:
+    # Turn off for an installation where an administrator provisions every account.
+    enabled: ${REGISTRATION_ENABLED:true}
+
+  encryption:
+    # For data that must be read back: SendGrid keys, bearer tokens, database passwords. Never for
+    # passwords, which are hashed and cannot be recovered by design.
+    #
+    # Committed development key. Replacing it makes every already-encrypted secret unreadable, because
+    # these values are encrypted rather than hashed: rotate it before storing anything you care about,
+    # not after.
+    key: ${APP_ENCRYPTION_KEY:IUuAXUw8gjaGtQGTTyKie34CSJZxMbySRTzr6iS9C5g=}
+    key-id: ${APP_ENCRYPTION_KEY_ID:default}
+
+app:
+  bootstrap-admin:
+    # On, so a fresh database gets a usable administrator without any environment setup. The account is
+    # created only when no ADMIN exists, so this is a no-op on every start after the first.
+    #
+    # This password is in version control and is therefore public. Change it at first sign-in. It is
+    # spelled out rather than defaulted to something like "admin" on purpose: a weak well-known password
+    # is guessable by anyone, whereas this one is only known to whoever can read this repository, and the
+    # startup log says plainly that it must be changed.
+    enabled: ${BOOTSTRAP_ADMIN_ENABLED:true}
+    username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
+    email: ${BOOTSTRAP_ADMIN_EMAIL:admin@orchpilot.local}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:Platform-Dev-Adm1n!}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    mongo:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+workflow:
+  engine:
+    # Blank means derive from hostname plus a random suffix.
+    instance-id: ${WORKFLOW_INSTANCE_ID:}
+
+    execution:
+      sync-timeout-millis: 60000
+      max-steps: 1000
+      default-node-timeout-millis: 60000
+      core-pool-size: 8
+      max-pool-size: 32
+      queue-capacity: 500
+      heartbeat-interval-millis: 15000
+      stale-after-millis: 120000
+      recovery-enabled: true
+      recovery-initial-delay-millis: 30000
+
+    plugins:
+      # Blank means a temporary directory. Set it to a writable volume so staged JARs survive a
+      # container restart and are not re-downloaded from GridFS on every start.
+      workspace-directory: ${PLUGIN_WORKSPACE_DIR:}
+      max-jar-bytes: 67108864
+      max-jar-entries: 20000
+      max-uncompressed-bytes: 536870912
+      unload-grace-millis: 30000
+      auto-load-on-startup: true
+      # Turn both of these on for third-party plugins: they are the compensating controls that make
+      # in-process loading defensible.
+      require-checksum: false
+      require-signature: false
+      # Empty denies all outbound calls unless a plugin is granted hosts at upload time.
+      default-allowed-hosts: []
+      http-max-timeout-millis: 60000
+      http-max-response-bytes: 8388608
+      data-store-max-results: 500
+      record-payloads: true
+      payload-max-chars: 4000
+
+    scheduler:
+      enabled: true
+      poll-interval-millis: 10000
+      batch-size: 25
+      misfire-threshold-millis: 300000
+
+    ai:
+      cli:
+        # AI command-line tools the engine may run — the Claude CLI, and any other adapter installed.
+        #
+        # Off by default, and deliberately not settable from the user interface. Every other setting in
+        # OrchPilot is configured through the console; this one is not, because it decides whether the engine
+        # process will execute a local binary. The AI_CLI_* permissions govern who may use the feature once
+        # an operator has allowed it here, but a UI-only switch would make a misconfigured permission model
+        # the difference between a wrong API call and code running as the engine's user.
+        #
+        # Turning this off stops execution everywhere, immediately, whatever is stored in MongoDB.
+        enabled: ${WORKFLOW_AI_CLI_ENABLED:false}
+
+        # How long any single invocation may run before it is destroyed.
+        timeout-seconds: 120
+
+        # Cap on captured stdout/stderr. A runaway process must not exhaust the engine's heap.
+        max-output-bytes: 524288
+
+        # Optional: confine executables to these directories. Empty means any path that passes validation,
+        # which is the practical default because installation locations vary by machine. Set it for a
+        # hardened deployment — a path outside every entry is refused no matter who configures it.
+        #   allowed-directories:
+        #     - /usr/local/bin
+        allowed-directories: []
+
+    security:
+      # Required for /api/plugins/** and /api/secrets/**. Empty leaves them unprotected, which is only
+      # acceptable behind an authenticating gateway; the engine warns loudly at startup.
+      admin-api-key: ${WORKFLOW_ADMIN_API_KEY:}
+      admin-api-key-header: X-Admin-Api-Key
+      admin-path-patterns:
+        - /api/plugins/**
+        - /api/secrets/**
+
+      # Browser origins allowed to call the API cross-origin. Needed when the Angular console runs on its
+      # own dev server: localhost:4200 calling localhost:8080 is cross-origin, and without a match here the
+      # browser blocks the request before the engine sees it.
+      #
+      # Serving the console and the API from one origin through a reverse proxy, as the shipped nginx
+      # configuration does, needs no entry here. A wildcard is refused: these endpoints install code.
+      allowed-origins: ${WORKFLOW_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200,http://localhost:4300,http://127.0.0.1:4300}
+
+    secrets:
+      # Base64-encoded 128, 192 or 256 bit AES key. Generate one with:
+      #   openssl rand -base64 32
+      # Without it, secret writes are rejected and plugins needing credentials fail.
+      # Committed development key, same caveats as security.encryption.key above.
+      master-key: ${WORKFLOW_SECRETS_KEY:qrMX2uikfv0bPI/EdZQZeMZHwe/yyMRvlET5vovBSuc=}
+      key-id: ${WORKFLOW_SECRETS_KEY_ID:default}
+
+    import-export:
+      # Largest .orchpilot file accepted for import, in bytes. Enforced before decryption so a hostile or
+      # corrupt file cannot exhaust memory. Keep it below spring.servlet.multipart.max-file-size above, which
+      # is the outer HTTP guard. Defaults to 50 MB.
+      max-file-bytes: ${WORKFLOW_IMPORT_MAX_FILE_BYTES:52428800}
+
+    external-form:
+      # Base URL a generated external form link is built on; the raw token is appended. Relative by default,
+      # resolving against whatever origin serves the console. Set an absolute https URL to email links that
+      # work from anywhere, e.g. https://app.example.com/public/form/
+      base-url: ${WORKFLOW_EXTERNAL_FORM_BASE_URL:/public/form/}
+      # Default link lifetime in hours when the request does not specify one.
+      default-expiration-hours: ${WORKFLOW_EXTERNAL_FORM_TTL_HOURS:24}
+      # Per-IP-per-minute request ceilings on the public form endpoints; the submit endpoint gets the stricter
+      # one. In-memory and per-instance; move to a shared store for a multi-node deployment.
+      rate-limit-per-minute: ${WORKFLOW_EXTERNAL_FORM_RATE_LIMIT:60}
+      submit-rate-limit-per-minute: ${WORKFLOW_EXTERNAL_FORM_SUBMIT_RATE_LIMIT:10}
+      # File extensions never accepted on an external upload (full upload handling is a separate seam).
+      # captcha-required stays false: the verifier is a seam with no provider wired yet.
+      captcha-required: ${WORKFLOW_EXTERNAL_FORM_CAPTCHA:false}
+
+logging:
+  level:
+    com.orchpilot.workflow: INFO
+    # Plugin output is logged under plugin.<pluginId>, so one plugin can be made verbose on its own.
+    plugin: INFO
+    org.springframework.data.mongodb.core.MongoTemplate: WARN
+
+# ---------------------------------------------------------------------------- plugin registry
+# Where plugin archives come from. Blank disables every registry interaction: already installed plugins keep
+# working and the marketplace is empty, which is the correct behaviour for an installation that has no registry
+# rather than a reason to refuse to start.
+#
+# The client secret is a credential for downloading executable code. It belongs in the environment or a secret
+# manager, never here.
+plugin:
+  server:
+    base-url: ${PLUGIN_SERVER_URL:http://localhost:8085}
+    client-id: ${PLUGIN_SERVER_CLIENT_ID:workflow-service}
+    # A committed development credential, exactly like the keys above: real randomness, and published, so
+    # every checkout shares it. It lets this engine download plugin archives, which are executable code.
+    # CommittedKeyDetector names it at every start and refuses to start under the prod profile.
+    client-secret: ${PLUGIN_SERVER_CLIENT_SECRET:r7lITM+Kv30KJNrcTKOJdzh1b+rRpDhMN1oLn817YFk=}
+    sync-interval: ${PLUGIN_SYNC_INTERVAL:PT5M}
+    request-timeout: PT20S
+    download-timeout: PT5M
+    cache-directory: ${PLUGIN_CACHE_DIR:plugin-cache}
+    sync-on-startup: ${PLUGIN_SYNC_ON_STARTUP:true}

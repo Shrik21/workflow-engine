@@ -1,0 +1,123 @@
+{
+  "pluginId": "${plugin.id}",
+  "name": "Secure Network / VPN",
+  "version": "${project.version}",
+  "description": "Manages and reports secure-network (VPN) connection state through provider control-plane APIs, with a pluggable provider architecture.",
+  "vendor": "OrchPilot",
+  "author": "OrchPilot",
+  "mainClass": "${plugin.class}",
+  "sdkVersion": "1.0.0",
+  "javaVersion": "17",
+  "category": "NETWORK",
+  "supportedPlatformVersion": ">=1.0.0 <2.0.0",
+  "engineCompatibility": ">=1.0.0 <2.0.0",
+  "pluginType": "NODE",
+
+  "nodeTypes": ["VPN"],
+
+  "nodes": [
+    {
+      "nodeType": "VPN",
+      "displayName": "Secure Network / VPN",
+      "description": "Connect, disconnect, check, test and wait on a VPN connection across AWS, Azure, GCP and generic IPsec / OpenVPN / WireGuard. Reports real provider state; a control-plane plugin that does not fake connectivity or dial tunnels.",
+      "category": "Network",
+      "icon": "shield",
+      "configurationSchema": {
+        "type": "object",
+        "required": ["provider", "operation"],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider",
+            "enum": ["AWS", "AZURE", "GCP", "IPSEC", "OPENVPN", "WIREGUARD"],
+            "default": "AWS",
+            "description": "Which VPN this node acts on. Provider-specific fields appear below."
+          },
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "enum": ["CONNECT", "DISCONNECT", "STATUS", "TEST_CONNECTION", "GET_INFO", "WAIT_UNTIL_CONNECTED"],
+            "default": "CONNECT",
+            "description": "For cloud providers CONNECT reports the tunnel state — there is no dial operation. TEST_CONNECTION states exactly what it checked."
+          },
+          "connectionProfile": {
+            "type": "string",
+            "title": "Connection profile / credential id",
+            "description": "Names a stored credential whose parts are the secrets <profile>.<name>, e.g. aws-prod.accessKeyId and aws-prod.secretKey. Select a profile instead of entering credentials on every node."
+          },
+          "connectionId": {
+            "type": "string",
+            "title": "Connection id",
+            "description": "The provider connection identifier — an AWS vpn-…, an Azure connection name, a GCP tunnel. Supports variables such as ${vpn.connectionId}."
+          },
+          "region": { "type": "string", "title": "Region", "description": "Cloud region, e.g. ap-south-1. Supports ${cloud.region}." },
+          "endpointHost": {
+            "type": "string",
+            "title": "Endpoint host override",
+            "description": "Rarely needed. Overrides the provider's default API host (a GovCloud or sovereign endpoint). Must be on the plugin's allowed hosts."
+          },
+
+          "subscriptionId": { "type": "string", "title": "Subscription id", "visibleWhen": { "provider": ["AZURE"] } },
+          "resourceGroup": { "type": "string", "title": "Resource group", "visibleWhen": { "provider": ["AZURE"] } },
+          "connectionName": { "type": "string", "title": "Connection name", "visibleWhen": { "provider": ["AZURE"] } },
+
+          "project": { "type": "string", "title": "Project", "visibleWhen": { "provider": ["GCP"] } },
+          "tunnel": { "type": "string", "title": "Tunnel name", "visibleWhen": { "provider": ["GCP"] } },
+
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint (host or host:port)",
+            "description": "The gateway. For WireGuard, vpn.example.com:51820.",
+            "visibleWhen": { "provider": ["IPSEC", "OPENVPN", "WIREGUARD"] }
+          },
+          "protocol": {
+            "type": "string", "title": "Protocol", "enum": ["UDP", "TCP"], "default": "UDP",
+            "description": "OpenVPN only. TCP lets this node open a real reachability socket to the port.",
+            "visibleWhen": { "provider": ["OPENVPN"] }
+          },
+          "ikeVersion": {
+            "type": "string", "title": "IKE version", "enum": ["IKEV2", "IKEV1"], "default": "IKEV2",
+            "visibleWhen": { "provider": ["IPSEC"] }
+          },
+          "authentication": {
+            "type": "string", "title": "Authentication", "enum": ["PSK", "CERT"], "default": "PSK",
+            "visibleWhen": { "provider": ["IPSEC"] }
+          },
+          "localCidr": { "type": "string", "title": "Local CIDR", "visibleWhen": { "provider": ["IPSEC", "OPENVPN", "WIREGUARD"] } },
+          "remoteCidr": { "type": "string", "title": "Remote CIDR", "visibleWhen": { "provider": ["IPSEC", "OPENVPN", "WIREGUARD"] } },
+          "allowedIps": { "type": "string", "title": "Allowed IPs", "description": "WireGuard, e.g. 10.0.0.0/8.", "visibleWhen": { "provider": ["WIREGUARD"] } },
+          "persistentKeepalive": { "type": "integer", "title": "Persistent keepalive (s)", "visibleWhen": { "provider": ["WIREGUARD"] } },
+
+          "waitUntilConnected": { "type": "boolean", "title": "Wait until connected", "default": false },
+          "timeoutSeconds": { "type": "integer", "title": "Timeout (seconds)", "default": 300, "description": "For a wait. On expiry the node fails with VPN_CONNECTION_TIMEOUT." },
+          "pollIntervalSeconds": { "type": "integer", "title": "Poll interval (seconds)", "default": 10 },
+
+          "outputVariable": { "type": "string", "title": "Output variable", "default": "vpnResult", "description": "Subsequent nodes read ${vpnResult.status}, ${vpnResult.connectionId}, etc." }
+        }
+      }
+    }
+  ],
+
+  "credentials": {
+    "required": false,
+    "description": "Credentials come from the secret store and only from there — there is no field on the node that holds a key. A connection profile names a stored credential whose parts are the secrets <profile>.<name>. AWS: accessKeyId, secretKey, optional sessionToken. Azure/GCP: accessToken (an OAuth bearer token the environment already mints). IPsec: presharedKey (or certificate/privateKey). OpenVPN: caCertificate, clientCertificate, clientKey, username, password. WireGuard: privateKey, optional presharedKey.",
+    "byProvider": {
+      "AWS": ["accessKeyId", "secretKey", "sessionToken"],
+      "AZURE": ["accessToken"],
+      "GCP": ["accessToken"],
+      "IPSEC": ["presharedKey", "certificate", "privateKey"],
+      "OPENVPN": ["caCertificate", "clientCertificate", "clientKey", "username", "password"],
+      "WIREGUARD": ["privateKey", "presharedKey"]
+    }
+  },
+
+  "dependencies": [],
+
+  "permissions": {
+    "network": ["ec2.*.amazonaws.com", "management.azure.com", "compute.googleapis.com"],
+    "secrets": ["vpn.", "aws.", "azure.", "gcp."],
+    "notes": "Cloud providers call their control-plane APIs through the engine's HTTP client, so they are bound by this plugin's allowed hosts — grant the specific host you use (e.g. ec2.ap-south-1.amazonaws.com) with Plugins → the version → Edit. The 'network' list here is a suggestion, not a grant. The generic providers (IPsec/OpenVPN/WireGuard) open a TCP reachability socket to the configured endpoint for OpenVPN-over-TCP only; that socket is not bound by the allowed-hosts guard, which covers the HTTP client. This plugin does not bring tunnels up and never runs a privileged VPN client."
+  },
+
+  "settings": {}
+}

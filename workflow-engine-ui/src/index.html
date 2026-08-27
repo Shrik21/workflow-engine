@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>OrchPilot Workflow Engine</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Author, execute and monitor workflows, and manage the runtime plugins that extend them."
+    />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <!--
+      No web font is fetched at runtime. This is an on-premise operations console and it must render
+      correctly with no outbound network access, so Raleway is used when it is available locally and a
+      system font stack carries the rest. To pin the brand face exactly, drop Raleway woff2 files into
+      public/fonts and add an @font-face rule to src/styles/_tokens.scss.
+    -->
+
+    <!--
+      Where the engine's REST API lives.
+
+      Leave this commented out for the two normal setups, both of which are same-origin and need no
+      configuration:
+        - npm start, where the dev server proxies /api to the engine (proxy.conf.json)
+        - the Docker image, where nginx serves this app and proxies /api to the engine
+
+      Uncomment and set it to call a Spring Boot backend on another origin directly, for example when
+      running `ng serve` without the proxy or serving this app from a static host:
+
+          <script>window.WORKFLOW_API_BASE_URL = 'http://localhost:8080';</script>
+
+      That path is cross-origin, so the engine must also list this page's origin in
+      workflow.engine.security.allowed-origins, or the browser blocks every request before the engine
+      sees it. Setting it here rather than at build time means one built artifact can be pointed at a
+      different engine without recompiling.
+    -->
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>
