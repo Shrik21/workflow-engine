@@ -11,3 +11,8 @@ docs/
 README.md
 ARCHITECTURE.md
 PLUGIN_DEVELOPMENT.md
+investor-materials/
+workflow-engine-ui/
+plugin-server-ui/
+.env
+.env.*
