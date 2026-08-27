@@ -8,7 +8,9 @@ import { NotificationService } from '../../core/notification.service';
 import { AgoPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { Icon } from '../../shared/ui/icon';
+import { LoadingSkeleton } from '../../shared/ui/loading-skeleton';
 import { Modal } from '../../shared/ui/modal';
+import { PageHeader } from '../../shared/ui/page-header';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { WorkflowExportDialog } from './workflow-export-dialog';
 import { WorkflowImportDialog } from './workflow-import-dialog';
@@ -28,6 +30,8 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
     RouterLink,
     StatusPill,
     EmptyState,
+    LoadingSkeleton,
+    PageHeader,
     AgoPipe,
     Icon,
     Modal,
@@ -36,24 +40,18 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
   ],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Workflows</h1>
-          <p>
-            A workflow is a graph of nodes. Publishing snapshots an immutable version that executions
-            pin, so editing a workflow never changes a run already in flight.
-          </p>
-        </div>
-        <div class="toolbar">
-          @if (session.has('WORKFLOW_CREATE')) {
-            <button class="btn" type="button" (click)="openImport()">
-              <wf-icon name="import" />
-              <span>Import</span>
-            </button>
-          }
-          <a class="btn btn--primary" routerLink="/workflows/new">New workflow</a>
-        </div>
-      </div>
+      <wf-page-header
+        title="Workflows"
+        description="A workflow is a graph of nodes. Publishing snapshots an immutable version that executions pin, so editing a workflow never changes a run already in flight."
+      >
+        @if (session.has('WORKFLOW_CREATE')) {
+          <button class="btn" type="button" (click)="openImport()">
+            <wf-icon name="import" />
+            <span>Import</span>
+          </button>
+        }
+        <a class="btn btn--primary" routerLink="/workflows/new">New workflow</a>
+      </wf-page-header>
 
       <div class="card">
         <div class="card__header">
@@ -84,7 +82,9 @@ import { WorkflowImportDialog } from './workflow-import-dialog';
           </button>
         </div>
 
-        @if (page().content.length === 0 && !loading()) {
+        @if (loading() && page().content.length === 0) {
+          <wf-loading-skeleton variant="table" label="Loading workflows" />
+        } @else if (page().content.length === 0) {
           <wf-empty-state
             heading="No workflows here"
             message="Create one, or clear the filters if you expected to see something."

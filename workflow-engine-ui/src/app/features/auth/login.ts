@@ -21,11 +21,11 @@ import { AuthService } from '../../core/auth/auth.service';
       <div class="auth__panel">
         <div class="auth__brand">
           <span class="auth__mark" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" />
-              <path d="M8 12a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              <circle cx="8" cy="12" r="1.6" fill="currentColor" />
-              <circle cx="16" cy="12" r="1.6" fill="currentColor" />
+            <svg width="36" height="36" viewBox="0 0 512 512">
+              <circle cx="256" cy="256" r="248" fill="#080D17" />
+              <circle cx="256" cy="256" r="148" fill="none" stroke="#3EC9D8" stroke-width="46" />
+              <circle cx="256" cy="256" r="62" fill="#3EC9D8" />
+              <path d="M 400 118 L 330 224 L 316 174 Z" fill="#F0A24B" />
             </svg>
           </span>
           <div>

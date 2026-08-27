@@ -69,8 +69,12 @@ describe('FormNodeConfig', () => {
     return fixture.nativeElement.textContent as string;
   }
 
+  /**
+   * Options of the form picker only. The Assignment select (#assign-type) is a separate control and must
+   * not be mixed into assertions about form names vs ids.
+   */
   function options(): string[] {
-    return Array.from(fixture.nativeElement.querySelectorAll('option')).map((option) =>
+    return Array.from(fixture.nativeElement.querySelectorAll('#form-select option')).map((option) =>
       (option as HTMLOptionElement).textContent!.trim(),
     );
   }

@@ -96,7 +96,26 @@
   --shadow-lg: 0 8px 28px rgba(0, 45, 91, 0.18);
 
   --sidebar-width: 216px;
+  --sidebar-collapsed-width: 64px;
   --topbar-height: 56px;
+  --page-max-width: 1500px;
+
+  // -------------------------------------------------------------- motion
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 280ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  // -------------------------------------------------------------- z-index
+  --z-sidebar: 40;
+  --z-sticky: 50;
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
+  // ------------------------------------------------------------- skeleton
+  --skeleton-base: var(--hl-grey-200);
+  --skeleton-shine: var(--hl-grey-100);
 
   // -------------------------------------------------- execution statuses
   // One colour per status, used by every status pill, timeline dot and canvas badge so that a
@@ -120,4 +139,19 @@
   --category-data: var(--hl-purple);
   --category-ai: var(--hl-rosy);
   --category-general: var(--hl-grey-600);
+
+  // ----------------------------------------------------- notice fills
+  --notice-info-bg: #eef7fb;
+  --notice-warning-bg: #fff8e6;
+  --notice-error-bg: #fdecec;
+  --notice-success-bg: #edf8ee;
+  --btn-primary-hover: #013e7a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+  }
 }

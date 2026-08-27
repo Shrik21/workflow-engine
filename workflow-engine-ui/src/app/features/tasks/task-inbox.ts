@@ -17,6 +17,9 @@ import { NotificationService } from '../../core/notification.service';
 import { DynamicForm } from '../forms/dynamic-form';
 import { AgoPipe, ShortIdPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { Icon } from '../../shared/ui/icon';
+import { LoadingSkeleton } from '../../shared/ui/loading-skeleton';
+import { PageHeader } from '../../shared/ui/page-header';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { ExternalLinkPanel } from './external-link-panel';
 
@@ -43,35 +46,31 @@ const STATUS_FILTERS: { key: string; label: string; statuses: TaskStatus[] }[] =
  * <p>The form is rendered by {@link DynamicForm}, the same component the designer previews with. That is the
  * reason Preview is worth anything: the author checks their work against what the user will actually see.
  */
-import { Icon } from '../../shared/ui/icon';
 @Component({
   selector: 'wf-task-inbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, 
+  imports: [
+    Icon,
     RouterLink,
     DynamicForm,
     StatusPill,
     EmptyState,
+    LoadingSkeleton,
+    PageHeader,
     AgoPipe,
     ShortIdPipe,
     ExternalLinkPanel,
   ],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Tasks</h1>
-          <p>
-            Work a workflow has raised for a person. A waiting task holds no thread, so it can stay open for as
-            long as it needs to and survives a restart.
-          </p>
-        </div>
-        <div class="toolbar">
-          <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="reload()">
-            <wf-icon name="refresh" /><span>Refresh</span>
-          </button>
-        </div>
-      </div>
+      <wf-page-header
+        title="Tasks"
+        description="Work a workflow has raised for a person. A waiting task holds no thread, so it can stay open for as long as it needs to and survives a restart."
+      >
+        <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="reload()">
+          <wf-icon name="refresh" /><span>Refresh</span>
+        </button>
+      </wf-page-header>
 
       <div class="tabs">
         @for (tab of buckets(); track tab.key) {
@@ -110,7 +109,11 @@ import { Icon } from '../../shared/ui/icon';
         </div>
       </div>
 
-      @if (tasks().length === 0 && !loading()) {
+      @if (loading() && tasks().length === 0) {
+        <div class="card">
+          <wf-loading-skeleton variant="table" label="Loading tasks" />
+        </div>
+      } @else if (tasks().length === 0) {
         <div class="card">
           <wf-empty-state [heading]="emptyHeading()" [message]="emptyMessage()">
             <a class="btn" routerLink="/workflows">Go to workflows</a>

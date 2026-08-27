@@ -6,6 +6,8 @@ import { FormStatus, FormSummary } from '../../core/models/form.models';
 import { NotificationService } from '../../core/notification.service';
 import { AgoPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { LoadingSkeleton } from '../../shared/ui/loading-skeleton';
+import { PageHeader } from '../../shared/ui/page-header';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
 
@@ -19,21 +21,15 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
 @Component({
   selector: 'wf-form-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, StatusPill, ConfirmDialog, EmptyState, AgoPipe],
+  imports: [RouterLink, StatusPill, ConfirmDialog, EmptyState, LoadingSkeleton, PageHeader, AgoPipe],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Forms</h1>
-          <p>
-            Forms are designed once and referenced by workflow form nodes. Publishing snapshots an immutable
-            version, so editing a form never changes what a task already waiting on it displays.
-          </p>
-        </div>
-        <div class="toolbar">
-          <a class="btn btn--primary" routerLink="/forms/new">New form</a>
-        </div>
-      </div>
+      <wf-page-header
+        title="Forms"
+        description="Forms are designed once and referenced by workflow form nodes. Publishing snapshots an immutable version, so editing a form never changes what a task already waiting on it displays."
+      >
+        <a class="btn btn--primary" routerLink="/forms/new">New form</a>
+      </wf-page-header>
 
       <div class="card">
         <div class="card__header">
@@ -61,7 +57,9 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
           <span class="small muted">{{ page().totalElements }} total</span>
         </div>
 
-        @if (page().content.length === 0 && !loading()) {
+        @if (loading() && page().content.length === 0) {
+          <wf-loading-skeleton variant="table" label="Loading forms" />
+        } @else if (page().content.length === 0) {
           <wf-empty-state
             heading="No forms yet"
             message="Design one, map its fields to workflow variables, then publish it and reference it from a form node."

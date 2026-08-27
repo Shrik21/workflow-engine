@@ -10,6 +10,8 @@ import {
 import { NotificationService } from '../../core/notification.service';
 import { AgoPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { LoadingSkeleton } from '../../shared/ui/loading-skeleton';
+import { PageHeader } from '../../shared/ui/page-header';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { InstallDialog, InstallIntent } from './install-dialog';
 
@@ -36,25 +38,18 @@ type Filter = 'ALL' | 'AVAILABLE' | 'INSTALLED' | 'UPDATES' | 'ATTENTION';
 @Component({
   selector: 'wf-marketplace',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [StatusPill, EmptyState, InstallDialog, AgoPipe, RouterLink],
+  imports: [StatusPill, EmptyState, LoadingSkeleton, PageHeader, InstallDialog, AgoPipe, RouterLink],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Plugins</h1>
-          <p>
-            Node types beyond the four built-ins come from plugins. This engine reads a registry of them and
-            installs on request, verifying each archive against its published checksum before anything loads
-            it.
-          </p>
-        </div>
-        <div class="toolbar">
-          <a class="btn btn--sm" routerLink="/plugins/installed">Local administration</a>
-          <button class="btn btn--sm" type="button" [disabled]="syncing()" (click)="sync()">
-            {{ syncing() ? 'Syncing…' : 'Sync catalogue' }}
-          </button>
-        </div>
-      </div>
+      <wf-page-header
+        title="Plugins"
+        description="Node types beyond the four built-ins come from plugins. This engine reads a registry of them and installs on request, verifying each archive against its published checksum before anything loads it."
+      >
+        <a class="btn btn--sm" routerLink="/plugins/installed">Local administration</a>
+        <button class="btn btn--sm" type="button" [disabled]="syncing()" (click)="sync()">
+          {{ syncing() ? 'Syncing…' : 'Sync catalogue' }}
+        </button>
+      </wf-page-header>
 
       @if (health(); as state) {
         @if (!state.configured) {
@@ -107,12 +102,13 @@ type Filter = 'ALL' | 'AVAILABLE' | 'INSTALLED' | 'UPDATES' | 'ATTENTION';
         />
       </div>
 
-      @if (visible().length === 0) {
+      @if (loading() && visible().length === 0) {
         <div class="card">
-          <wf-empty-state
-            [heading]="loading() ? 'Loading the catalogue…' : 'Nothing to show'"
-            [message]="emptyMessage()"
-          />
+          <wf-loading-skeleton variant="page" label="Loading the plugin catalogue" />
+        </div>
+      } @else if (visible().length === 0) {
+        <div class="card">
+          <wf-empty-state heading="Nothing to show" [message]="emptyMessage()" />
         </div>
       }
 

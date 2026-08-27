@@ -5,6 +5,8 @@ import { NotificationService } from '../../core/notification.service';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { AgoPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { Icon } from '../../shared/ui/icon';
+import { PageHeader } from '../../shared/ui/page-header';
 import { Modal } from '../../shared/ui/modal';
 import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
 
@@ -15,34 +17,28 @@ import { ConfirmDialog, ConfirmRequest } from '../../shared/ui/confirm-dialog';
  * scopes and read counts, and the value field is write-only. That is worth being explicit about in the
  * interface itself, so nobody goes looking for a reveal button that should not exist.
  */
-import { Icon } from '../../shared/ui/icon';
 @Component({
   selector: 'wf-secret-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, Modal, ConfirmDialog, EmptyState, AgoPipe],
+  imports: [Icon, Modal, ConfirmDialog, EmptyState, PageHeader, AgoPipe],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Secrets</h1>
-          <p>
-            Credentials plugins use. A workflow references a secret by name; the engine decrypts it at
-            execution time, checks it against the plugin's granted scopes, records the access and keeps
-            the value out of logs and execution records.
-          </p>
-        </div>
-        <div class="toolbar">
-          <button class="btn btn--sm" type="button" (click)="load()"><wf-icon name="refresh" /><span>Refresh</span></button>
-          <button
-            class="btn btn--primary"
-            type="button"
-            [disabled]="!session.has('SECRET_MANAGE')"
-            (click)="startCreate()"
-          >
-            Add secret
-          </button>
-        </div>
-      </div>
+      <wf-page-header
+        title="Secrets"
+        description="Credentials plugins use. A workflow references a secret by name; the engine decrypts it at execution time, checks it against the plugin's granted scopes, records the access and keeps the value out of logs and execution records."
+      >
+        <button class="btn btn--sm" type="button" (click)="load()">
+          <wf-icon name="refresh" /><span>Refresh</span>
+        </button>
+        <button
+          class="btn btn--primary"
+          type="button"
+          [disabled]="!session.has('SECRET_MANAGE')"
+          (click)="startCreate()"
+        >
+          Add secret
+        </button>
+      </wf-page-header>
 
       @if (!session.has('SECRET_VIEW')) {
         <div class="notice notice--warning" style="margin-bottom: var(--space-4)">

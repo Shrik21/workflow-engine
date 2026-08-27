@@ -27,6 +27,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         padding: var(--space-7) var(--space-5);
         text-align: center;
         color: var(--text-muted);
+        border: 1px dashed var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
       }
 
       h4 {

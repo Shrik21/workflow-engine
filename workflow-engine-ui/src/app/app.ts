@@ -7,6 +7,7 @@ import { TaskApiService } from './core/api/task-api.service';
 import { AuthStateService } from './core/auth/auth-state.service';
 import { AuthService } from './core/auth/auth.service';
 import { Permission } from './core/auth/auth.models';
+import { Icon } from './shared/ui/icon';
 import { ToastHost } from './shared/ui/toast-host';
 
 interface NavItem {
@@ -15,6 +16,25 @@ interface NavItem {
   exact: boolean;
   /** Hidden unless the user holds one of these. Empty means visible to anyone signed in. */
   permissions: Permission[];
+  icon:
+    | 'workflows'
+    | 'executions'
+    | 'tasks'
+    | 'forms'
+    | 'nodes'
+    | 'plugins'
+    | 'secrets'
+    | 'settings'
+    | 'events'
+    | 'users'
+    | 'groups';
+  /** Visual group label in the sidebar. Presentation only — does not change guards. */
+  group: 'Build' | 'Run' | 'Extend' | 'Settings' | 'Admin';
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
 }
 
 /**
@@ -30,13 +50,35 @@ interface NavItem {
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost, Icon],
   template: `
     @if (chromeless()) {
       <router-outlet />
     } @else {
-      <div class="shell">
-        <aside class="sidebar">
+      <div class="shell" [class.shell--nav-open]="mobileNavOpen()">
+        <a class="skip-link" href="#main-content">Skip to content</a>
+
+        <button
+          class="nav-toggle"
+          type="button"
+          [attr.aria-expanded]="mobileNavOpen()"
+          aria-controls="app-sidebar"
+          (click)="mobileNavOpen.set(!mobileNavOpen())"
+        >
+          <wf-icon [name]="mobileNavOpen() ? 'close' : 'menu'" [size]="18" />
+          <span class="sr-only">{{ mobileNavOpen() ? 'Close navigation' : 'Open navigation' }}</span>
+        </button>
+
+        @if (mobileNavOpen()) {
+          <button
+            class="nav-backdrop"
+            type="button"
+            aria-label="Close navigation"
+            (click)="mobileNavOpen.set(false)"
+          ></button>
+        }
+
+        <aside class="sidebar" id="app-sidebar" aria-label="Primary">
           <div class="brand">
             <span class="brand__mark" aria-hidden="true">
               <svg width="30" height="30" viewBox="0 0 512 512">
@@ -52,36 +94,44 @@ interface NavItem {
             </span>
           </div>
 
-          <nav class="nav">
-            @for (item of visibleNavigation(); track item.path) {
-              <a
-                class="nav__link"
-                [routerLink]="item.path"
-                routerLinkActive="nav__link--active"
-                [routerLinkActiveOptions]="{ exact: item.exact }"
-              >
-                <span>{{ item.label }}</span>
-                @if (item.path === '/tasks' && waitingCount() > 0) {
-                  <span class="nav__badge" [attr.aria-label]="waitingCount() + ' tasks waiting for you'">
-                    {{ waitingCount() }}
-                  </span>
-                }
-                @if (item.path === '/nodes' && pluginNodeCount() > 0) {
-                  <span class="nav__badge nav__badge--quiet">{{ pluginNodeCount() }}</span>
-                }
-                @if (item.path === '/plugins' && updatableCount() > 0) {
-                  <span
-                    class="nav__badge nav__badge--quiet"
-                    [attr.aria-label]="updatableCount() + ' plugins have a newer version'"
-                    >{{ updatableCount() }}</span
+          <nav class="nav" aria-label="Application">
+            @for (group of visibleGroups(); track group.label) {
+              <div class="nav__group">
+                <p class="nav__group-label">{{ group.label }}</p>
+                @for (item of group.items; track item.path) {
+                  <a
+                    class="nav__link"
+                    [routerLink]="item.path"
+                    routerLinkActive="nav__link--active"
+                    [routerLinkActiveOptions]="{ exact: item.exact }"
+                    [attr.title]="item.label"
+                    (click)="mobileNavOpen.set(false)"
                   >
+                    <wf-icon class="nav__icon" [name]="item.icon" [size]="16" />
+                    <span class="nav__label">{{ item.label }}</span>
+                    @if (item.path === '/tasks' && waitingCount() > 0) {
+                      <span class="nav__badge" [attr.aria-label]="waitingCount() + ' tasks waiting for you'">
+                        {{ waitingCount() }}
+                      </span>
+                    }
+                    @if (item.path === '/nodes' && pluginNodeCount() > 0) {
+                      <span class="nav__badge nav__badge--quiet">{{ pluginNodeCount() }}</span>
+                    }
+                    @if (item.path === '/plugins' && updatableCount() > 0) {
+                      <span
+                        class="nav__badge nav__badge--quiet"
+                        [attr.aria-label]="updatableCount() + ' plugins have a newer version'"
+                        >{{ updatableCount() }}</span
+                      >
+                    }
+                  </a>
                 }
-              </a>
+              </div>
             }
           </nav>
 
           <div class="sidebar__footer">
-            <a class="identity" routerLink="/profile">
+            <a class="identity" routerLink="/profile" (click)="mobileNavOpen.set(false)">
               <span class="identity__avatar" aria-hidden="true">{{ initials() }}</span>
               <span class="identity__text">
                 <span class="identity__name">{{ state.displayName() }}</span>
@@ -92,7 +142,7 @@ interface NavItem {
           </div>
         </aside>
 
-        <main class="content">
+        <main class="content" id="main-content" tabindex="-1">
           <router-outlet />
         </main>
       </div>
@@ -102,6 +152,22 @@ interface NavItem {
   `,
   styles: [
     `
+      .skip-link {
+        position: absolute;
+        left: var(--space-3);
+        top: -40px;
+        z-index: calc(var(--z-toast) + 1);
+        background: var(--hl-white);
+        color: var(--hl-blue);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+      }
+
+      .skip-link:focus {
+        top: var(--space-3);
+      }
+
       .shell {
         display: grid;
         grid-template-columns: var(--sidebar-width) 1fr;
@@ -114,13 +180,14 @@ interface NavItem {
         background: var(--hl-blue);
         color: var(--text-inverse);
         min-height: 0;
+        z-index: var(--z-sidebar);
       }
 
       .brand {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-4) var(--space-4) var(--space-5);
+        padding: var(--space-4) var(--space-4) var(--space-4);
       }
 
       .brand__mark {
@@ -150,26 +217,43 @@ interface NavItem {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        padding: 0 var(--space-2);
+        padding: 0 var(--space-2) var(--space-3);
+        gap: var(--space-3);
+      }
+
+      .nav__group-label {
+        margin: 0 0 var(--space-1);
+        padding: 0 var(--space-3);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
       }
 
       .nav__link {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: 9px var(--space-3);
+        padding: 8px var(--space-3);
         border-radius: var(--radius-sm);
         color: rgba(255, 255, 255, 0.82);
         font-family: var(--font-brand);
         font-size: var(--text-md);
         text-decoration: none;
         margin-bottom: 2px;
+        transition: background var(--motion-fast) var(--ease-standard);
       }
 
       .nav__link:hover {
         background: rgba(255, 255, 255, 0.09);
         color: var(--text-inverse);
         text-decoration: none;
+      }
+
+      .nav__link:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
       }
 
       .nav__link--active {
@@ -179,8 +263,17 @@ interface NavItem {
         box-shadow: inset 3px 0 0 var(--hl-green);
       }
 
-      .nav__link span:first-child {
+      .nav__icon {
+        flex: none;
+        opacity: 0.9;
+      }
+
+      .nav__label {
         flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .nav__badge {
@@ -219,6 +312,11 @@ interface NavItem {
       .identity:hover {
         background: rgba(255, 255, 255, 0.13);
         text-decoration: none;
+      }
+
+      .identity:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
       }
 
       .identity__avatar {
@@ -272,6 +370,11 @@ interface NavItem {
         color: var(--text-inverse);
       }
 
+      .signout:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
       .content {
         min-width: 0;
         min-height: 0;
@@ -279,19 +382,68 @@ interface NavItem {
         background: var(--surface-sunken);
       }
 
+      .content:focus {
+        outline: none;
+      }
+
+      .nav-toggle,
+      .nav-backdrop {
+        display: none;
+      }
+
       @media (max-width: 900px) {
         .shell {
-          grid-template-columns: 64px 1fr;
+          grid-template-columns: 1fr;
         }
 
-        .brand__text,
-        .identity__text {
-          display: none;
-        }
-
-        .nav__link {
+        .nav-toggle {
+          display: inline-flex;
+          align-items: center;
           justify-content: center;
-          font-size: var(--text-xs);
+          position: fixed;
+          top: var(--space-3);
+          left: var(--space-3);
+          z-index: calc(var(--z-sidebar) + 2);
+          width: 40px;
+          height: 40px;
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background: var(--surface);
+          color: var(--hl-blue);
+          box-shadow: var(--shadow-sm);
+          cursor: pointer;
+        }
+
+        .nav-toggle:focus-visible {
+          outline: none;
+          box-shadow: var(--focus-ring);
+        }
+
+        .nav-backdrop {
+          display: block;
+          position: fixed;
+          inset: 0;
+          z-index: calc(var(--z-sidebar) - 1);
+          border: 0;
+          background: rgba(0, 45, 91, 0.4);
+          cursor: pointer;
+        }
+
+        .sidebar {
+          position: fixed;
+          inset: 0 auto 0 0;
+          width: min(280px, 86vw);
+          transform: translateX(-105%);
+          transition: transform var(--motion-base) var(--ease-standard);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .shell--nav-open .sidebar {
+          transform: translateX(0);
+        }
+
+        .content {
+          padding-top: 56px;
         }
       }
     `,
@@ -299,31 +451,58 @@ interface NavItem {
 })
 export class App {
   private static readonly NAVIGATION: NavItem[] = [
-    { path: '/workflows', label: 'Workflows', exact: false, permissions: ['WORKFLOW_VIEW'] },
-    { path: '/executions', label: 'Executions', exact: false, permissions: ['EXECUTION_VIEW'] },
-    { path: '/tasks', label: 'Tasks', exact: true, permissions: ['TASK_VIEW', 'TASK_VIEW_ALL'] },
-    { path: '/forms', label: 'Forms', exact: false, permissions: ['WORKFLOW_VIEW'] },
-    { path: '/nodes', label: 'Node types', exact: true, permissions: [] },
-    { path: '/plugins', label: 'Plugins', exact: true, permissions: ['PLUGIN_VIEW'] },
-    { path: '/secrets', label: 'Secrets', exact: true, permissions: ['SECRET_VIEW'] },
-    { path: '/settings/ai-providers', label: 'AI Providers', exact: true, permissions: ['AI_PROVIDER_VIEW'] },
-    { path: '/settings/ai-usage', label: 'AI Usage', exact: true, permissions: ['AI_PROVIDER_VIEW'] },
+    { path: '/workflows', label: 'Workflows', exact: false, permissions: ['WORKFLOW_VIEW'], icon: 'workflows', group: 'Build' },
+    { path: '/forms', label: 'Forms', exact: false, permissions: ['WORKFLOW_VIEW'], icon: 'forms', group: 'Build' },
+    { path: '/nodes', label: 'Node types', exact: true, permissions: [], icon: 'nodes', group: 'Build' },
+    { path: '/executions', label: 'Executions', exact: false, permissions: ['EXECUTION_VIEW'], icon: 'executions', group: 'Run' },
+    { path: '/tasks', label: 'Tasks', exact: true, permissions: ['TASK_VIEW', 'TASK_VIEW_ALL'], icon: 'tasks', group: 'Run' },
+    { path: '/events', label: 'Events', exact: true, permissions: ['EVENT_EMIT'], icon: 'events', group: 'Run' },
+    { path: '/plugins', label: 'Plugins', exact: true, permissions: ['PLUGIN_VIEW'], icon: 'plugins', group: 'Extend' },
+    { path: '/secrets', label: 'Secrets', exact: true, permissions: ['SECRET_VIEW'], icon: 'secrets', group: 'Extend' },
+    {
+      path: '/settings/ai-providers',
+      label: 'AI Providers',
+      exact: true,
+      permissions: ['AI_PROVIDER_VIEW'],
+      icon: 'settings',
+      group: 'Settings',
+    },
+    {
+      path: '/settings/ai-usage',
+      label: 'AI Usage',
+      exact: true,
+      permissions: ['AI_PROVIDER_VIEW'],
+      icon: 'settings',
+      group: 'Settings',
+    },
     // Not `exact`, so the entry stays highlighted on /settings/ai/claude-cli and its future siblings.
     {
       path: '/settings/ai',
       label: 'AI Configuration',
       exact: false,
       permissions: ['AI_CLI_VIEW'],
+      icon: 'settings',
+      group: 'Settings',
     },
     {
       path: '/settings/storage',
       label: 'File Storage',
       exact: true,
       permissions: ['WORKFLOW_STORAGE_SETTINGS_VIEW'],
+      icon: 'settings',
+      group: 'Settings',
     },
-    { path: '/events', label: 'Events', exact: true, permissions: ['EVENT_EMIT'] },
-    { path: '/admin/users', label: 'Users', exact: true, permissions: ['USER_VIEW'] },
-    { path: '/admin/groups', label: 'Groups', exact: true, permissions: ['USER_VIEW'] },
+    { path: '/admin/users', label: 'Users', exact: true, permissions: ['USER_VIEW'], icon: 'users', group: 'Admin' },
+    // Visibility unchanged: still USER_VIEW. Route still requires ADMIN — flagged for separate review.
+    { path: '/admin/groups', label: 'Groups', exact: true, permissions: ['USER_VIEW'], icon: 'groups', group: 'Admin' },
+  ];
+
+  private static readonly GROUP_ORDER: NavItem['group'][] = [
+    'Build',
+    'Run',
+    'Extend',
+    'Settings',
+    'Admin',
   ];
 
   protected readonly state = inject(AuthStateService);
@@ -335,6 +514,7 @@ export class App {
   private readonly router = inject(Router);
 
   protected readonly waitingCount = signal(0);
+  protected readonly mobileNavOpen = signal(false);
   private readonly currentUrl = signal(this.router.url);
 
   /** Sign-in, registration and the public form render without the shell. */
@@ -350,11 +530,15 @@ export class App {
     );
   });
 
-  protected readonly visibleNavigation = computed(() =>
-    App.NAVIGATION.filter(
+  protected readonly visibleGroups = computed((): NavGroup[] => {
+    const visible = App.NAVIGATION.filter(
       (item) => item.permissions.length === 0 || this.state.hasAny(...item.permissions),
-    ),
-  );
+    );
+    return App.GROUP_ORDER.map((label) => ({
+      label,
+      items: visible.filter((item) => item.group === label),
+    })).filter((group) => group.items.length > 0);
+  });
 
   protected readonly pluginNodeCount = computed(() => this.catalog.pluginEntries().length);
 
@@ -380,6 +564,7 @@ export class App {
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         this.currentUrl.set(event.urlAfterRedirects);
+        this.mobileNavOpen.set(false);
         // Loaded lazily rather than at construction: an unauthenticated visitor on the sign-in page has no
         // token, and requesting the catalogue would produce a 401 before they have even signed in.
         if (this.state.isAuthenticated()) {
