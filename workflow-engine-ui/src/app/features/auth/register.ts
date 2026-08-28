@@ -3,6 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { NotificationService } from '../../core/notification.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { policyViolations, scorePassword } from '../../core/auth/auth.models';
+import { BrandMark } from '../../shared/ui/brand-mark';
+import { ThemeToggle } from '../../shared/ui/theme-toggle';
 
 /**
  * The registration screen.
@@ -18,18 +20,29 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
 @Component({
   selector: 'wf-register',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, BrandMark, ThemeToggle],
   template: `
     <div class="auth">
+      <div class="auth__theme">
+        <wf-theme-toggle />
+      </div>
       <div class="auth__panel">
-        <h1>Create an account</h1>
+        <div class="auth__brand">
+          <wf-brand-mark [size]="36" />
+          <div>
+            <h1>OrchPilot</h1>
+            <p>Workflow Platform</p>
+          </div>
+        </div>
+
+        <h2>Create an account</h2>
         <p class="auth__intro small muted">
           New accounts can build and run their own workflows. Plugin management, secrets and user
           administration are granted by an administrator.
         </p>
 
         @if (error(); as message) {
-          <div class="notice notice--error" role="alert">
+          <div class="notice notice--error" role="alert" id="register-error">
             <strong>{{ message }}</strong>
             @if (details().length > 0) {
               <ul>
@@ -49,7 +62,7 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
         }
 
         <form (submit)="submit($event)" novalidate>
-          <div class="grid-2">
+          <div class="grid-2 auth__names">
             <div class="field">
               <label class="field__label" for="firstName">First name</label>
               <input
@@ -57,6 +70,7 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
                 type="text"
                 autocomplete="given-name"
                 [value]="firstName()"
+                [disabled]="busy() || !policy().registrationEnabled"
                 (input)="firstName.set($any($event.target).value)"
               />
             </div>
@@ -67,6 +81,7 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
                 type="text"
                 autocomplete="family-name"
                 [value]="lastName()"
+                [disabled]="busy() || !policy().registrationEnabled"
                 (input)="lastName.set($any($event.target).value)"
               />
             </div>
@@ -83,7 +98,9 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
               autocapitalize="none"
               spellcheck="false"
               required
+              [attr.aria-invalid]="error() ? 'true' : null"
               [value]="username()"
+              [disabled]="busy() || !policy().registrationEnabled"
               (input)="username.set($any($event.target).value)"
             />
             <p class="field__hint">Letters, digits, dots, dashes and underscores.</p>
@@ -101,6 +118,7 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
               spellcheck="false"
               required
               [value]="email()"
+              [disabled]="busy() || !policy().registrationEnabled"
               (input)="email.set($any($event.target).value)"
             />
           </div>
@@ -116,12 +134,15 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
                 autocomplete="new-password"
                 required
                 [value]="password()"
+                [disabled]="busy() || !policy().registrationEnabled"
                 (input)="password.set($any($event.target).value)"
               />
               <button
                 class="password__toggle"
                 type="button"
                 [attr.aria-label]="revealed() ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="revealed()"
+                [disabled]="busy() || !policy().registrationEnabled"
                 (click)="revealed.set(!revealed())"
               >
                 {{ revealed() ? 'Hide' : 'Show' }}
@@ -159,10 +180,11 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
               autocomplete="new-password"
               required
               [value]="confirm()"
+              [disabled]="busy() || !policy().registrationEnabled"
               (input)="confirm.set($any($event.target).value)"
             />
             @if (confirm().length > 0 && !passwordsMatch()) {
-              <p class="field__error">The passwords do not match.</p>
+              <p class="field__error" role="alert">The passwords do not match.</p>
             }
           </div>
 
@@ -185,12 +207,19 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
   styles: [
     `
       .auth {
+        position: relative;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: var(--space-5);
-        background: linear-gradient(160deg, var(--hl-blue) 0%, #001b37 100%);
+        background: linear-gradient(160deg, var(--sidebar-bg) 0%, #001b37 100%);
+      }
+
+      .auth__theme {
+        position: absolute;
+        top: var(--space-4);
+        right: var(--space-4);
       }
 
       .auth__panel {
@@ -202,13 +231,36 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
         padding: var(--space-6);
       }
 
-      h1 {
+      .auth__brand {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-5);
+      }
+
+      .auth__brand h1 {
         font-size: var(--text-xl);
-        margin-bottom: var(--space-2);
+        margin: 0;
+        line-height: 1.1;
+      }
+
+      .auth__brand p {
+        margin: 0;
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+      }
+
+      h2 {
+        font-size: var(--text-lg);
+        margin: 0 0 var(--space-2);
       }
 
       .auth__intro {
         margin: 0 0 var(--space-4);
+      }
+
+      .auth__names {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       }
 
       .password {
@@ -226,6 +278,21 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
         font-family: var(--font-body);
         font-size: var(--text-sm);
         color: var(--text-muted);
+      }
+
+      .password__toggle:hover:not(:disabled) {
+        background: var(--control-hover);
+        color: var(--text);
+      }
+
+      .password__toggle:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .password__toggle:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .strength {
@@ -292,6 +359,7 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
         width: 100%;
         justify-content: center;
         margin-top: var(--space-2);
+        min-height: 38px;
       }
 
       .auth__footer {
@@ -303,6 +371,17 @@ import { policyViolations, scorePassword } from '../../core/auth/auth.models';
         margin: var(--space-2) 0 0;
         padding-left: 18px;
         font-size: var(--text-sm);
+      }
+
+      @media (max-width: 480px) {
+        .auth {
+          padding: var(--space-4);
+          align-items: flex-start;
+        }
+
+        .auth__panel {
+          padding: var(--space-5);
+        }
       }
     `,
   ],

@@ -1,0 +1,37 @@
+Product evidence
+- Repository: local checkout of Workflow-OrchPilot/workflow-engine, inspected 2026-08-26.
+- README.md, ARCHITECTURE.md, SECURITY.md, AI_AGENT_NODE.md, AI_CLI_CONFIGURATION.md,
+  WORKFLOW_INSTANCE_LIFECYCLE.md, WORKFLOW_PORTABILITY.md, PLUGIN_OPERATION_FRAMEWORK.md.
+- Source inventory (local): 650 Java main-source files / 80,084 lines; 141 Java test files / 21,783 lines;
+  73 core-engine test classes; 160 Spring REST handler annotations; 13 plugin modules;
+  118 Angular source files / 28,595 lines. Counts include source only, exclude target/node_modules.
+- Screenshots captured from the locally running authenticated application in the Codex in-app browser.
+
+Market and competitor sources (accessed 2026-08-26)
+- Gartner, Forecast Analysis: Business Orchestration and Automation Technologies, Worldwide:
+  https://www.gartner.com/en/documents/6530402
+  Claim used: consolidated BOAT spending nearly $7B in 2025 and projected above $21B by 2029.
+- Gartner, Market Opportunity Map: Hyperautomation via Process-Agnostic Software, Worldwide:
+  https://www.gartner.com/en/documents/6165623
+  Claim used: hyperautomation process-agnostic software projected at $119.2B by 2028, 15.9% CAGR.
+- Gartner newsroom, enterprise network automation:
+  https://www.gartner.com/en/newsroom/press-releases/2024-09-18-gartner-says-30-percent-of-enterprises-will-automate-more-than-half-of-their-network-activities-by-2026
+  Claim used: 30% of enterprises forecast to automate more than half of network activities by 2026.
+- Camunda platform:
+  https://camunda.com/platform/
+  Claims used: people + agents + systems orchestration, BPMN portability, self-managed/SaaS,
+  governance and 700+ enterprise customers.
+- Temporal platform:
+  https://temporal.io/
+  Claims used: durable execution, state capture, retries/recovery, open-source/self-hosted or cloud.
+- n8n pricing and platform:
+  https://n8n.io/pricing/
+  Claims used: execution-oriented pricing and self-hosted enterprise/business positioning.
+- n8n Business plan announcement:
+  https://support.n8n.io/article/what-is-the-n-8-n-business-plan-that-launched-in-august-2025
+  Claims used: Git version control, SSO, environments, queue-mode scaling in self-hosted Business.
+
+Important qualification
+- Pricing, GTM, milestones, and financial targets in the materials are recommendations, not current company facts.
+- No customer traction, revenue, funding ask, founder biography, or proven ROI was supplied; placeholders and
+  validation milestones are used instead of invented claims.

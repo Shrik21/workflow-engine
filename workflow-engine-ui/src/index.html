@@ -9,7 +9,26 @@
       name="description"
       content="Author, execute and monitor workflows, and manage the runtime plugins that extend them."
     />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Apply the stored theme before first paint to avoid a light flash when dark is preferred.
+      (function () {
+        try {
+          var preference = localStorage.getItem('orchpilot.theme') || 'dark';
+          var dark =
+            preference === 'dark' ||
+            (preference === 'system' &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="alternate icon" href="favicon.ico" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { BrandMark } from '../../shared/ui/brand-mark';
+import { ThemeToggle } from '../../shared/ui/theme-toggle';
 
 /**
  * The sign-in screen.
@@ -15,19 +17,15 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'wf-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, BrandMark, ThemeToggle],
   template: `
     <div class="auth">
+      <div class="auth__theme">
+        <wf-theme-toggle />
+      </div>
       <div class="auth__panel">
         <div class="auth__brand">
-          <span class="auth__mark" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8" />
-              <path d="M8 12a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              <circle cx="8" cy="12" r="1.6" fill="currentColor" />
-              <circle cx="16" cy="12" r="1.6" fill="currentColor" />
-            </svg>
-          </span>
+          <wf-brand-mark [size]="36" />
           <div>
             <h1>OrchPilot</h1>
             <p>Workflow Platform</p>
@@ -37,7 +35,7 @@ import { AuthService } from '../../core/auth/auth.service';
         <h2>Sign in to your account</h2>
 
         @if (error(); as message) {
-          <div class="notice notice--error" role="alert">
+          <div class="notice notice--error" role="alert" id="login-error">
             <strong>{{ message }}</strong>
             @if (details().length > 0) {
               <ul>
@@ -60,6 +58,8 @@ import { AuthService } from '../../core/auth/auth.service';
               autocapitalize="none"
               spellcheck="false"
               required
+              [attr.aria-invalid]="error() ? 'true' : null"
+              [attr.aria-describedby]="error() ? 'login-error' : null"
               [value]="username()"
               [disabled]="busy()"
               (input)="username.set($any($event.target).value)"
@@ -75,6 +75,7 @@ import { AuthService } from '../../core/auth/auth.service';
                 [type]="revealed() ? 'text' : 'password'"
                 autocomplete="current-password"
                 required
+                [attr.aria-invalid]="error() ? 'true' : null"
                 [value]="password()"
                 [disabled]="busy()"
                 (input)="password.set($any($event.target).value)"
@@ -84,6 +85,7 @@ import { AuthService } from '../../core/auth/auth.service';
                 type="button"
                 [attr.aria-label]="revealed() ? 'Hide password' : 'Show password'"
                 [attr.aria-pressed]="revealed()"
+                [disabled]="busy()"
                 (click)="revealed.set(!revealed())"
               >
                 {{ revealed() ? 'Hide' : 'Show' }}
@@ -115,13 +117,19 @@ import { AuthService } from '../../core/auth/auth.service';
   styles: [
     `
       .auth {
+        position: relative;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: var(--space-5);
-        /* The brand blue, so the sign-in page is unmistakably part of the platform. */
-        background: linear-gradient(160deg, var(--hl-blue) 0%, #001b37 100%);
+        background: linear-gradient(160deg, var(--sidebar-bg) 0%, #001b37 100%);
+      }
+
+      .auth__theme {
+        position: absolute;
+        top: var(--space-4);
+        right: var(--space-4);
       }
 
       .auth__panel {
@@ -138,11 +146,6 @@ import { AuthService } from '../../core/auth/auth.service';
         align-items: center;
         gap: var(--space-3);
         margin-bottom: var(--space-5);
-      }
-
-      .auth__mark {
-        color: var(--hl-green);
-        display: inline-flex;
       }
 
       .auth__brand h1 {
@@ -179,15 +182,26 @@ import { AuthService } from '../../core/auth/auth.service';
         color: var(--text-muted);
       }
 
-      .password__toggle:hover {
-        background: var(--hl-grey-100);
+      .password__toggle:hover:not(:disabled) {
+        background: var(--control-hover);
         color: var(--text);
+      }
+
+      .password__toggle:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .password__toggle:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .auth__submit {
         width: 100%;
         justify-content: center;
         margin-top: var(--space-2);
+        min-height: 38px;
       }
 
       .auth__footer {
@@ -205,6 +219,17 @@ import { AuthService } from '../../core/auth/auth.service';
         margin: var(--space-2) 0 0;
         padding-left: 18px;
         font-size: var(--text-sm);
+      }
+
+      @media (max-width: 480px) {
+        .auth {
+          padding: var(--space-4);
+          align-items: flex-start;
+        }
+
+        .auth__panel {
+          padding: var(--space-5);
+        }
       }
     `,
   ],

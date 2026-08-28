@@ -147,7 +147,7 @@ type Interaction =
               markerHeight="7"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1 L 9 5 L 0 9 z" fill="var(--hl-blue)" />
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="var(--link)" />
             </marker>
           </defs>
 
@@ -400,14 +400,20 @@ type Interaction =
       }
 
       .edge--selected .edge__line {
-        stroke: var(--hl-blue);
-        stroke-width: 2.4;
+        stroke: var(--link);
+        stroke-width: 2.6;
       }
 
       /* An edge pointing at a node that no longer exists. Dashed red so it is obviously broken. */
       .edge--dangling .edge__line {
         stroke: var(--hl-error);
         stroke-dasharray: 5 4;
+        stroke-width: 2;
+      }
+
+      .edge--dangling .edge__label {
+        fill: var(--hl-error);
+        font-weight: 600;
       }
 
       .edge__pending {
@@ -468,12 +474,17 @@ type Interaction =
         border-color: var(--node-color);
         box-shadow:
           0 0 0 2px var(--surface),
-          0 0 0 4px var(--node-color);
+          0 0 0 4px var(--node-color),
+          var(--shadow-lg);
+      }
+
+      .node--selected .node__name {
+        color: var(--link);
       }
 
       .node--unknown .node__body {
         border-style: dashed;
-        background: #fffaf3;
+        background: var(--canvas-unknown-bg);
       }
 
       .node__icon {
@@ -539,7 +550,7 @@ type Interaction =
         top: -9px;
         right: auto;
         left: 6px;
-        background: #fff3e0;
+        background: var(--canvas-warning-bg);
         border-color: var(--hl-orange);
         color: var(--hl-orange-alt);
       }

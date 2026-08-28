@@ -7,6 +7,9 @@ import { ExecutionResponse, ExecutionStatus } from '../../core/models/execution.
 import { WorkflowAuditEntry } from '../../core/models/workflow.models';
 import { AgoPipe, ShortIdPipe } from '../../shared/pipes/format.pipes';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { Icon } from '../../shared/ui/icon';
+import { LoadingSkeleton } from '../../shared/ui/loading-skeleton';
+import { PageHeader } from '../../shared/ui/page-header';
 import { StatusPill } from '../../shared/ui/status-pill';
 
 /**
@@ -16,30 +19,23 @@ import { StatusPill } from '../../shared/ui/status-pill';
  * requests to redraw identical rows, and stopping when nothing is running also makes the refresh
  * indicator meaningful.
  */
-import { Icon } from '../../shared/ui/icon';
 @Component({
   selector: 'wf-execution-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, RouterLink, StatusPill, EmptyState, AgoPipe, ShortIdPipe],
+  imports: [Icon, RouterLink, StatusPill, EmptyState, LoadingSkeleton, PageHeader, AgoPipe, ShortIdPipe],
   template: `
     <div class="page">
-      <div class="page-header">
-        <div class="page-header__text">
-          <h1>Executions</h1>
-          <p>
-            Every run, whatever started it. Synchronous, asynchronous, scheduled, event-driven and
-            manual executions all go through the same engine, so they are all listed here.
-          </p>
-        </div>
-        <div class="toolbar">
-          @if (live()) {
-            <span class="small muted">Refreshing every 4s while runs are in flight</span>
-          }
-          <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="load()">
-            <wf-icon name="refresh" /><span>Refresh</span>
-          </button>
-        </div>
-      </div>
+      <wf-page-header
+        title="Executions"
+        description="Every run, whatever started it. Synchronous, asynchronous, scheduled, event-driven and manual executions all go through the same engine, so they are all listed here."
+      >
+        @if (live()) {
+          <span class="small muted">Refreshing every 4s while runs are in flight</span>
+        }
+        <button class="btn btn--sm" type="button" [disabled]="loading()" (click)="load()">
+          <wf-icon name="refresh" /><span>Refresh</span>
+        </button>
+      </wf-page-header>
 
       @if (workflowId()) {
         <div class="card wf-history">
@@ -59,7 +55,7 @@ import { Icon } from '../../shared/ui/icon';
 
           @if (showHistory()) {
             @if (historyLoading()) {
-              <p class="pad small muted">Loading workflow history…</p>
+              <wf-loading-skeleton variant="table" [rows]="[1, 2, 3]" label="Loading workflow history" />
             } @else if (historyDenied()) {
               <p class="pad small muted">You do not have permission to view this workflow's history.</p>
             } @else if (history().length === 0) {
@@ -96,8 +92,8 @@ import { Icon } from '../../shared/ui/icon';
       }
 
       <div class="card">
-        <div class="card__header">
-          <div class="btn-group">
+        <div class="card__header list-toolbar">
+          <div class="btn-group" role="group" aria-label="Filter by status">
             @for (option of statusOptions; track option.value) {
               <button
                 class="btn btn--sm"
@@ -113,11 +109,14 @@ import { Icon } from '../../shared/ui/icon';
             <span class="tag tag--mono">workflow {{ workflowId() }}</span>
             <a class="btn btn--quiet btn--sm" routerLink="/executions">Clear</a>
           }
-          <span class="spacer"></span>
-          <span class="small muted">{{ page().totalElements }} total</span>
+          <div class="list-toolbar__meta">
+            <span class="small muted">{{ page().totalElements }} total</span>
+          </div>
         </div>
 
-        @if (page().content.length === 0 && !loading()) {
+        @if (loading() && page().content.length === 0) {
+          <wf-loading-skeleton variant="table" label="Loading executions" />
+        } @else if (page().content.length === 0) {
           <wf-empty-state
             heading="No executions"
             message="Run a published workflow, or emit an event that one subscribes to."
@@ -125,6 +124,7 @@ import { Icon } from '../../shared/ui/icon';
             <a class="btn" routerLink="/workflows">Go to workflows</a>
           </wf-empty-state>
         } @else {
+          <div class="table-scroll">
           <table class="table table--clickable">
             <thead>
               <tr>
@@ -169,6 +169,7 @@ import { Icon } from '../../shared/ui/icon';
               }
             </tbody>
           </table>
+          </div>
 
           @if (page().totalPages > 1) {
             <div class="card__footer">

@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  HostListener,
   inject,
   input,
   signal,
@@ -24,6 +25,7 @@ import { KvEditor } from '../../shared/forms/kv-editor';
 import { AgoPipe } from '../../shared/pipes/format.pipes';
 import { Modal } from '../../shared/ui/modal';
 import { StatusPill } from '../../shared/ui/status-pill';
+import { Icon } from '../../shared/ui/icon';
 import { DesignerStore } from './designer.store';
 import { GraphCanvas } from './graph-canvas';
 import { NodePalette } from './node-palette';
@@ -63,93 +65,105 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
     PluginUpgradeDialog,
     ScheduleEditor,
     AgoPipe,
+    Icon,
   ],
   template: `
     <div class="designer">
-      <header class="designer__bar">
-        <button class="btn btn--quiet btn--sm" type="button" (click)="leave()">Back</button>
+      <header class="designer__bar" role="toolbar" aria-label="Workflow actions">
+        <div class="designer__identity">
+          <button class="btn btn--quiet btn--sm" type="button" (click)="leave()">Back</button>
 
-        <input
-          class="designer__name"
-          type="text"
-          aria-label="Workflow name"
-          placeholder="Workflow name"
-          [value]="store.name()"
-          (input)="store.setName($any($event.target).value)"
-        />
+          <input
+            class="designer__name"
+            type="text"
+            aria-label="Workflow name"
+            placeholder="Workflow name"
+            [value]="store.name()"
+            (input)="store.setName($any($event.target).value)"
+          />
 
-        <wf-status-pill [status]="store.status()" />
-        @if (store.publishedVersion() !== null) {
-          <span class="tag" title="The version executions currently pin"
-            >v{{ store.publishedVersion() }} live</span
-          >
-        }
-        @if (store.dirty()) {
-          <span class="tag tag--dirty" title="Not yet saved">unsaved</span>
-        }
+          <wf-status-pill [status]="store.status()" />
+          @if (store.publishedVersion() !== null) {
+            <span class="tag" title="The version executions currently pin"
+              >v{{ store.publishedVersion() }} live</span
+            >
+          }
+          @if (store.dirty()) {
+            <span class="tag tag--dirty" title="Not yet saved">Unsaved changes</span>
+          }
+        </div>
 
-        <span class="spacer"></span>
-
-        <button class="btn btn--sm" type="button" (click)="dialog.set('settings')">
-          Variables and triggers
-        </button>
-        <button class="btn btn--sm" type="button" (click)="dialog.set('json')">JSON</button>
-        <button
-          class="btn btn--sm"
-          type="button"
-          [disabled]="store.isNew()"
-          title="Who created this workflow, and who has changed it since"
-          (click)="openHistory()"
-        >
-          History
-        </button>
-        @if (outdatedPluginNodes() > 0) {
-          <button
-            class="btn btn--sm btn--attention"
-            type="button"
-            title="Nodes here pin a plugin version older than the newest installed one"
-            (click)="dialog.set('plugins')"
-          >
-            Plugin updates
-            <span class="count">{{ outdatedPluginNodes() }}</span>
+        <div class="designer__tools">
+          <button class="btn btn--sm" type="button" (click)="dialog.set('settings')">
+            Variables &amp; triggers
           </button>
-        }
-        <button
-          class="btn btn--sm"
-          type="button"
-          title="Reposition every node by walking the graph from its start node"
-          (click)="store.relayout()"
-        >
-          Auto-layout
-        </button>
-        <button class="btn btn--sm" type="button" [disabled]="busy()" (click)="validate()">
-          Validate
-        </button>
-        <button class="btn btn--primary btn--sm" type="button" [disabled]="busy()" (click)="save()">
-          Save
-        </button>
-        <button
-          class="btn btn--accent btn--sm"
-          type="button"
-          [disabled]="busy() || store.isNew()"
-          title="Validates, then snapshots an immutable version that executions pin"
-          (click)="publish()"
-        >
-          Publish
-        </button>
-        <button
-          class="btn btn--sm"
-          type="button"
-          [disabled]="store.status() !== 'PUBLISHED'"
-          [title]="
-            store.status() === 'PUBLISHED'
-              ? 'Start an execution of the published version'
-              : 'Publish the workflow before running it'
-          "
-          (click)="dialog.set('run')"
-        >
-          Run
-        </button>
+          <button class="btn btn--sm" type="button" (click)="dialog.set('json')">JSON</button>
+          <button
+            class="btn btn--sm"
+            type="button"
+            [disabled]="store.isNew()"
+            title="Who created this workflow, and who has changed it since"
+            (click)="openHistory()"
+          >
+            History
+          </button>
+          @if (outdatedPluginNodes() > 0) {
+            <button
+              class="btn btn--sm btn--attention"
+              type="button"
+              title="Nodes here pin a plugin version older than the newest installed one"
+              (click)="dialog.set('plugins')"
+            >
+              Plugin updates
+              <span class="count">{{ outdatedPluginNodes() }}</span>
+            </button>
+          }
+          <button
+            class="btn btn--sm"
+            type="button"
+            title="Reposition every node by walking the graph from its start node"
+            (click)="store.relayout()"
+          >
+            Auto-layout
+          </button>
+        </div>
+
+        <div class="designer__actions">
+          <button class="btn btn--sm" type="button" [disabled]="busy()" (click)="validate()">
+            Validate
+          </button>
+          <button
+            class="btn btn--primary btn--sm"
+            type="button"
+            [disabled]="busy()"
+            title="Save the editable draft. Does not create a runnable version."
+            (click)="save()"
+          >
+            Save draft
+          </button>
+          <button
+            class="btn btn--accent btn--sm"
+            type="button"
+            [disabled]="busy() || store.isNew()"
+            title="Validates, then snapshots an immutable version that executions pin"
+            (click)="publish()"
+          >
+            Publish
+          </button>
+          <button
+            class="btn btn--sm"
+            type="button"
+            [disabled]="store.status() !== 'PUBLISHED'"
+            [title]="
+              store.status() === 'PUBLISHED'
+                ? 'Start an execution of the published version'
+                : 'Publish the workflow before running it'
+            "
+            (click)="dialog.set('run')"
+          >
+            Run
+          </button>
+        </div>
       </header>
 
       @if (issues().length > 0) {
@@ -183,12 +197,12 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
               aria-label="Show the node palette"
               (click)="togglePalette()"
             >
-              <span aria-hidden="true">☰</span>
+              <wf-icon name="nodes" [size]="16" />
               <span class="designer__reopen-label">Nodes</span>
             </button>
           } @else {
             <div class="designer__side-head">
-              <span class="small muted">Nodes</span>
+              <span class="designer__side-title">Node palette</span>
               <button
                 class="designer__collapse"
                 type="button"
@@ -237,12 +251,12 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
               aria-label="Show the properties panel"
               (click)="toggleProperties()"
             >
-              <span aria-hidden="true">☰</span>
+              <wf-icon name="open" [size]="16" />
               <span class="designer__reopen-label">Properties</span>
             </button>
           } @else {
             <div class="designer__side-head">
-              <span class="small muted">Properties</span>
+              <span class="designer__side-title">Properties</span>
               <button
                 class="designer__collapse"
                 type="button"
@@ -565,18 +579,50 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
       .designer__bar {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
+        gap: var(--space-3);
         padding: var(--space-2) var(--space-3);
         background: var(--surface);
         border-bottom: 1px solid var(--border);
         flex-wrap: wrap;
       }
 
+      .designer__identity,
+      .designer__tools,
+      .designer__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+
+      .designer__identity {
+        flex: 1 1 280px;
+        min-width: 0;
+      }
+
+      .designer__tools {
+        flex: 1 1 auto;
+      }
+
+      .designer__actions {
+        margin-left: auto;
+        padding-left: var(--space-2);
+        border-left: 1px solid var(--border);
+      }
+
       .designer__name {
-        width: 260px;
+        width: min(280px, 100%);
         font-family: var(--font-brand);
         font-size: var(--text-md);
         font-weight: 600;
+      }
+
+      .designer__side-title {
+        font-size: var(--text-xs);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
       }
 
       /* Loud enough to notice, quiet enough not to compete with Publish. */
@@ -595,20 +641,23 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
       }
 
       .tag--dirty {
-        background: #fff3e0;
+        background: var(--notice-warning-bg);
         color: var(--hl-orange-alt);
+        font-weight: 600;
       }
 
       .designer__issues {
         padding: var(--space-2) var(--space-4);
-        background: #fdecec;
+        background: var(--notice-error-bg);
         border-bottom: 1px solid var(--border);
+        border-left: 3px solid var(--hl-error);
         max-height: 132px;
         overflow-y: auto;
       }
 
       .designer__issues--warning {
-        background: #fff8e6;
+        background: var(--notice-warning-bg);
+        border-left-color: var(--hl-warning);
       }
 
       .designer__issues ul {
@@ -616,6 +665,19 @@ type Dialog = 'none' | 'settings' | 'run' | 'json' | 'plugins' | 'history' | 'le
         padding-left: 20px;
         font-size: var(--text-sm);
         color: var(--hl-grey-800);
+      }
+
+      @media (max-width: 900px) {
+        .designer__actions {
+          margin-left: 0;
+          border-left: none;
+          padding-left: 0;
+          width: 100%;
+        }
+
+        .designer__name {
+          width: min(200px, 100%);
+        }
       }
 
       .designer__panes {
@@ -1106,6 +1168,19 @@ export class WorkflowDesigner {
         },
         error: () => this.busy.set(false),
       });
+  }
+
+  /**
+   * Browser close/refresh guard. Complements the in-app leave modal; does not replace it.
+   * Returning a string is ignored by modern browsers but still arms the native prompt.
+   */
+  @HostListener('window:beforeunload', ['$event'])
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.store.dirty()) {
+      return;
+    }
+    event.preventDefault();
+    event.returnValue = true;
   }
 
   protected leave(): void {
