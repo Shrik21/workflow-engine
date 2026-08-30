@@ -1,0 +1,12 @@
+package com.orchpilot.workflow.plugins.aws;
+import com.orchpilot.workflow.sdk.context.*;
+import com.orchpilot.workflow.sdk.node.*;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+class AwsPluginTest {
+ @Test void publishesEveryNodeInOneAwsCategory(){AwsPlugin p=new AwsPlugin();assertThat(p.getNodeDefinitions()).hasSize(15).allSatisfy(n->assertThat(n.category()).isEqualTo("AWS"));assertThat(p.getNodeDefinitions()).filteredOn(NodeDefinition::destructive).extracting(NodeDefinition::nodeType).containsExactlyInAnyOrder("AWS_EC2_TERMINATE_INSTANCES","AWS_VPC_DELETE","AWS_EKS_DELETE_CLUSTER");}
+ @Test void executesSignedEc2DescribeAndReturnsResponse(){PluginContext pc=mock(PluginContext.class);when(pc.logger()).thenReturn(mock(PluginLogger.class));PluginHttpClient http=mock(PluginHttpClient.class);SecretProvider secrets=mock(SecretProvider.class);when(pc.http()).thenReturn(http);when(pc.secrets()).thenReturn(secrets);when(secrets.require("aws.test")).thenReturn("{\"accessKeyId\":\"AKID\",\"secretAccessKey\":\"secret\"}");when(http.execute(any())).thenReturn(new HttpResponseView(200,Map.of("Content-Type",List.of("text/xml")),"<DescribeInstancesResponse/>",2));AwsPlugin p=new AwsPlugin();p.initialize(pc);NodeExecutionContext ec=mock(NodeExecutionContext.class);when(ec.nodeType()).thenReturn("AWS_EC2_DESCRIBE_INSTANCES");when(ec.timeoutMillis()).thenReturn(5000L);when(ec.configuration()).thenReturn(new MapConfiguration(Map.of("credentialsSecret","aws.test","region","us-east-1")));NodeExecutionResult result=p.execute(ec);assertThat(result.isSuccess()).isTrue();assertThat(result.outputs().get("response")).isEqualTo("<DescribeInstancesResponse/>");verify(http).execute(argThat(r->r.uri().equals("https://ec2.us-east-1.amazonaws.com/")&&r.body().contains("Action=DescribeInstances")&&r.headers().containsKey("Authorization")));}
+ @Test void destructiveOperationRequiresConfirmationBeforeSecretOrNetwork(){PluginContext pc=mock(PluginContext.class);when(pc.logger()).thenReturn(mock(PluginLogger.class));AwsPlugin p=new AwsPlugin();p.initialize(pc);NodeExecutionContext ec=mock(NodeExecutionContext.class);when(ec.nodeType()).thenReturn("AWS_VPC_DELETE");when(ec.configuration()).thenReturn(new MapConfiguration(Map.of("credentialsSecret","aws.test","region","us-east-1","vpcId","vpc-1")));NodeExecutionResult result=p.execute(ec);assertThat(result.errorCode()).isEqualTo("AWS_CONFIRMATION_REQUIRED");verify(pc,never()).secrets();}
+}

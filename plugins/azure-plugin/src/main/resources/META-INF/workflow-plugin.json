@@ -1,0 +1,7 @@
+{
+  "pluginId":"${plugin.id}","name":"Azure","version":"${project.version}",
+  "description":"Manage Azure Virtual Machines, virtual networks and AKS from one plugin category.",
+  "vendor":"OrchPilot","mainClass":"${plugin.class}","sdkVersion":"1.0.0","javaVersion":"17",
+  "engineCompatibility":">=1.0.0 <2.0.0","pluginType":"NODE","provider":"AZURE","supportsAI":true,
+  "permissions":{"network":["login.microsoftonline.com","management.azure.com"],"secrets":["azure."],"notes":"Uses an Azure service principal stored in an azure.* secret and OAuth client credentials."}
+}
