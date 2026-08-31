@@ -156,8 +156,8 @@ type Filter = 'ALL' | 'AVAILABLE' | 'INSTALLED' | 'UPDATES' | 'ATTENTION';
 
             <div class="plugin__facts">
               <div class="fact">
-                <span class="fact__label">Registry</span>
-                <span class="mono">{{ plugin.serverVersion || 'not offered' }}</span>
+                <span class="fact__label">{{ plugin.status === 'UNKNOWN_TO_REGISTRY' ? 'Source' : 'Registry' }}</span>
+                <span class="mono">{{ plugin.status === 'UNKNOWN_TO_REGISTRY' ? 'Local installation' : (plugin.serverVersion || 'not offered') }}</span>
               </div>
               <div class="fact">
                 <span class="fact__label">Installed</span>

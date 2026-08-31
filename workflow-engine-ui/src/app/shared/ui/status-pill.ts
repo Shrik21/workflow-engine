@@ -68,7 +68,10 @@ export class StatusPill {
   readonly status = input.required<string | null | undefined>();
   readonly title = input<string | null>(null);
 
-  readonly label = computed(() => (this.status() ?? 'UNKNOWN').replace(/_/g, ' '));
+  readonly label = computed(() => {
+    const value = this.status() ?? 'UNKNOWN';
+    return value.toUpperCase() === 'UNKNOWN_TO_REGISTRY' ? 'LOCAL INSTALL' : value.replace(/_/g, ' ');
+  });
 
   readonly pulsing = computed(() => {
     const value = (this.status() ?? '').toUpperCase();

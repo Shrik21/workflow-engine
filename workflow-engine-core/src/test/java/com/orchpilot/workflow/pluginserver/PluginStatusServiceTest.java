@@ -63,6 +63,26 @@ class PluginStatusServiceTest {
     }
 
     @Test
+    void directUploadMetadataEnrichesAnExistingInstallationLedger() {
+        InstalledPlugin ledger = locally("slack", "1.0.1");
+        when(installed.findAllByOrderByPluginIdAsc()).thenReturn(List.of(ledger));
+
+        PluginVersion version = new PluginVersion();
+        version.setPluginId("slack");
+        version.setVersion("1.0.1");
+        version.setName("Slack");
+        version.setStatus(PluginStatus.ACTIVE);
+        version.setNodeTypes(List.of("SLACK_MESSAGE", "SLACK_REACTION"));
+        when(engineVersions.findAll()).thenReturn(List.of(version));
+
+        var row = service.statuses().get(0);
+
+        assertEquals(List.of("SLACK_MESSAGE", "SLACK_REACTION"), row.nodeTypes());
+        assertEquals(PluginSyncStatus.UNKNOWN_TO_REGISTRY, row.status());
+        org.mockito.Mockito.verify(installed, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void deletedDirectUploadsAreNotListed() {
         PluginVersion version = new PluginVersion();
         version.setPluginId("deleted");

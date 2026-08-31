@@ -162,9 +162,6 @@ public class PluginStatusService {
                 projection.setName(version.getName());
                 return projection;
             });
-            if (plugin.version(version.getVersion()).isPresent()) {
-                continue;
-            }
             InstallState state = switch (version.getStatus()) {
                 case ACTIVE -> InstallState.ACTIVE;
                 case INSTALLED -> InstallState.INSTALLED;
@@ -172,10 +169,21 @@ public class PluginStatusService {
                 case FAILED -> InstallState.INSTALL_FAILED;
                 case DELETED -> throw new IllegalStateException("Deleted version was not filtered");
             };
+            InstalledPlugin.InstalledVersion ledger = plugin.version(version.getVersion()).orElse(null);
             plugin.put(new InstalledPlugin.InstalledVersion(version.getVersion(), state,
-                    version.getSha256(), null, version.getJarSizeBytes(), null,
-                    version.getNodeTypes(), Map.of(), Map.of(), version.getUploadedAt(),
-                    version.getUploadedBy(), version.getLastLoadedAt(), version.getLoadError()));
+                    version.getSha256() != null ? version.getSha256() : ledger == null ? null : ledger.checksum(),
+                    ledger == null ? null : ledger.cachePath(), version.getJarSizeBytes(),
+                    ledger == null ? null : ledger.sdkVersion(), version.getNodeTypes(),
+                    ledger == null ? Map.of() : ledger.grantedPermissions(),
+                    ledger == null ? Map.of() : ledger.settings(),
+                    version.getUploadedAt() != null ? version.getUploadedAt()
+                            : ledger == null ? null : ledger.installedAt(),
+                    version.getUploadedBy() != null ? version.getUploadedBy()
+                            : ledger == null ? null : ledger.installedBy(),
+                    version.getLastLoadedAt() != null ? version.getLastLoadedAt()
+                            : ledger == null ? null : ledger.lastLoadedAt(),
+                    version.getLoadError() != null ? version.getLoadError()
+                            : ledger == null ? null : ledger.failure()));
         }
     }
 
