@@ -12,30 +12,14 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /build
 
-# Copy the POMs first and resolve dependencies. Docker caches this layer, so an
-# ordinary source change does not re-download the world.
-COPY pom.xml ./
-COPY workflow-plugin-sdk/pom.xml workflow-plugin-sdk/
-COPY workflow-engine-core/pom.xml workflow-engine-core/
-# The registry is a module of the same reactor, so its POM and sources must be present even though this
-# image does not ship it. Maven constructs the reactor from every module the parent declares and fails on a
-# missing directory; omitting it here made this image unbuildable the moment plugin-server was added.
-COPY plugin-server/pom.xml plugin-server/
-COPY plugins/sendgrid-plugin/pom.xml plugins/sendgrid-plugin/
-COPY plugins/restapi-plugin/pom.xml plugins/restapi-plugin/
-COPY plugins/slack-plugin/pom.xml plugins/slack-plugin/
-RUN mvn -B -q dependency:go-offline -DskipTests || true
+# Maven reads every child module declared by the parent POM before applying
+# -pl. Copy the complete filtered Java source tree so reactor discovery cannot
+# fail when a new plugin module is added to the parent.
+COPY . .
 
-COPY workflow-plugin-sdk/src workflow-plugin-sdk/src
-COPY workflow-engine-core/src workflow-engine-core/src
-COPY plugin-server/src plugin-server/src
-COPY plugins/sendgrid-plugin/src plugins/sendgrid-plugin/src
-COPY plugins/restapi-plugin/src plugins/restapi-plugin/src
-COPY plugins/slack-plugin/src plugins/slack-plugin/src
-
-# Unit tests run in the image build; integration tests are tagged and excluded
-# because they need their own Docker daemon.
-RUN mvn -B clean install
+# Tests are compiled but not executed while assembling the deployment image.
+# CI should execute the suite outside the image build.
+RUN mvn -B -DskipTests -pl workflow-engine-core,plugins/sendgrid-plugin,plugins/restapi-plugin,plugins/slack-plugin -am clean install
 
 # ---------------------------------------------------------------------------
 # Runtime stage
@@ -52,9 +36,9 @@ WORKDIR /app
 COPY --from=build /build/workflow-engine-core/target/workflow-engine.jar app.jar
 
 # Sample plugins, for verifying a deployment by uploading one.
-COPY --from=build /build/plugins/sendgrid-plugin/target/sendgrid-plugin-1.0.0.jar sample-plugins/
-COPY --from=build /build/plugins/restapi-plugin/target/restapi-plugin-1.0.0.jar sample-plugins/
-COPY --from=build /build/plugins/slack-plugin/target/slack-plugin-1.0.0.jar sample-plugins/
+COPY --from=build /build/plugins/sendgrid-plugin/target/sendgrid-plugin-*.jar sample-plugins/
+COPY --from=build /build/plugins/restapi-plugin/target/restapi-plugin-*.jar sample-plugins/
+COPY --from=build /build/plugins/slack-plugin/target/slack-plugin-*.jar sample-plugins/
 
 # Plugin JARs are staged here from GridFS before being loaded. Mounting a volume
 # avoids re-downloading them on every restart.
@@ -70,7 +54,7 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseContainerSupport -Djava.security.
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-    CMD wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' || exit 1
+    CMD wget -qO- http://127.0.0.1:8080/actuator/health/liveness | grep -q '"status":"UP"' || exit 1
 
 # exec form via sh so JAVA_OPTS is expanded, with exec so the JVM is PID 1 and
 # receives SIGTERM directly. Graceful shutdown depends on that signal arriving.

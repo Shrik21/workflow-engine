@@ -70,6 +70,8 @@
         <module>plugins/gcp-kubernetes-plugin</module>
         <module>plugins/excel-plugin</module>
         <module>plugins/gcp-network-plugin</module>
+        <module>plugins/aws-plugin</module>
+        <module>plugins/azure-plugin</module>
     </modules>
 
     <dependencyManagement>

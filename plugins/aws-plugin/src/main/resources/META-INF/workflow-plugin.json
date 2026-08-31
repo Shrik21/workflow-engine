@@ -1,0 +1,8 @@
+{
+  "pluginId":"${plugin.id}", "name":"AWS", "version":"${project.version}",
+  "description":"Manage AWS EC2, VPC and EKS resources from one plugin category.",
+  "vendor":"OrchPilot", "mainClass":"${plugin.class}", "sdkVersion":"1.0.0",
+  "javaVersion":"17", "engineCompatibility":">=1.0.0 <2.0.0", "pluginType":"NODE",
+  "provider":"AWS", "supportsAI":true,
+  "permissions":{"network":["*.amazonaws.com"],"secrets":["aws."],"notes":"AWS credentials are read only from an aws.* secret and requests use Signature Version 4."}
+}

@@ -1,0 +1,7 @@
+package com.orchpilot.workflow.plugins.azure;
+enum AzureOperation{
+ VM_LIST("AZURE_VM_LIST","List Virtual Machines",true,false),VM_GET("AZURE_VM_GET","Get Virtual Machine",true,false),VM_CREATE("AZURE_VM_CREATE","Create Virtual Machine",false,false),VM_START("AZURE_VM_START","Start Virtual Machine",false,false),VM_DEALLOCATE("AZURE_VM_DEALLOCATE","Deallocate Virtual Machine",false,false),VM_RESTART("AZURE_VM_RESTART","Restart Virtual Machine",false,false),VM_DELETE("AZURE_VM_DELETE","Delete Virtual Machine",false,true),
+ VNET_LIST("AZURE_VNET_LIST","List Virtual Networks",true,false),VNET_CREATE("AZURE_VNET_CREATE","Create Virtual Network",false,false),VNET_DELETE("AZURE_VNET_DELETE","Delete Virtual Network",false,true),SUBNET_CREATE("AZURE_SUBNET_CREATE","Create Subnet",false,false),NSG_CREATE("AZURE_NSG_CREATE","Create Network Security Group",false,false),
+ AKS_LIST("AZURE_AKS_LIST","List AKS Clusters",true,false),AKS_GET("AZURE_AKS_GET","Get AKS Cluster",true,false),AKS_CREATE("AZURE_AKS_CREATE","Create AKS Cluster",false,false),AKS_DELETE("AZURE_AKS_DELETE","Delete AKS Cluster",false,true);
+ final String nodeType,displayName;final boolean readOnly,destructive;AzureOperation(String n,String d,boolean r,boolean x){nodeType=n;displayName=d;readOnly=r;destructive=x;}static AzureOperation from(String n){for(AzureOperation o:values())if(o.nodeType.equals(n))return o;return null;}
+}
